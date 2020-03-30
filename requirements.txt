@@ -1,0 +1,13 @@
+asgiref==3.2.7
+certifi==2019.11.28
+chardet==3.0.4
+Django==3.0.4
+gunicorn==20.0.4
+idna==2.9
+pytz==2019.3
+requests==2.23.0
+sqlparse==0.3.1
+tqdm==4.44.1
+urllib3==1.25.8
+django-environ==0.4.5
+psycopg2==2.8.4
