@@ -11,3 +11,5 @@ tqdm==4.44.1
 urllib3==1.25.8
 django-environ==0.4.5
 psycopg2==2.8.4
+ijson==2.6.1
+python-slugify==4.0.0
