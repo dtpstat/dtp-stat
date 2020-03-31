@@ -6,9 +6,10 @@ from django.utils.crypto import get_random_string
 from slugify import slugify
 
 
-def get_slug(instance, string=None, length=5):
-    if string:
-        slug = slugify(string)
+def get_slug(instance, slug_string=None, length=5):
+    print(slug_string)
+    if slug_string:
+        slug = slugify(slug_string)
     else:
         slug = get_random_string(length=length)
 
@@ -16,10 +17,13 @@ def get_slug(instance, string=None, length=5):
 
     qs_exists = Klass.objects.filter(slug=slug).exists()
     if qs_exists:
-        return get_slug(instance)
+        if slug_string:
+            return get_slug(instance, slug_string=slug_string)
+        else:
+            return get_slug(instance)
     return slug
 
-# Create your models here.
+
 class Region(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None, db_index=True)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
@@ -32,9 +36,8 @@ class Region(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = get_slug(self, string=self.name)
-
+        if not self.slug and self.name:
+            self.slug = get_slug(self, slug_string=self.name)
         super(Region, self).save(*args, **kwargs)
 
 
@@ -93,9 +96,9 @@ class DTP(models.Model):
     #ugc_point = models.PointField(help_text="coordinates from users", null=True, default=None)
 
     address = models.CharField(max_length=10000, help_text="address", null=True, blank=True, default=None, db_index=True)
-    point = models.PointField(help_text="coordinates", null=True, default=None)
+    point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
 
-    data = JSONField(help_text="extra data", null=True, blank=True, default=dict())
+    data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
 
     participants = models.IntegerField(help_text="participants count", null=True, blank=True, default=None,
                                        db_index=True)
@@ -136,6 +139,7 @@ class DTP(models.Model):
             self.point = Point(self.data.get('geocoder_point').get('lat'), self.data.get('geocoder_point').get('long'))
         elif self.data.get('gibdd_point') and self.data.get('gibdd_point').get('lat') and self.data.get('gibdd_point').get('long'):
             self.point = Point(self.data.get('gibdd_point').get('lat'), self.data.get('gibdd_point').get('long'))
+            self.address = self.data.get('gibdd_point').get('address')
 
         super(DTP, self).save(*args, **kwargs)
 

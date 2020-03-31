@@ -15,7 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from data import views as data_views
+
+from rest_framework.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter
+router = DefaultRouter()
+router.register(r'api/stat', data_views.StatApiView)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('api/dtp/', data_views.DTPApiView.as_view()),
+    path('api/stat/', data_views.StatApiView.as_view({"get": "stat"})),
+    path('api/filters/', data_views.FilterApiView.as_view()),
 ]
+
+#urlpatterns += router.urls
