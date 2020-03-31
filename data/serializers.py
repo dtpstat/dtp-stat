@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from drf_extra_fields.geo_fields import PointField
+from data import models
 
 
 class DTPSerializer(serializers.Serializer):
@@ -9,6 +10,13 @@ class DTPSerializer(serializers.Serializer):
     participants = serializers.IntegerField()
     injured = serializers.IntegerField()
     dead = serializers.IntegerField()
-    light = serializers.CharField()
+    point = PointField()
+
+
+class RegionSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    name = serializers.CharField()
+    parent_region = serializers.CharField()
+    level = serializers.IntegerField()
     point = PointField()
 

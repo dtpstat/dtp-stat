@@ -14,6 +14,12 @@ from data import serializers
 from data import utils
 
 
+class SearchRegionApiView(generics.ListAPIView):
+    queryset = models.Region.objects.all()
+    serializer_class = serializers.RegionSerializer
+    filterset_class = data_filters.SearchRegionFilterSet
+
+
 class DTPApiView(generics.ListAPIView):
     queryset = models.DTP.objects.all()
     serializer_class = serializers.DTPSerializer
