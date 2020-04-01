@@ -20,11 +20,11 @@ class DTPFilterSet(django_filters.FilterSet):
     nearby = django_filters.BaseInFilter(field_name='nearby__name', lookup_expr='in')
     conditions = django_filters.BaseInFilter(field_name='road_conditions__name', lookup_expr='in')
     violations = django_filters.BaseInFilter(field_name='participant__violations__name', lookup_expr='in')
+    id = django_filters.CharFilter(field_name='slug', lookup_expr="exact")
 
     class Meta:
         model = models.DTP
         fields = {
-            'slug': ['exact'],
             'dead': ['gte', 'lte', 'exact', 'gt', 'lt'],
         }
 

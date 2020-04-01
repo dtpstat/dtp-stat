@@ -4,7 +4,7 @@ from data import models
 
 
 class DTPSerializer(serializers.Serializer):
-    slug = serializers.CharField()
+    id = serializers.CharField(source='slug')
     datetime = serializers.DateTimeField()
     category = serializers.CharField()
     participants = serializers.IntegerField()
