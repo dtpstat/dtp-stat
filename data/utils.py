@@ -11,6 +11,7 @@ from tqdm import tqdm
 import datetime
 import requests
 import pytz
+import re
 
 import environ
 env = environ.Env()
@@ -20,13 +21,6 @@ def open_json(path):
     with open(path) as data_file:
         data = json.load(data_file)
     return data
-
-
-def download(download_item):
-    download_item.phase = "downloading"
-    download_item.save()
-
-    pass
 
 
 def get_geo_data(item, dtp):
@@ -97,14 +91,96 @@ def get_region(region_code, region_name, parent_region_code, parent_region_name)
     return region
 
 
+def add_participant_record(participant, dtp, vehicle=None):
+    participant_item = models.Participant(
+        role=participant['K_UCH'] or None,
+        driving_experience=participant['V_ST'] if participant['V_ST'] and int(participant['V_ST']) and int(participant['V_ST']) < 90 else None,
+        health_status=participant['S_T'] or None,
+        gender=participant['POL'] or None,
+        dtp=dtp,
+        vehicle=vehicle
+    )
+    participant_item.save()
+
+    for violation_item in (participant['NPDD'] + participant['NPDD']):
+        if violation_item != "Нет нарушений":
+            violation, created = models.Violation.objects.get_or_create(
+                name=violation_item
+            )
+            participant_item.violations.add(violation)
+
+
+def add_participants_records(item, dtp):
+    models.Vehicle.objects.filter(participant__dtp=dtp).delete()
+    dtp.participant_set.clear()
+
+    for vehicle_item in item['infoDtp']['ts_info']:
+        category, created = models.VehicleCategory.objects.get_or_create(
+            name=vehicle_item['t_ts']
+        ) if vehicle_item['t_ts'] else None
+
+        vehicle = models.Vehicle(
+            year=vehicle_item['g_v'] or None,
+            brand=vehicle_item['marka_ts'] or None,
+            vehicle_model=vehicle_item['m_ts'] or None,
+            color=vehicle_item['color'] or None,
+            category=category
+        )
+        vehicle.save()
+
+        for participant in vehicle_item['ts_uch']:
+            add_participant_record(participant, dtp, vehicle=vehicle)
+
+    for participant in item['infoDtp']['uchInfo']:
+        add_participant_record(participant, dtp)
+
+
+def add_related_data(item, dtp):
+    related_data = [
+        {
+            "model": models.Nearby,
+            "dtp_model": dtp.nearby,
+            "data": item['infoDtp']['OBJ_DTP'] + item['infoDtp']['sdor'],
+            "exclude": [
+                'нет объектов',
+                "отсутствие",
+                'иное место'
+            ]
+        },
+        {
+            "model": models.Weather,
+            "dtp_model": dtp.weather,
+            "data": item['infoDtp']['s_pog'],
+            "exclude": []
+        },
+        {
+            "model": models.RoadCondition,
+            "dtp_model": dtp.road_conditions,
+            "data": item['infoDtp']['ndu'] + [item['infoDtp']['s_pch']],
+            "exclude": [
+                "не установлены",
+            ]
+        }
+    ]
+
+    for data_item in related_data:
+        data_item['dtp_model'].clear()
+        for data_object in data_item['data']:
+            if not any(re.search("суб[\wА-я]+ выдвиж[\wА-я]+|парти", data_object, re.IGNORECASE) for x in data_item['data']):
+                new_item, created = data_item['model'].objects.get_or_create(
+                    name=data_object
+                )
+                data_item['dtp_model'].add(new_item)
+
+
 def add_dtp_record(item):
     dtp, created = models.DTP.objects.get_or_create(
         slug=item['KartId']
     )
     dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
     dtp.region = get_region(item["oktmo_code"], item["area_name"], item["parent_region_code"], item["parent_region_name"])
-    dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V'])
-    dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv'])
+    dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
+    dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
     dtp.participants = item['K_UCH']
     dtp.injured = item['RAN']
     dtp.dead = item['POG']
@@ -115,17 +191,27 @@ def add_dtp_record(item):
     dtp.data['source'] = item
     dtp.save()
 
+    add_participants_records(item, dtp)
+    add_related_data(item, dtp)
 
 
+    # nearby_objects, roadcondition, weather,
 
-    #mvc_item.participant_set.clear()
+    """
+    
+    for nearby_object in (dtp['infoDtp']['OBJ_DTP'] + dtp['infoDtp']['sdor']):
+        if nearby_object != "Перегон (нет объектов на месте ДТП)" and nearby_object != "Отсутствие в непосредственной близости объектов УДС и объектов притяжения":
+            nearby_object_item, created = models.Nearby.objects.get_or_create(
+                name=nearby_object
+            )
 
-    #return mvc_item
-
+            mvc_item.nearby.add(nearby_object_item.id)
+    """
 
 def recording(download_item):
     models.DTP.objects.all().delete()
-    models.Region.objects.all().delete()
+    models.Participant.objects.all().delete()
+    models.Vehicle.objects.all().delete()
     download_item.phase = "recording"
     download_item.save()
 
@@ -134,8 +220,15 @@ def recording(download_item):
         for item in tqdm(ijson.items(f, 'item')):
             add_dtp_record(item)
             n = n + 1
-            if n == 100:
+            if n == 1:
                 break
+
+
+def download(download_item):
+    download_item.phase = "downloading"
+    download_item.save()
+
+    pass
 
 
 def check_download():
@@ -173,7 +266,7 @@ def get_region_by_request(request):
     if lat and long:
         pnt = Point(float(lat), float(long))
 
-        dtp = models.DTP.objects.filter(
+        region = models.DTP.objects.filter(
             point__dwithin=(pnt, 1)
         ).annotate(
             distance=Distance('point', pnt)

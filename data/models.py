@@ -160,13 +160,13 @@ class VehicleCategory(models.Model):
 
 class Vehicle(models.Model):
     brand = models.CharField(max_length=1000, help_text="brand", null=True, blank=True, default=None, db_index=True)
-    car_model = models.CharField(max_length=1000, help_text="model", null=True, blank=True, default=None, db_index=True)
+    vehicle_model = models.CharField(max_length=1000, help_text="model", null=True, blank=True, default=None, db_index=True)
     color = models.CharField(max_length=1000, help_text="color", null=True, blank=True, default=None, db_index=True)
     year = models.IntegerField(help_text="year", null=True, blank=True, default=None, db_index=True)
     category = models.ForeignKey(VehicleCategory, help_text="category", null=True, blank=True, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.brand + " " + self.car_model
+        return self.brand + " " + self.vehicle_model
 
 
 class Participant(models.Model):
@@ -175,7 +175,7 @@ class Participant(models.Model):
     health_status = models.CharField(max_length=1000, help_text="Participant status", null=True, blank=True, default=None)
     gender = models.CharField(max_length=1000, help_text="Participant gender", null=True, blank=True, default=None)
 
-    mvc = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
+    dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
     violations = models.ManyToManyField(Violation, help_text="violations", db_index=True)
     vehicle = models.ForeignKey(Vehicle, help_text="vehicle", null=True, blank=True, default=None, on_delete=models.CASCADE)
 
