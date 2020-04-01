@@ -166,7 +166,7 @@ def add_related_data(item, dtp):
     for data_item in related_data:
         data_item['dtp_model'].clear()
         for data_object in data_item['data']:
-            if not any(re.search("суб[\wА-я]+ выдвиж[\wА-я]+|парти", data_object, re.IGNORECASE) for x in data_item['data']):
+            if not any(re.search(x, data_object, re.IGNORECASE) for x in data_item['exclude']):
                 new_item, created = data_item['model'].objects.get_or_create(
                     name=data_object
                 )
@@ -195,23 +195,13 @@ def add_dtp_record(item):
     add_related_data(item, dtp)
 
 
-    # nearby_objects, roadcondition, weather,
-
-    """
-    
-    for nearby_object in (dtp['infoDtp']['OBJ_DTP'] + dtp['infoDtp']['sdor']):
-        if nearby_object != "Перегон (нет объектов на месте ДТП)" and nearby_object != "Отсутствие в непосредственной близости объектов УДС и объектов притяжения":
-            nearby_object_item, created = models.Nearby.objects.get_or_create(
-                name=nearby_object
-            )
-
-            mvc_item.nearby.add(nearby_object_item.id)
-    """
-
 def recording(download_item):
     models.DTP.objects.all().delete()
     models.Participant.objects.all().delete()
     models.Vehicle.objects.all().delete()
+    models.Nearby.objects.all().delete()
+    models.Weather.objects.all().delete()
+    models.RoadCondition.objects.all().delete()
     download_item.phase = "recording"
     download_item.save()
 
@@ -220,7 +210,7 @@ def recording(download_item):
         for item in tqdm(ijson.items(f, 'item')):
             add_dtp_record(item)
             n = n + 1
-            if n == 1:
+            if n == 10:
                 break
 
 

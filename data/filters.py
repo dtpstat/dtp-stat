@@ -16,6 +16,10 @@ class DTPFilterSet(django_filters.FilterSet):
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')
     light = django_filters.BaseInFilter(field_name='light__name', lookup_expr='in')
     category = django_filters.BaseInFilter(field_name='category__name', lookup_expr='in')
+    weather = django_filters.BaseInFilter(field_name='weather__name', lookup_expr='in')
+    nearby = django_filters.BaseInFilter(field_name='nearby__name', lookup_expr='in')
+    conditions = django_filters.BaseInFilter(field_name='road_conditions__name', lookup_expr='in')
+    violations = django_filters.BaseInFilter(field_name='participant__violations__name', lookup_expr='in')
 
     class Meta:
         model = models.DTP
