@@ -139,6 +139,48 @@ class DTP(models.Model):
     def get_absolute_url(self):
         return '/dtp/' + self.slug + '/'
 
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "point": {
+                "lat": self.point.coords[1],
+                "long": self.point.coords[0],
+            },
+            "region": self.region.name,
+            "parent_region": self.region.parent_region.name,
+            "datetime": self.datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            "address": self.address,
+            "participants_count": self.participants,
+            "injured_count": self.injured,
+            "dead_count": self.dead,
+            "category": self.category.name,
+            "light": self.light.name,
+            "nearby": [x.name for x in self.nearby.all()],
+            "weather": [x.name for x in self.weather.all()],
+            "road_conditions": [x.name for x in self.road_conditions.all()],
+            "vehicles": [{
+                'brand':x.brand,
+                'model':x.vehicle_model,
+                'color': x.color,
+                'year': x.year,
+                'category': x.category.name,
+                'participants': [{
+                    "health_status": y.health_status,
+                    "role": y.role,
+                    "gender": y.gender,
+                    "years_of_driving_experience": y.driving_experience,
+                    "violations": [k.name for k in y.violations.all()]
+                } for y in x.participant_set.all()]
+            } for x in Vehicle.objects.filter(participant__dtp=self).distinct()],
+            "participants": [{
+                "health_status": x.health_status,
+                "role": x.role,
+                "gender": x.gender,
+                "violations": [y.name for y in x.violations.all()]
+            } for x in self.participant_set.filter(vehicle__isnull=True)],
+            "tags": [x.name for x in self.tags.all()]
+        }
+
     def save(self, *args, **kwargs):
         if self.data.get('ugc_point') and self.data.get('ugc_point').get('lat') and self.data.get('ugc_point').get('long'):
             self.point = Point(self.data.get('ugc_point').get('lat'), self.data.get('ugc_point').get('long'))

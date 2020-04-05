@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.gis.geos import Point, GEOSGeometry
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
+from django.contrib.postgres.aggregates.general import StringAgg
+from django.forms.models import model_to_dict
 
 import json
 import ijson
@@ -13,6 +15,7 @@ import requests
 import pytz
 import re
 import os
+import pandas as pd
 from scrapy.crawler import CrawlerProcess
 from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
 
@@ -270,3 +273,44 @@ def get_region_by_request(request):
         ).order_by('distance')[0].region
 
         return region
+
+
+def generate_datasets():
+    data = [obj.as_dict() for obj in models.DTP.objects.all()]
+    with open('static/data/' + 'test.json', 'w') as data_file:
+        json.dump(data, data_file, ensure_ascii=False)
+
+    """
+    data = list(models.DTP.objects.all().annotate(
+        election_regions=StringAgg('election_item__regions__name', ordering="election_item__regions__level",
+                                   delimiter=", ")
+    ).values(
+        'id',
+        'datetime',
+        'slug',
+        'region__name',
+        'region__parent_region__name',
+        'address',
+        #'point',
+        'participants',
+        'injured',
+        'dead',
+        'category__name',
+        'light__name',
+        'candidate__data__birthplace',
+        'electoral_district',
+        'election_item__election__name',
+        'election_item__name',
+        'election_regions',
+        'election_item__date',
+        'election_item__level__name',
+        'election_item__stage__name',
+        'election_item__type__name',
+        'election_item__scheme__name',
+        'gas_url',
+
+    ))
+
+    df = pd.DataFrame(data)
+    df.to_csv('static/data/nominations.csv')
+    """
