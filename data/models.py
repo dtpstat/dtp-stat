@@ -5,9 +5,7 @@ from django.utils.crypto import get_random_string
 
 from slugify import slugify
 
-
 def get_slug(instance, slug_string=None, length=5):
-    print(slug_string)
     if slug_string:
         slug = slugify(slug_string)
     else:
@@ -83,6 +81,13 @@ class RoadCondition(models.Model):
         return self.name
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None, db_index=True)
+
+    def __str__(self):
+        return self.name
+
+
 class DTP(models.Model):
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
@@ -112,9 +117,11 @@ class DTP(models.Model):
     category = models.ForeignKey(Category, help_text="category", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     light = models.ForeignKey(Light, help_text="light", null=True, blank=True, default=None,
                                  on_delete=models.SET_NULL, db_index=True)
+
     nearby = models.ManyToManyField(Nearby, help_text="nearby objects", db_index=True)
     weather = models.ManyToManyField(Weather, help_text="weather", db_index=True)
     road_conditions = models.ManyToManyField(RoadCondition, help_text="Road conditions", db_index=True)
+    tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True)
     #participant_type = models.ForeignKey(MVCParticipantType, help_text="MVC Participant Type", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
 
     source = models.CharField(max_length=100, help_text="data source", null=True, blank=True, default=None, choices=[

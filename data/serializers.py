@@ -3,6 +3,12 @@ from drf_extra_fields.geo_fields import PointField
 from data import models
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Tag
+        fields = ('name',)
+
+
 class DTPSerializer(serializers.Serializer):
     id = serializers.CharField(source='slug')
     datetime = serializers.DateTimeField()
@@ -11,6 +17,7 @@ class DTPSerializer(serializers.Serializer):
     injured = serializers.IntegerField()
     dead = serializers.IntegerField()
     point = PointField()
+    #tags = TagSerializer(many=True)
 
 
 class RegionSerializer(serializers.Serializer):

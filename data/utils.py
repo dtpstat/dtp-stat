@@ -12,6 +12,9 @@ import datetime
 import requests
 import pytz
 import re
+import os
+from scrapy.crawler import CrawlerProcess
+from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
 
 import environ
 env = environ.Env()
@@ -177,8 +180,11 @@ def add_dtp_record(item):
     dtp, created = models.DTP.objects.get_or_create(
         slug=item['KartId']
     )
+
+    tag, created = models.Tag.objects.get_or_create(name=item['tag']) if item['tag'] else None
+    dtp.tags.add(tag)
     dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
-    dtp.region = get_region(item["oktmo_code"], item["area_name"], item["parent_region_code"], item["parent_region_name"])
+    dtp.region = get_region(item["area_code"], item["area_name"], item["region_code"], item["region_name"])
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
     dtp.participants = item['K_UCH']
@@ -214,11 +220,12 @@ def recording(download_item):
                 break
 
 
-def download(download_item):
-    download_item.phase = "downloading"
-    download_item.save()
-
-    pass
+def download():
+    models.DTP.objects.all().delete()
+    first_dir = os.getcwd()
+    os.chdir("data/parser")
+    os.system('scrapy crawl dtp')
+    os.chdir(first_dir)
 
 
 def check_download():
