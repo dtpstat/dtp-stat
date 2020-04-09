@@ -1,9 +1,8 @@
-
-
 from rest_framework import generics, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
+from rest_framework.pagination import LimitOffsetPagination
 import django_filters.rest_framework
 from rest_framework.decorators import action
 from django.db.models import Sum
@@ -25,6 +24,7 @@ class DTPApiView(generics.ListAPIView):
     serializer_class = serializers.DTPSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
     filterset_class = data_filters.DTPFilterSet
+    pagination_class = LimitOffsetPagination
 
 
 class StatApiView(viewsets.ModelViewSet):

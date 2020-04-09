@@ -280,6 +280,18 @@ def generate_datasets():
     with open('static/data/' + 'test.json', 'w') as data_file:
         json.dump(data, data_file, ensure_ascii=False)
 
+
+def generate_datasets_geojson():
+    data = [obj.as_dict() for obj in models.DTP.objects.all()]
+    geo_data = { "type": "FeatureCollection", "features": [
+        {"type": "Feature",
+         "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
+         "properties": item
+         } for item in data
+    ]}
+    with open('static/data/' + 'test.geojson', 'w') as data_file:
+        json.dump(geo_data, data_file, ensure_ascii=False)
+
     """
     data = list(models.DTP.objects.all().annotate(
         election_regions=StringAgg('election_item__regions__name', ordering="election_item__regions__level",

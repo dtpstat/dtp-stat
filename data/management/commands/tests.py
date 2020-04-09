@@ -6,4 +6,4 @@ class Command(BaseCommand):
     help = 'Test'
 
     def handle(self, *args, **kwargs):
-        utils.generate_datasets()
+        utils.generate_datasets_geojson()
