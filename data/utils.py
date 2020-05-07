@@ -7,6 +7,10 @@ from django.contrib.gis.measure import D
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.forms.models import model_to_dict
 
+import scrapy
+from scrapy.crawler import CrawlerProcess
+from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
+
 import json
 import ijson
 from tqdm import tqdm
@@ -15,6 +19,7 @@ import requests
 import pytz
 import re
 import os
+from lxml import html
 import pandas as pd
 from scrapy.crawler import CrawlerProcess
 from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
@@ -75,6 +80,7 @@ def geocode(address):
 
 
 def get_region(region_code, region_name, parent_region_code, parent_region_name):
+
     parent_region, created = models.Region.objects.get_or_create(
         level=1,
         gibdd_code=parent_region_code
@@ -121,21 +127,22 @@ def add_participants_records(item, dtp):
     dtp.participant_set.clear()
 
     for vehicle_item in item['infoDtp']['ts_info']:
-        category, created = models.VehicleCategory.objects.get_or_create(
-            name=vehicle_item['t_ts']
-        ) if vehicle_item['t_ts'] else None
+        if vehicle_item.get('t_ts'):
+            category, created = models.VehicleCategory.objects.get_or_create(
+                name=vehicle_item['t_ts']
+            )
 
-        vehicle = models.Vehicle(
-            year=vehicle_item['g_v'] or None,
-            brand=vehicle_item['marka_ts'] or None,
-            vehicle_model=vehicle_item['m_ts'] or None,
-            color=vehicle_item['color'] or None,
-            category=category
-        )
-        vehicle.save()
+            vehicle = models.Vehicle(
+                year=vehicle_item['g_v'] or None,
+                brand=vehicle_item['marka_ts'] or None,
+                vehicle_model=vehicle_item['m_ts'] or None,
+                color=vehicle_item['color'] or None,
+                category=category
+            )
+            vehicle.save()
 
-        for participant in vehicle_item['ts_uch']:
-            add_participant_record(participant, dtp, vehicle=vehicle)
+            for participant in vehicle_item['ts_uch']:
+                add_participant_record(participant, dtp, vehicle=vehicle)
 
     for participant in item['infoDtp']['uchInfo']:
         add_participant_record(participant, dtp)
@@ -187,7 +194,8 @@ def add_dtp_record(item):
     tag, created = models.Tag.objects.get_or_create(name=item['tag']) if item['tag'] else None
     dtp.tags.add(tag)
     dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
-    dtp.region = get_region(item["area_code"], item["area_name"], item["region_code"], item["region_name"])
+    #dtp.region = get_region(item["area_code"], item["area_name"], item["region_code"], item["region_name"])
+    dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"])
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
     dtp.participants = item['K_UCH']
@@ -224,14 +232,92 @@ def recording(download_item):
 
 
 def download():
-    models.DTP.objects.all().delete()
+    #models.DTP.objects.all().delete()
     first_dir = os.getcwd()
     os.chdir("data/parser")
     os.system('scrapy crawl dtp')
     os.chdir(first_dir)
 
 
+def check_dates_from_gibdd(scripts):
+    source_date_data = None
+    date_data = []
+
+    for script in scripts:
+        if script.text and "dateComboData" in script.text:
+            string = script.text
+            p = re.compile(r"dateComboData = (.*?);", re.MULTILINE)
+            m = p.search(string)
+            data = m.groups()[0]
+            source_date_data = json.loads(data)
+            if source_date_data:
+                break
+
+    if source_date_data:
+        for year in source_date_data:
+            for month in year['nodes']:
+                date_data.append(datetime.datetime.strptime(month['Value'].replace("MONTHS:", ""), '%m.%Y').date())
+
+    return date_data or None
+
+
+def get_tags_data(data, parent_name=None):
+    export_data = {}
+    for item in data:
+        item_text = item['Text'] if not parent_name else parent_name + ", " + item['Text']
+        export_data[item['Value']] = item_text
+        if item.get('nodes'):
+            export_data = {**export_data, **get_tags_data(item.get('nodes'), parent_name=item_text)}
+    return export_data
+
+
+def get_tags(scripts):
+    tags = {}
+
+    for script in scripts:
+        if script.text and "pokComboData" in script.text:
+            string = script.text
+            p = re.compile(r"pokComboData = (.*?);", re.MULTILINE)
+            data = json.loads(p.search(string).groups()[0])
+            tags = get_tags_data(data)
+            for k in ['1']:
+                tags.pop(k, None)
+
+    return tags
+
+
 def check_download():
+    models.DTP.objects.all().delete()
+
+    # проверяем обновления на сайте ГИБДД
+    r = requests.get('http://stat.gibdd.ru/')
+    r = html.fromstring(r.content)
+    scripts = r.xpath('//script')
+
+    gibdd_actual_dates = sorted(check_dates_from_gibdd(scripts))
+    tags = get_tags(scripts)
+
+    # сверяем с нашей базой и, если расходится, то загружаем данные
+    for region in tqdm(models.Region.objects.filter(level=1)[0:1]):
+        print(region)
+        for area in tqdm(region.region_set.all()[0:1]):
+            print(area)
+            if not area.actual_date or any(area.actual_date < date for date in gibdd_actual_dates):
+                if area.actual_date:
+                    start_date_index = min([index for index, date in enumerate(gibdd_actual_dates) if date > area.actual_date])
+                    start_date_index = start_date_index - 2 if start_date_index >= 2 else 0
+                    dates = gibdd_actual_dates[start_date_index:]
+                else:
+                    dates = gibdd_actual_dates
+
+                process = CrawlerProcess()
+                process.crawl(DtpSpider,
+                              dates=dates,
+                              tags=tags,
+                              area=area)
+                process.start()
+    #
+    """
     download_item, created = models.Download.objects.filter(
         datetime__month=timezone.now().month,
         datetime__year=timezone.now().year,
@@ -252,7 +338,7 @@ def check_download():
 
     #download_item.phase = "done"
     download_item.save()
-
+    """
 
 def get_region_by_request(request):
     lat = request.query_params.get('lat')

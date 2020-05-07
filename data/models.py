@@ -29,6 +29,7 @@ class Region(models.Model):
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     point = models.PointField(help_text="coordinates", null=True, default=None)
+    actual_date = models.DateField(help_text="coordinates", null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name

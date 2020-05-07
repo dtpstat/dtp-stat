@@ -1,5 +1,8 @@
 import scrapy
 from scrapy.http.request import Request
+from scrapy import signals
+from scrapy.exceptions import CloseSpider
+from scrapy.spidermiddlewares.httperror import HttpError
 
 import json
 from ast import literal_eval
@@ -25,31 +28,6 @@ def dates_generator(year=None):
     return list(dates_set)
 
 
-def get_tags_data(data, parent_name=None):
-    export_data = {}
-    for item in data:
-        item_text = item['Text'] if not parent_name else parent_name + ", " + item['Text']
-        export_data[item['Value']] = item_text
-        if item.get('nodes'):
-            export_data = {**export_data, **get_tags_data(item.get('nodes'), parent_name=item_text)}
-    return export_data
-
-
-def get_tags(scripts):
-    tags = {}
-
-    for script in scripts:
-        if script.extract() and "pokComboData" in script.extract():
-            string = script.extract()
-            p = re.compile(r"pokComboData = (.*?);", re.MULTILINE)
-            data = json.loads(p.search(string).groups()[0])
-            tags = get_tags_data(data)
-            for k in ['1']:
-                tags.pop(k, None)
-
-    return tags
-
-
 def get_regions(scripts):
     regions = []
 
@@ -68,8 +46,33 @@ def get_regions(scripts):
 class DtpSpider(scrapy.Spider):
     name = "dtp"
 
-    start_urls = ['http://stat.gibdd.ru/']
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'data.parser.dtp_parser.pipelines.DtpParserPipeline': 300
+        },
+    }
 
+    def start_requests(self):
+        for date in self.dates:
+            #for tag_code, tag_name in list(self.tags.items()):
+            for tag_code, tag_name in [("1","Тест")]:
+                payload = dict()
+                payload["data"] = '{"date":["MONTHS:' + date.strftime('%m.%Y') + '"],"ParReg":"' + self.area.parent_region.gibdd_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + self.area.gibdd_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
+                yield Request(
+                    'http://stat.gibdd.ru/map/getDTPCardData',
+                    method="POST",
+                    meta={
+                      "tag_name": tag_name,
+                      "area_code": self.area.gibdd_code
+                    },
+                    body=json.dumps(payload),
+                    headers={'Content-Type': 'application/json; charset=UTF-8'},
+                    callback=self.parse_area,
+                    errback=self.handle_error
+                )
+
+
+    """
     def parse(self, response):
         scripts = response.xpath('//script')
 
@@ -104,6 +107,8 @@ class DtpSpider(scrapy.Spider):
                         headers={'Content-Type': 'application/json; charset=UTF-8'}
                     )
 
+                    print("lol")
+    
     def parse_region(self, response):
         export = json.loads(response.body_as_unicode())['metabase']
         export = json.loads(literal_eval(export)[0]['maps'])
@@ -125,6 +130,7 @@ class DtpSpider(scrapy.Spider):
                 body=json.dumps(payload),
                 headers={'Content-Type': 'application/json; charset=UTF-8'},
                 callback=self.parse_area)
+    """
 
     def parse_area(self, response):
         export = json.loads(response.body_as_unicode())
@@ -133,12 +139,27 @@ class DtpSpider(scrapy.Spider):
 
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
-                export_dtp['region_name'] = response.meta['region_name']
-                export_dtp['region_code'] = response.meta['region_code']
-                export_dtp['area_name'] = response.meta['area_name']
                 export_dtp['area_code'] = response.meta['area_code']
                 export_dtp['tag'] = response.meta['tag_name']
                 yield export_dtp
 
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(DtpSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def handle_error(self, failure):
+        if failure.check(HttpError):
+            if failure.value.response.status in [500, 200]:
+                return
+
+        raise CloseSpider("failed")
+
+    def spider_closed(self, reason):
+        if reason == "finished":
+            self.area.actual_date = max(self.dates)
+            print("УРА")
+            #self.area.save()
 
 
