@@ -15,7 +15,7 @@ BOT_NAME = 'dtp_parser'
 SPIDER_MODULES = ['dtp_parser.spiders']
 NEWSPIDER_MODULE = 'dtp_parser.spiders'
 
-LOG_LEVEL='INFO'
+LOG_LEVEL='DEBUG'
 FEED_EXPORT_ENCODING = 'utf-8'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% block meta-tags %}
+        <meta property="og:title" content="Карта ДТП">
+        <meta property="og:description" content="Карта ДТП">
+        <meta name="description" content="Карта ДТП">
+        <meta name="keywords" content="Карта ДТП">
+        <meta property="og:image" content=""/>
+        <title>Карта ДТП</title>
+    {% endblock %}
+
+    {% block page-styles %}
+    {% endblock %}
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+{% if request.resolver_match.url_name != "home" %}
+    {% include "navigation.html" %}
+{% endif %}
+
+{% block content %}
+{% endblock %}
+
+{% if request.resolver_match.url_name != "home" %}
+    {% include "footer.html" %}
+{% endif %}
+
+
+{% block page-scripts %}
+{% endblock %}
+
+</body>
+</html>

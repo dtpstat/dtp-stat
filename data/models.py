@@ -5,6 +5,7 @@ from django.utils.crypto import get_random_string
 
 from slugify import slugify
 
+
 def get_slug(instance, slug_string=None, length=5):
     if slug_string:
         slug = slugify(slug_string)
@@ -16,7 +17,7 @@ def get_slug(instance, slug_string=None, length=5):
     qs_exists = Klass.objects.filter(slug=slug).exists()
     if qs_exists:
         if slug_string:
-            return get_slug(instance, slug_string=slug_string)
+            return get_slug(instance, slug_string=slug_string + "-" + get_random_string(length=3))
         else:
             return get_slug(instance)
     return slug
@@ -28,8 +29,6 @@ class Region(models.Model):
     gibdd_code = models.CharField(max_length=20, help_text="gibdd code", null=True, blank=True, default=None, db_index=True)
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
-    point = models.PointField(help_text="coordinates", null=True, default=None)
-    actual_date = models.DateField(help_text="coordinates", null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
@@ -231,9 +230,6 @@ class Participant(models.Model):
 
 
 class Download(models.Model):
-    datetime = models.DateTimeField(help_text="datetime", null=True, blank=True, default=None, db_index=True)
-    phase = models.CharField(max_length=100, help_text="phase", null=True, blank=True, default=None, choices=[
-        ("downloading", "Выгрузка данных"),
-        ("recording", "Запись в базу"),
-        ("done", "Готово")
-    ])
+    date = models.DateField(help_text="date", null=True, blank=True, default=None, db_index=True)
+    region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
+    tags = models.BooleanField(help_text="tags", null=True, blank=True, default=False)

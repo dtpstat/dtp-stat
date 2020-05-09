@@ -16,9 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from data import views as data_views
+from application import views as app_views
 
 
 urlpatterns = [
+    path('', app_views.home, name='home'),
+
     path('admin/', admin.site.urls),
 
     path('api/regions/', data_views.SearchRegionApiView.as_view()),

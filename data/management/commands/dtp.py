@@ -6,4 +6,4 @@ class Command(BaseCommand):
     help = 'Download dtp'
 
     def handle(self, *args, **kwargs):
-        utils.check_download()
+        utils.check_dtp()

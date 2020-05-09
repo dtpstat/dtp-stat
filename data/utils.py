@@ -8,8 +8,9 @@ from django.contrib.postgres.aggregates.general import StringAgg
 from django.forms.models import model_to_dict
 
 import scrapy
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerProcess, CrawlerRunner
 from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
+from data.parser.dtp_parser.spiders.region_spider import RegionSpider
 
 import json
 import ijson
@@ -21,8 +22,9 @@ import re
 import os
 from lxml import html
 import pandas as pd
-from scrapy.crawler import CrawlerProcess
-from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
+from multiprocessing import Process
+from twisted.internet import reactor, defer
+
 
 import environ
 env = environ.Env()
@@ -80,7 +82,6 @@ def geocode(address):
 
 
 def get_region(region_code, region_name, parent_region_code, parent_region_name):
-
     parent_region, created = models.Region.objects.get_or_create(
         level=1,
         gibdd_code=parent_region_code
@@ -286,59 +287,111 @@ def get_tags(scripts):
     return tags
 
 
-def check_download():
+def crawl(spider_name, params=None):
+    first_dir = os.getcwd()
+    os.chdir("data/parser")
+    command = 'scrapy crawl ' + spider_name
+    if params:
+        for key, value in params.items():
+            command += ' -a ' + key + "=" + value
+    print(command)
+    os.system(command)
+    os.chdir(first_dir)
+
+
+def dates_generator(start, end):
+    dates_set = set()
+
+    while start <= end:
+        start += datetime.timedelta(days=1)
+        dates_set.add(datetime.datetime(start.year, start.month, 1).strftime('%m.%Y'))
+
+    return list(dates_set)
+
+
+def download_success(dates, region_code, tags=False):
+    region = get_object_or_404(models.Region, gibdd_code=region_code)
+
+    if region.level == 1:
+        region_ids = [x.id for x in region.region_set.all()] + [region.id]
+    else:
+        region_ids = [region.id]
+
+    for region_id in region_ids:
+        for date in [datetime.datetime.strptime(x, '%m.%Y') for x in dates.split(",")]:
+            download_item, created = models.Download.objects.get_or_create(
+                region_id=region_id,
+                date=date
+            )
+            download_item.tags = tags
+            download_item.save()
+
+
+def check_dtp(tags=False):
+    #models.Region.objects.all().delete()
     models.DTP.objects.all().delete()
+    models.Participant.objects.all().delete()
+    models.Vehicle.objects.all().delete()
+    models.Nearby.objects.all().delete()
+    models.Weather.objects.all().delete()
+    models.RoadCondition.objects.all().delete()
+    models.Tag.objects.all().delete()
 
     # проверяем обновления на сайте ГИБДД
     r = requests.get('http://stat.gibdd.ru/')
-    r = html.fromstring(r.content)
+    r = html.fromstring(r.content.decode('UTF-8'))
     scripts = r.xpath('//script')
 
     gibdd_actual_dates = sorted(check_dates_from_gibdd(scripts))
-    tags = get_tags(scripts)
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
     for region in tqdm(models.Region.objects.filter(level=1)[0:1]):
-        print(region)
-        for area in tqdm(region.region_set.all()[0:1]):
-            print(area)
+        region_dates = models.Download.objects.filter(
+            region=region
+        )
+
+        if region_dates:
+            region_actual_date = region_dates.latest('date').date
+            min_values = [index for index, date in enumerate(gibdd_actual_dates) if date > region_actual_date]
+            if not min_values:
+                continue
+            start_date_index = min(min_values)
+            start_date_index = start_date_index - 2 if start_date_index >= 2 else 0
+            dates = gibdd_actual_dates[start_date_index:]
+        else:
+            dates = gibdd_actual_dates
+
+        export_dates = dates_generator(start=min(dates), end=max(dates))
+
+        crawl("dtp", params={
+            "dates": ",".join(export_dates),
+            "region_code": str(region.gibdd_code),
+            "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+        })
+
+        """
+        for area in tqdm(region.region_set.all()):
             if not area.actual_date or any(area.actual_date < date for date in gibdd_actual_dates):
-                if area.actual_date:
-                    start_date_index = min([index for index, date in enumerate(gibdd_actual_dates) if date > area.actual_date])
-                    start_date_index = start_date_index - 2 if start_date_index >= 2 else 0
-                    dates = gibdd_actual_dates[start_date_index:]
-                else:
-                    dates = gibdd_actual_dates
+                
 
-                process = CrawlerProcess()
-                process.crawl(DtpSpider,
-                              dates=dates,
-                              tags=tags,
-                              area=area)
-                process.start()
-    #
-    """
-    download_item, created = models.Download.objects.filter(
-        datetime__month=timezone.now().month,
-        datetime__year=timezone.now().year,
-    ).get_or_create()
+                params = {
+                    'dates': dates,
+                    'area_code': area.gibdd_code,
+                    'reagion_code': region.gibdd_code
+                }
 
-    if created or download_item.phase == "downloading":
-        download_item.datetime = timezone.now()
-        download_item.save()
+                first_dir = os.getcwd()
+                os.chdir("data/parser")
+                command = 'scrapy crawl dtp'
+                for param in {}
+                -a shop_alias=' + shop.alias
+                os.system()
+                os.chdir(first_dir)
 
-        download(download_item)
-        recording(download_item)
+                process.crawl(DtpSpider, dates=dates[:3], tags=tags, area=area)
+        """
 
-    elif download_item.phase == "recording":
-        recording(download_item)
 
-    elif download_item.phase == "done":
-        return
-
-    #download_item.phase = "done"
-    download_item.save()
-    """
 
 def get_region_by_request(request):
     lat = request.query_params.get('lat')
