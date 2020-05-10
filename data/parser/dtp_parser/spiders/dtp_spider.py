@@ -1,6 +1,3 @@
-import django
-django.setup()
-
 from data import utils
 
 import scrapy

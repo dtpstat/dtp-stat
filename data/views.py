@@ -22,9 +22,12 @@ class SearchRegionApiView(generics.ListAPIView):
 class DTPApiView(generics.ListAPIView):
     queryset = models.DTP.objects.all()
     serializer_class = serializers.DTPSerializer
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
     filterset_class = data_filters.DTPFilterSet
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
     pagination_class = LimitOffsetPagination
+
+    def post(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
 class StatApiView(viewsets.ModelViewSet):

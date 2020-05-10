@@ -9,6 +9,16 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import environ
+env = environ.Env()
+
+import sys
+sys.path.insert(0, env('PROJECT_PATH'))
+
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'dtpstat.settings'
+
+import django; django.setup()
 
 BOT_NAME = 'dtp_parser'
 

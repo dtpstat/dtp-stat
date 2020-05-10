@@ -3,14 +3,7 @@ from . import models
 from django.shortcuts import get_object_or_404
 from django.contrib.gis.geos import Point, GEOSGeometry
 from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.measure import D
-from django.contrib.postgres.aggregates.general import StringAgg
-from django.forms.models import model_to_dict
-
-import scrapy
-from scrapy.crawler import CrawlerProcess, CrawlerRunner
-from data.parser.dtp_parser.spiders.dtp_spider import DtpSpider
-from data.parser.dtp_parser.spiders.region_spider import RegionSpider
+from django.db import transaction
 
 import json
 import ijson
@@ -34,6 +27,42 @@ def open_json(path):
     with open(path) as data_file:
         data = json.load(data_file)
     return data
+
+
+def extra_filters_data():
+    # severity
+    severity_levels = {
+        0: {'name': 'Без пострадавших', 'keywords': ['не пострадал']},
+        1: {'name': 'Легкая', 'keywords': ['разовой']},
+        2: {'name': 'Средняя', 'keywords': ['амбулатор']},
+        3: {'name': 'Тяжкая', 'keywords': ['стационар']},
+        4: {'name': 'С погибшими', 'keywords': ['скончался']}
+    }
+
+    for item in severity_levels.items():
+        severity_item, created = models.Severity.objects.get_or_create(
+            level=item[0]
+        )
+        severity_item.name = item[1]['name']
+        severity_item.keywords = item[1]['keywords']
+        severity_item.save()
+
+    # participant types
+    participant_types = {
+        'pedestrians': "С пешеходами",
+        'velo': "C велосипедистами",
+        'moto': "C мотоциклистами",
+        'public_transport': "C общественным транспортом",
+        'kids': "C детьми"
+    }
+
+    for participant_type in participant_types.items():
+        participant_type_item, created = models.ParticipantCategory.objects.get_or_create(
+            slug=participant_type[0]
+        )
+        participant_type_item.name = participant_type[1]
+        participant_type_item.save()
+
 
 
 def get_geo_data(item, dtp):
@@ -105,13 +134,21 @@ def get_region(region_code, region_name, parent_region_code, parent_region_name)
 
 
 def add_participant_record(participant, dtp, vehicle=None):
+    # тяжесть
+    participant_severity = None
+    for severity in models.Severity.objects.all():
+        if participant['S_T'] and severity.keywords[0] in participant['S_T'].lower():
+            participant_severity = severity
+            break
+
     participant_item = models.Participant(
         role=participant['K_UCH'] or None,
         driving_experience=participant['V_ST'] if participant['V_ST'] and int(participant['V_ST']) and int(participant['V_ST']) < 90 else None,
         health_status=participant['S_T'] or None,
-        gender=participant['POL'] or None,
+        gender=participant['POL'] if participant['POL'] and participant['POL'] != "Не определен" else None,
         dtp=dtp,
-        vehicle=vehicle
+        vehicle=vehicle,
+        severity=participant_severity
     )
     participant_item.save()
 
@@ -187,6 +224,40 @@ def add_related_data(item, dtp):
                 data_item['dtp_model'].add(new_item)
 
 
+def add_extra_filters(item, dtp):
+    # severity
+    severity_levels = [x.severity.level for x in dtp.participant_set.all() if x.severity]
+
+    if severity_levels:
+        dtp.severity = get_object_or_404(models.Severity, level=max(severity_levels))
+    else:
+        dtp.severity = get_object_or_404(models.Severity, level=1)
+
+    # participatn categories
+    dtp.participant_categories.clear()
+    participant_categories = {x.slug: x.id for x in models.ParticipantCategory.objects.all()}
+
+    dtp_participants = dtp.participant_set.all()
+    dtp_participants_roles_string = ",".join([x.role.lower() for x in dtp_participants if x.role])
+    dtp_vehicles_categories_string = ",".join([x.category.name for x in models.Vehicle.objects.filter(participant__in=dtp_participants) if x.category]).lower()
+    all_tags_string = ";".join([x.name for x in dtp.tags.all()]).lower()
+
+    if any("пешеход" in x.role.lower() for x in dtp_participants if x.role):
+        dtp.participant_categories.add(participant_categories.get("pedestrians"))
+
+    if any(x.lower() in dtp_participants_roles_string + dtp_vehicles_categories_string for x in ['велосипед']):
+        dtp.participant_categories.add(participant_categories.get("velo"))
+
+    if any(x.lower() in dtp_vehicles_categories_string for x in ['мотоцикл', 'мототранспорт', 'мопед', 'моторол']):
+        dtp.participant_categories.add(participant_categories.get("moto"))
+
+    if "до 16 лет" in all_tags_string:
+        dtp.participant_categories.add(participant_categories.get("kids"))
+
+    if any(x.lower() in dtp_vehicles_categories_string + all_tags_string for x in ['автобус', 'троллейбус', 'трамвай']):
+        dtp.participant_categories.add(participant_categories.get("public_transport"))
+
+
 def add_dtp_record(item):
     dtp, created = models.DTP.objects.get_or_create(
         slug=item['KartId']
@@ -211,36 +282,16 @@ def add_dtp_record(item):
 
     add_participants_records(item, dtp)
     add_related_data(item, dtp)
+    add_extra_filters(item, dtp)
+
+    dtp.save()
 
 
-def recording(download_item):
-    models.DTP.objects.all().delete()
-    models.Participant.objects.all().delete()
-    models.Vehicle.objects.all().delete()
-    models.Nearby.objects.all().delete()
-    models.Weather.objects.all().delete()
-    models.RoadCondition.objects.all().delete()
-    download_item.phase = "recording"
-    download_item.save()
+def check_dates_from_gibdd():
+    r = requests.get('http://stat.gibdd.ru/')
+    r = html.fromstring(r.content.decode('UTF-8'))
+    scripts = r.xpath('//script')
 
-    with open("data/data/dtp.json", 'r') as f:
-        n = 0
-        for item in tqdm(ijson.items(f, 'item')):
-            add_dtp_record(item)
-            n = n + 1
-            if n == 10:
-                break
-
-
-def download():
-    #models.DTP.objects.all().delete()
-    first_dir = os.getcwd()
-    os.chdir("data/parser")
-    os.system('scrapy crawl dtp')
-    os.chdir(first_dir)
-
-
-def check_dates_from_gibdd(scripts):
     source_date_data = None
     date_data = []
 
@@ -259,7 +310,14 @@ def check_dates_from_gibdd(scripts):
             for month in year['nodes']:
                 date_data.append(datetime.datetime.strptime(month['Value'].replace("MONTHS:", ""), '%m.%Y').date())
 
-    return date_data or None
+    with transaction.atomic():
+        if date_data:
+            for region in tqdm(models.Region.objects.all()):
+                for date in date_data:
+                    download_item, created = models.Download.objects.get_or_create(
+                        region=region,
+                        date=date
+                    )
 
 
 def get_tags_data(data, parent_name=None):
@@ -323,44 +381,27 @@ def download_success(dates, region_code, tags=False):
                 region_id=region_id,
                 date=date
             )
+            download_item.base_data = True
             download_item.tags = tags
-            download_item.save()
+            #download_item.save()
 
 
 def check_dtp(tags=False):
-    #models.Region.objects.all().delete()
     models.DTP.objects.all().delete()
     models.Participant.objects.all().delete()
     models.Vehicle.objects.all().delete()
     models.Nearby.objects.all().delete()
     models.Weather.objects.all().delete()
     models.RoadCondition.objects.all().delete()
-    models.Tag.objects.all().delete()
+    #models.Download.objects.all().delete()
 
     # проверяем обновления на сайте ГИБДД
-    r = requests.get('http://stat.gibdd.ru/')
-    r = html.fromstring(r.content.decode('UTF-8'))
-    scripts = r.xpath('//script')
-
-    gibdd_actual_dates = sorted(check_dates_from_gibdd(scripts))
+    check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
     for region in tqdm(models.Region.objects.filter(level=1)[0:1]):
-        region_dates = models.Download.objects.filter(
-            region=region
-        )
-
-        if region_dates:
-            region_actual_date = region_dates.latest('date').date
-            min_values = [index for index, date in enumerate(gibdd_actual_dates) if date > region_actual_date]
-            if not min_values:
-                continue
-            start_date_index = min(min_values)
-            start_date_index = start_date_index - 2 if start_date_index >= 2 else 0
-            dates = gibdd_actual_dates[start_date_index:]
-        else:
-            dates = gibdd_actual_dates
-
+        dates = sorted([x['date'] for x in models.Download.objects.filter(region=region, base_data=False).values("date")])
+        dates = dates[0:10]
         export_dates = dates_generator(start=min(dates), end=max(dates))
 
         crawl("dtp", params={
@@ -368,29 +409,6 @@ def check_dtp(tags=False):
             "region_code": str(region.gibdd_code),
             "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
         })
-
-        """
-        for area in tqdm(region.region_set.all()):
-            if not area.actual_date or any(area.actual_date < date for date in gibdd_actual_dates):
-                
-
-                params = {
-                    'dates': dates,
-                    'area_code': area.gibdd_code,
-                    'reagion_code': region.gibdd_code
-                }
-
-                first_dir = os.getcwd()
-                os.chdir("data/parser")
-                command = 'scrapy crawl dtp'
-                for param in {}
-                -a shop_alias=' + shop.alias
-                os.system()
-                os.chdir(first_dir)
-
-                process.crawl(DtpSpider, dates=dates[:3], tags=tags, area=area)
-        """
-
 
 
 def get_region_by_request(request):

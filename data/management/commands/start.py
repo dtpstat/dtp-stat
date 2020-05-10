@@ -6,4 +6,5 @@ class Command(BaseCommand):
     help = 'Download regions'
 
     def handle(self, *args, **kwargs):
+        utils.extra_filters_data()
         utils.crawl('regions')

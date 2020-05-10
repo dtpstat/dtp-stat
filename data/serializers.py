@@ -12,7 +12,7 @@ class TagSerializer(serializers.ModelSerializer):
 class DTPSerializer(serializers.Serializer):
     id = serializers.CharField(source='slug')
     datetime = serializers.DateTimeField()
-    category = serializers.CharField()
+    severity = serializers.IntegerField(source="severity.level")
     participants = serializers.IntegerField()
     injured = serializers.IntegerField()
     dead = serializers.IntegerField()

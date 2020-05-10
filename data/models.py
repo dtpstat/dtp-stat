@@ -88,6 +88,17 @@ class Tag(models.Model):
         return self.name
 
 
+class Severity(models.Model):
+    level = models.IntegerField(help_text="level", null=True, blank=True)
+    name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None)
+    keywords = JSONField(null=True, blank=True, default=list)
+
+
+class ParticipantCategory(models.Model):
+    name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None)
+    slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None)
+
+
 class DTP(models.Model):
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
@@ -117,12 +128,14 @@ class DTP(models.Model):
     category = models.ForeignKey(Category, help_text="category", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     light = models.ForeignKey(Light, help_text="light", null=True, blank=True, default=None,
                                  on_delete=models.SET_NULL, db_index=True)
+    severity = models.ForeignKey(Severity, help_text="severity lvl", db_index=True, on_delete=models.SET_NULL,
+                                 null=True, blank=True, default=None)
 
     nearby = models.ManyToManyField(Nearby, help_text="nearby objects", db_index=True)
     weather = models.ManyToManyField(Weather, help_text="weather", db_index=True)
     road_conditions = models.ManyToManyField(RoadCondition, help_text="Road conditions", db_index=True)
     tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True)
-    #participant_type = models.ForeignKey(MVCParticipantType, help_text="MVC Participant Type", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
+    participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", null=True, blank=True, default=None, db_index=True)
 
     source = models.CharField(max_length=100, help_text="data source", null=True, blank=True, default=None, choices=[
         ("police", "ГИБДД"),
@@ -227,9 +240,11 @@ class Participant(models.Model):
     dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
     violations = models.ManyToManyField(Violation, help_text="violations", db_index=True)
     vehicle = models.ForeignKey(Vehicle, help_text="vehicle", null=True, blank=True, default=None, on_delete=models.CASCADE)
+    severity = models.ForeignKey(Severity, help_text="severity lvl", db_index=True, null=True, blank=True, default=None, on_delete=models.SET_NULL)
 
 
 class Download(models.Model):
     date = models.DateField(help_text="date", null=True, blank=True, default=None, db_index=True)
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
+    base_data = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
     tags = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
