@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 import django_filters.rest_framework
 from rest_framework.decorators import action
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from data import filters as data_filters
 from data import models
@@ -34,20 +34,31 @@ class StatApiView(viewsets.ModelViewSet):
     queryset = models.DTP.objects.all()
     serializer_class = serializers.DTPSerializer
     filterset_class = data_filters.DTPFilterSet
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
 
     @action(detail=False, methods=['get'])
     def stat(self, request):
-        region = utils.get_region_by_request(request)
+        geo = request.query_params.get('geo')
+        scale = request.query_params.get('scale')
 
-        if region:
-            queryset = self.filter_queryset(self.queryset).filter(region=region)
-            region_name = region.name
+        queryset = self.filter_queryset(self.queryset)
+
+        if "," in geo:
+            name = "Полигон"
         else:
-            region_name = "Россия"
-            queryset = self.filter_queryset(self.queryset)
+            region = utils.get_region_by_request(request)
+            if region:
+                if not scale or int(scale) < 7:
+                    name = region.name
+                    queryset = queryset.filter(Q(region=region))
+                else:
+                    name = region.parent_region.name
+                    queryset = queryset.filter(Q(region__parent_region=region.parent_region))
+            else:
+                name = "Россия"
 
         data = {
-            "region_name": region_name,
+            "name": name,
             "count": queryset.count(),
             "dead": queryset.aggregate(Sum("dead")).get('dead__sum'),
             "injured": queryset.aggregate(Sum("injured")).get('injured__sum')

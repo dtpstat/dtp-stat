@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
@@ -96,7 +96,8 @@ DATE_FORMAT = 'd.m.Y'
 CKEDITOR_UPLOAD_PATH = 'blog/'
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

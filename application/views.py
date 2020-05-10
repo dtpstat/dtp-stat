@@ -20,3 +20,10 @@ def blog_post(request, slug):
     return render(request, "blog/post.html", context={
         'post': post
     })
+
+
+def page(request, slug):
+    page = get_object_or_404(models.Page, slug=slug)
+    return render(request, "page.html", context={
+        'page': page
+    })

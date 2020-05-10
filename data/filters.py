@@ -1,6 +1,7 @@
 from data import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D
+from django.db.models import Q
 
 import django_filters
 from rest_framework import filters as drf_filters
@@ -11,7 +12,6 @@ class SearchRegionFilterSet(django_filters.FilterSet):
 
 
 class DTPFilterSet(django_filters.FilterSet):
-    region = django_filters.CharFilter(field_name='region__slug')
     start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')
     category = django_filters.BaseInFilter(field_name='category__name', lookup_expr='in')
@@ -36,9 +36,11 @@ class DTPFilterSet(django_filters.FilterSet):
 class GeoFilterBackend(drf_filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         geo = request.query_params.get('geo')
-        if geo:
+        if "," in geo:
             geo = GEOSGeometry('POLYGON((' + geo + '))')
             queryset = queryset.filter(point__within=geo)
+        else:
+            geo = GEOSGeometry('POINT(' + geo + ')')
         """
         lat = request.query_params.get('lat')
         long = request.query_params.get('long')

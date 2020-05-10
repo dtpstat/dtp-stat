@@ -412,16 +412,12 @@ def check_dtp(tags=False):
 
 
 def get_region_by_request(request):
-    lat = request.query_params.get('lat')
-    long = request.query_params.get('long')
-    region = request.query_params.get('region')
+    geo = request.query_params.get('geo')
 
-    if region:
-        region = get_object_or_404(models.Region, slug=region)
-        return region
+    if geo:
 
-    if lat and long:
-        pnt = Point(float(lat), float(long))
+        pnt = GEOSGeometry('POINT(' + geo + ')')
+        print(pnt)
 
         region = models.DTP.objects.filter(
             point__dwithin=(pnt, 1)

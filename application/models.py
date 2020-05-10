@@ -28,7 +28,7 @@ def get_slug(instance, slug_string=None, length=5):
 
 
 class BlogPost(models.Model):
-    created_at = models.DateTimeField(help_text="datetime publish", default=timezone.now, null=True, blank=True, )
+    created_at = models.DateTimeField(help_text="datetime publish", default=timezone.now, null=True, blank=True)
     title = models.CharField(help_text="Post title", max_length=200, null=True, blank=True, default=None)
     text = RichTextUploadingField(help_text="text", null=True, blank=True, default=None)
     slug = models.CharField(help_text="slug", max_length=200, null=True, blank=True, default=None, db_index=True)
@@ -38,3 +38,14 @@ class BlogPost(models.Model):
         if not self.slug and self.title:
             self.slug = get_slug(self, slug_string=self.title[:30])
         super(BlogPost, self).save(*args, **kwargs)
+
+
+class Page(models.Model):
+    title = models.CharField(help_text="Post title", max_length=200, null=True, blank=True, default=None)
+    text = RichTextUploadingField(help_text="text", null=True, blank=True, default=None)
+    slug = models.CharField(help_text="slug", max_length=200, null=True, blank=True, default=None, db_index=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.title:
+            self.slug = get_slug(self, slug_string=self.title[:30])
+        super(Page, self).save(*args, **kwargs)

@@ -29,6 +29,8 @@ urlpatterns = [
     path('blog/<slug>', app_views.blog_post, name='blog_post'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
+    path('pages/<slug>', app_views.page, name='page'),
+
     path('admin/', admin.site.urls),
 
     path('api/regions/', data_views.SearchRegionApiView.as_view()),
