@@ -19,3 +19,4 @@ django-filter==2.2.0
 scrapy==2.0.1
 pandas==1.0.3
 ansible==2.9.7
+django-ckeditor==5.9.0

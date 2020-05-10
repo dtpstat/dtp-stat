@@ -131,4 +131,6 @@ dmypy.json
 /data/data/
 /static/data/
 
-/ansible/
+/ansible
+/media
+*.gz
