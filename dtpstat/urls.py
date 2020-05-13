@@ -36,6 +36,6 @@ urlpatterns = [
     path('api/regions/', data_views.SearchRegionApiView.as_view()),
     path('api/dtp/', data_views.DTPApiView.as_view()),
     path('api/stat/', data_views.StatApiView.as_view({"get": "stat"})),
-    path('api/filters/', data_views.FilterApiView.as_view()),
+    path('api/filters/', data_views.FiltersApiView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

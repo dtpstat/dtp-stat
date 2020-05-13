@@ -27,3 +27,5 @@ def page(request, slug):
     return render(request, "page.html", context={
         'page': page
     })
+
+

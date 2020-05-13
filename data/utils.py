@@ -383,7 +383,7 @@ def download_success(dates, region_code, tags=False):
             )
             download_item.base_data = True
             download_item.tags = tags
-            #download_item.save()
+            download_item.save()
 
 
 def check_dtp(tags=False):
@@ -396,7 +396,7 @@ def check_dtp(tags=False):
     #models.Download.objects.all().delete()
 
     # проверяем обновления на сайте ГИБДД
-    check_dates_from_gibdd()
+    #check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
     for region in tqdm(models.Region.objects.filter(level=1)[0:1]):
@@ -415,9 +415,7 @@ def get_region_by_request(request):
     geo = request.query_params.get('geo')
 
     if geo:
-
         pnt = GEOSGeometry('POINT(' + geo + ')')
-        print(pnt)
 
         region = models.DTP.objects.filter(
             point__dwithin=(pnt, 1)

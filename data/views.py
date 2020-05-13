@@ -12,6 +12,8 @@ from data import models
 from data import serializers
 from data import utils
 
+import calendar
+
 
 class SearchRegionApiView(generics.ListAPIView):
     queryset = models.Region.objects.all()
@@ -66,16 +68,107 @@ class StatApiView(viewsets.ModelViewSet):
         return Response(data)
 
 
-class FilterApiView(APIView):
+class FiltersApiView(APIView):
     def get(self, request):
-        data = {x: [] for x in ['street']}
-
+        data = {}
         region = utils.get_region_by_request(request)
 
-        if region:
-            data['street'] = [x.name for x in models.Street.objects.filter(dtp__region=region).distinct().order_by("name")]
+        if not region:
+            data = {
+                "error_message": "Вы находитесь за пределами России"
+            }
+        else:
+            try:
+                last_base_data = models.Download.objects.filter(region=region, base_data=True).latest("date").date
+            except:
+                last_base_data = None
 
-        data["category"] = [x.name for x in models.Category.objects.all().order_by("name")]
-        data["light"] = [x.name for x in models.Light.objects.all().order_by("name")]
+            try:
+                last_tags_data = models.Download.objects.filter(region=region, base_data=True).latest("date").date
+            except:
+                last_tags_data = None
+
+            if not last_base_data:
+                data = {
+                    "error_message": "Данных по вашему региону пока нет"
+                }
+            else:
+                data = {
+                    "error_message": None,
+                    "filters": {
+                        "date": {
+                            "range_values:": [
+                                "2015-01-01",
+                                last_base_data.replace(
+                                    day=calendar.monthrange(last_base_data.year, last_base_data.month)[1]
+                                ).strftime("%Y-%m-%d")
+                            ],
+                            "range_params": [
+                                "start_date",
+                                "end_date"
+                            ]
+                        },
+                        "participants": {
+                            "values": [(x.name, x.slug) for x in models.ParticipantCategory.objects.filter(
+                                ~Q(slug__in=['kids', 'public_transport'])
+                            )],
+                            "parameter": "participant_categories"
+                        },
+                        "categories": {
+                            "values": [(x.name, x.name) for x in models.Category.objects.all().order_by("name")],
+                            "parameter": "category"
+                        },
+                        "severity": {
+                            "values": [(x.name, x.level) for x in models.Severity.objects.all().order_by("level")],
+                            "parameter": "severity"
+                        },
+                        "violations": {
+                            "values": [(x.name, x.name) for x in models.Violation.objects.all().order_by("name")],
+                            "parameter": "violations"
+                        },
+                        "extra": [
+                            {
+                                "name": "Погода",
+                                "values": [(x.name, x.name) for x in models.Weather.objects.all().order_by("name")],
+                                "parameter": "weather"
+                            }, {
+                                "name": "Состояние дороги",
+                                "values": [(x.name, x.name) for x in models.RoadCondition.objects.all().order_by("name")],
+                                "parameter": "conditions"
+                            }, {
+                                "name": "Освещение",
+                                "values": [(x.name, x.name) for x in models.Light.objects.all().order_by("name")],
+                                "parameter": "light"
+                            }, {
+                                "name": "Поблизости",
+                                "values": [(x.name, x.name) for x in models.Nearby.objects.all().order_by("name")],
+                                "parameter": "nearby"
+                            }, {
+                                "name": "Улицы",
+                                "values": [(x.name, x.name) for x in models.Street.objects.filter(
+                                    Q(dtp__region=region) | Q(dtp__region__in=region.region_set.all())
+                                ).distinct().order_by("name")],
+                                "parameter": "street"
+                            }, {
+                                "name": "Теги",
+                                "values": [(x.name, x.name) for x in models.Tag.objects.all().order_by("name")],
+                                "parameter": "tags"
+                            }
+                        ]
+                    }
+                }
+
+
+            """
+            data = {x: [] for x in ['street']}
+    
+            region = utils.get_region_by_request(request)
+    
+            if region:
+                data['street'] = [x.name for x in models.Street.objects.filter(dtp__region=region).distinct().order_by("name")]
+    
+            data["category"] = [x.name for x in models.Category.objects.all().order_by("name")]
+            data["light"] = [x.name for x in models.Light.objects.all().order_by("name")]
+            """
         return Response(data)
 
