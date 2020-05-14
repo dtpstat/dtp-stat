@@ -20,7 +20,7 @@ class DTPFilterSet(django_filters.FilterSet):
     conditions = django_filters.BaseInFilter(field_name='road_conditions__name', lookup_expr='in')
     violations = django_filters.BaseInFilter(field_name='participant__violations__name', lookup_expr='in')
     id = django_filters.CharFilter(field_name='slug', lookup_expr="exact")
-    street = django_filters.BaseInFilter(field_name='street__name', lookup_expr='in')
+    street = django_filters.BaseInFilter(field_name='street', lookup_expr='in')
 
     class Meta:
         model = models.DTP

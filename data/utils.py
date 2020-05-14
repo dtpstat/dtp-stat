@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.contrib.gis.geos import Point
 from . import models
 from django.shortcuts import get_object_or_404
 from django.db import transaction
@@ -11,6 +12,7 @@ import pytz
 import re
 import os
 from lxml import html
+import herepy
 
 
 import environ
@@ -77,31 +79,106 @@ def get_geo_data(item, dtp):
     ]
 
     if address_components[1]:
-        street, created = models.Street.objects.get_or_create(name=address_components[1])
+        street = address_components[1]
         gibdd_address = ", ".join([x for x in address_components if x]).strip()
     elif road_components[1]:
-        street, created = models.Street.objects.get_or_create(name=road_components[1])
-        gibdd_address = ", ".join([x for x in address_components if x]).strip()
+        street = road_components[1]
+        gibdd_address = ", ".join([x for x in road_components if x]).strip()
     else:
         street = None
         gibdd_address = None
 
-    return gibdd_lat, gibdd_long, gibdd_address, street
+    if gibdd_lat and gibdd_long:
+        geo_item, created = models.Geo.objects.get_or_create(
+            dtp=dtp,
+            source="gibdd"
+        )
+        geo_item.point = Point(gibdd_lat, gibdd_long)
+        geo_item.address = gibdd_address
+        geo_item.street = street
+        geo_item.save()
 
 
-def geocode(address):
-    url = "https://geocode.search.hereapi.com/v1/geocode"
-    headers = {
-        "Authorization": "Bearer " + env('HERE_TOKEN')
+def get_geocode_point(dtp):
+
+    geocode_point, created = models.Geo.objects.get_or_create(
+        dtp=dtp,
+        source='geocode'
+    )
+
+    if created:
+        geocode_point_data = geocode(dtp)
+        if geocode_point_data and geocode_point_data.get('lat') and geocode_point_data.get('long'):
+            geocode_point.point = Point(geocode_point_data['long'], geocode_point_data['lat'])
+            geocode_point.address = geocode_point_data.get('address')
+            geocode_point.street = geocode_point_data.get('street')
+            geocode_point.save()
+            return geocode_point
+        else:
+            geocode_point.delete()
+            return None
+
+
+def geocoder_yandex(address):
+    params = {
+        "geocode": address,
+        "apikey": "ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec",
+        "format": "json"
     }
-    payload = {
-        "q": address
-    }
-    response = requests.get(url, params=payload, headers=headers)
+
+    url = "https://geocode-maps.yandex.ru/1.x"
+    r = requests.get(url, params=params)
+
+    data = {}
+
     try:
-        return response.json().get('items')[0]['access'][0]['lat'], response.json().get('items')[0]['access'][0]['long']
+        geo = r.json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
+
+        data['lat'] = float(geo['Point']['pos'].split(" ")[1])
+        data['long'] = float(geo['Point']['pos'].split(" ")[0])
+
+        data['address'] = geo['metaDataProperty']['GeocoderMetaData']['text']
+
+        address_components_street = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
+                                     x['kind'] == "street"]
+        if address_components_street:
+            data['street'] = address_components_street[0]['name']
     except:
         pass
+
+    return data if data != {} else None
+
+
+def geocoder_here(address=None, coords=None):
+    api_key = 'RiiGcCcn0R9NGRwFZN311cD12LIyDil7BvOJLliMjdg'
+    response = None
+
+    if address:
+        geocoderApi = herepy.GeocoderApi('RiiGcCcn0R9NGRwFZN311cD12LIyDil7BvOJLliMjdg')
+        response = geocoderApi.free_form(address).as_dict()
+    elif coords:
+        geocoderReverseApi = herepy.GeocoderReverseApi(api_key)
+        response = geocoderReverseApi.retrieve_addresses(coords).as_dict()
+
+    if response:
+        return {
+            'lat': response['Response']['View'][0]['Result'][0]['Location']['NavigationPosition'][0]['Latitude'],
+            "long": response['Response']['View'][0]['Result'][0]['Location']['NavigationPosition'][0]['Longitude']
+        }
+    else:
+        return None
+
+
+def geocode(dtp):
+    data = geocoder_yandex(dtp.full_address())
+    print(data)
+    if data:
+        here_data = geocoder_here(coords=[data['lat'], data['long']])
+        if here_data:
+            data['lat'] = here_data['lat']
+            data['long'] = here_data['long']
+    print(data)
+    return data
 
 
 def get_region(region_code, region_name, parent_region_code, parent_region_name):
@@ -256,21 +333,20 @@ def add_dtp_record(item):
     dtp, created = models.DTP.objects.get_or_create(
         slug=item['KartId']
     )
+    dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"])
+
+    get_geo_data(item, dtp)
 
     tag, created = models.Tag.objects.get_or_create(name=item['tag']) if item['tag'] else None
     dtp.tags.add(tag)
+
     dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
-    #dtp.region = get_region(item["area_code"], item["area_name"], item["region_code"], item["region_name"])
-    dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"])
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
     dtp.participants = item['K_UCH']
     dtp.injured = item['RAN']
     dtp.dead = item['POG']
     dtp.scheme = item['infoDtp']['s_dtp'] if item['infoDtp']['s_dtp'] not in ["290", "390", "490", "590", "690", "790", "890", "990"] else None
-    dtp.data['gibdd_point'] = {}
-    dtp.data['gibdd_point']['lat'], dtp.data['gibdd_point']['long'], dtp.data['gibdd_point']['address'], dtp.street = get_geo_data(item, dtp)
-    dtp.source = "police"
     dtp.data['source'] = item
     dtp.save()
 

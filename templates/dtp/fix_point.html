@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+
+{% block content %}
+    {% if message %}
+        <div class="m-auto">
+            <h4>{{ message }}</h4>
+        </div>
+    {% else %}
+    <div class="m-auto">
+        <div class="text-center">
+            <h3>Корректировка координат ДТП</h3>
+            <br>
+            <h5>Выберите наиболее подходящие координаты или предложите свои</h5>
+            <br>
+            <p>Адрес - {{ dtp.full_address }}</p>
+            {% if dtp.nearby.all %}
+                <p>Поблизости - {{ dtp.nearby.all|join:", " }}</p>
+            {% endif %}
+        </div>
+
+        <div class="container geo-fix-point mb-5">
+            <div class="row mt-5">
+                {% if geo.gibdd %}
+                    <div class="geo-option col p-4 m-2">
+                        <h5 style="height: 50px" class="text-center">Оставить старые координаты </h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="lat" value="{{ geo.gibdd.0 }}" disabled>
+                            <input type="text" class="form-control" name="long" value="{{ geo.gibdd.1 }}" disabled>
+                        </div>
+                        <div id="gibdd-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                        <div class="submit">
+                            <button class="btn btn-warning">Выбрать</button>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if geo.geocode %}
+                    <div class="geo-option col p-4 m-2">
+                        <h5 style="height: 50px" class="text-center">Автоматический подбор по адресу</h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="lat" value="{{ geo.geocode.0 }}" disabled>
+                            <input type="text" class="form-control" name="long" value="{{ geo.geocode.1 }}" disabled>
+                        </div>
+                        <div id="geocode-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                        <div class="submit">
+                            <button class="btn btn-warning">Выбрать</button>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="geo-option ugc col p-4 m-2">
+                    <div style="height: 50px;text-align: center;margin-bottom: 10px">
+                        <h5>Предложить свои координаты</h5>
+                        <p class="small">Кликайте на карту</p>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="lat" disabled>
+                        <input type="text" class="form-control" name="long" disabled>
+                    </div>
+                    <div id="ugc-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                    <div class="submit">
+                        <button class="btn btn-warning">Выбрать</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-5 mt-3">
+                <form method="post" id="submit">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if field.name != "captcha" %}
+                            <input name="{{ field.name }}" hidden>
+                        {% else %}
+                            <div style="margin: auto;text-align: center;">
+                                {{ field }}
+                            </div>
+
+                        {% endif %}
+                    {% endfor %}
+                </form>
+                <p class="text-danger">{{ error }}</p>
+                <button class="btn btn-secondary btn-lg" id="submit-button">Отправить</button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block page-scripts %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec&lang=ru_RU"
+            type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $('#submit-button').on('click',function() {
+            var error =  $(".text-danger")
+            error.text("");
+
+            var active_options = $('.geo-option.active')
+
+            if(active_options.length) {
+                var active_option = active_options.first()
+
+                var lat = active_option.find("input[name*='lat']").val();
+                var long = active_option.find("input[name*='long']").val();
+                if (lat && long) {
+                    $("form input[name*='lat']").val(lat)
+                    $("form input[name*='long']").val(long)
+                    $("form").submit()
+                } else {
+                    error.text("Нужно выбрать точку на карте или выбрать другой вариант");
+                }
+            } else {
+                error.text("Вы не выбрали ни один вариант");
+            }
+
+        });
+
+        $('.submit > button').on('click',function() {
+            $('.submit > button').show()
+            $('.geo-option').removeClass("active");
+
+            $(this).hide()
+            $(this).parent().parent().addClass("active")
+        });
+
+        ymaps.ready(init);
+        function init(){
+            {% for item in geo.items %}
+                var {{ item.0 }}_map = new ymaps.Map("{{ item.0 }}-map", {
+                    center: {{ item.1 }},
+                    zoom: 15,
+                    controls: ['geolocationControl', 'typeSelector', 'zoomControl'],
+                }, {suppressMapOpenBlock: true});
+
+                var {{ item.0 }}_placemark = new ymaps.Placemark({{ item.1 }});
+                {{ item.0 }}_map.geoObjects.add({{ item.0 }}_placemark);
+            {% endfor %}
+
+            var myPlacemark, ugc_map = new ymaps.Map("ugc-map", {
+                    center: {{ geo.gibdd }},
+                    zoom: 15,
+                    controls: ['geolocationControl', 'typeSelector', 'zoomControl'],
+                }, {suppressMapOpenBlock: true});
+
+
+            ugc_map.events.add('click', function (e) {
+                var coords = e.get('coords');
+
+                // Если метка уже создана – просто передвигаем ее.
+                if (myPlacemark) {
+                    myPlacemark.geometry.setCoordinates(coords);
+                }
+                // Если нет – создаем.
+                else {
+                    myPlacemark = createPlacemark(coords);
+                    ugc_map.geoObjects.add(myPlacemark);
+                    // Слушаем событие окончания перетаскивания на метке.
+                    myPlacemark.events.add('dragend', function () {
+                        putValues(coords);
+                    });
+                }
+                putValues(coords);
+            });
+
+            // Создание метки.
+            function createPlacemark(coords) {
+                return new ymaps.Placemark(coords, {}, {
+                    preset: 'islands#violetDotIconWithCaption',
+                    draggable: false
+                });
+            }
+
+            // Добавляем координаты
+            function putValues(coords) {
+                $('.ugc input[name*=\'lat\']').val(coords[0].toString().slice(0,10));
+                $('.ugc input[name*=\'long\']').val(coords[1].toString().slice(0,10));
+                $('.ugc > .submit > button').trigger( "click" );
+            };
+
+        }
+    </script>
+{% endblock %}

@@ -20,3 +20,5 @@ scrapy==2.0.1
 pandas==1.0.3
 ansible==2.9.7
 django-ckeditor==5.9.0
+herepy==2.1.1
+django-recaptcha==2.0.6

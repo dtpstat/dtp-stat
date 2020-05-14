@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from . import middlewares
+from django.contrib.postgres.fields import JSONField
 
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -58,3 +59,15 @@ class OpenData(models.Model):
 
     def mb_file_size(self):
         return self.file_size/(1024*1024)
+
+
+class Feedback(models.Model):
+    dtp = models.ForeignKey("data.DTP",  null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    comment = models.TextField(null=True, blank=True, default=None)
+    data = JSONField(default=dict, null=True, blank=True)
+    edited_by = models.ForeignKey(User, default=middlewares.get_current_user, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    status = models.CharField(max_length=200, null=True, blank=True, default="new", choices=[
+        ("new", "новое"),
+        ("done", "готово")
+    ])

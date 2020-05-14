@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="m-auto text-center">
+        <h3 class="text-center">Тут будет карточка ДТП</h3>
+        <p>
+            <a href="{% url "dtp_fix_point" dtp.slug %}">Пожаловаться на некорректные координаты</a>
+        </p>
+    </div>
+{% endblock %}

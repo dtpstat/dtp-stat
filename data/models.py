@@ -104,27 +104,17 @@ class DTP(models.Model):
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
     datetime = models.DateTimeField(help_text="datetime", null=True, blank=True, default=None, db_index=True)
 
-    #gibdd_address = models.CharField(max_length=10000, help_text="address", null=True, blank=True, default=None, db_index=True)
-    #gibdd_point = models.PointField(help_text="coordinates from police", null=True, default=None)
-    #geocoder_address = models.CharField(max_length=10000, help_text="address", null=True, blank=True, default=None, db_index=True)
-    #geocoder_point = models.PointField(help_text="coordinates from geocoder", null=True, default=None)
-    #ugc_address = models.CharField(max_length=10000, help_text="address", null=True, blank=True, default=None, db_index=True)
-    #ugc_point = models.PointField(help_text="coordinates from users", null=True, default=None)
-
-    address = models.CharField(max_length=10000, help_text="address", null=True, blank=True, default=None, db_index=True)
+    address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
+    street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None, db_index=True)
     point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
-
-    data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
 
     participants = models.IntegerField(help_text="participants count", null=True, blank=True, default=None,
                                        db_index=True)
     injured = models.IntegerField(help_text="injured count", null=True, blank=True, default=None, db_index=True)
     dead = models.IntegerField(help_text="dead count", null=True, blank=True, default=None, db_index=True)
 
-    scheme = models.CharField(max_length=100, help_text="scheme number", null=True, blank=True, default=None,
-                              db_index=True)
+    scheme = models.CharField(max_length=100, help_text="scheme number", null=True, blank=True, default=None)
 
-    street = models.ForeignKey(Street, help_text="Street", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     category = models.ForeignKey(Category, help_text="category", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     light = models.ForeignKey(Light, help_text="light", null=True, blank=True, default=None,
                                  on_delete=models.SET_NULL, db_index=True)
@@ -137,17 +127,15 @@ class DTP(models.Model):
     tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True)
     participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", null=True, blank=True, default=None, db_index=True)
 
-    source = models.CharField(max_length=100, help_text="data source", null=True, blank=True, default=None, choices=[
-        ("police", "ГИБДД"),
-        ("police_deleted", "ГИБДД (удалено)"),
-        ("ugc", "Пользователи")
-    ])
-
+    data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.category.name + " " + self.region.name + " " + str(self.datetime)
+
+    def full_address(self):
+        return ", ".join([x for x in [self.region.parent_region.name, self.region.name, self.address] if x])
 
     def get_absolute_url(self):
         return '/dtp/' + self.slug + '/'
@@ -195,15 +183,27 @@ class DTP(models.Model):
         }
 
     def save(self, *args, **kwargs):
-        if self.data.get('ugc_point') and self.data.get('ugc_point').get('lat') and self.data.get('ugc_point').get('long'):
-            self.point = Point(self.data.get('ugc_point').get('lat'), self.data.get('ugc_point').get('long'))
-        elif self.data.get('geocoder_point') and self.data.get('geocoder_point').get('lat') and self.data.get('geocoder_point').get('long'):
-            self.point = Point(self.data.get('geocoder_point').get('lat'), self.data.get('geocoder_point').get('long'))
-        elif self.data.get('gibdd_point') and self.data.get('gibdd_point').get('lat') and self.data.get('gibdd_point').get('long'):
-            self.point = Point(self.data.get('gibdd_point').get('lat'), self.data.get('gibdd_point').get('long'))
-            self.address = self.data.get('gibdd_point').get('address')
+        if not self.point:
+            geo = self.geo_set.filter(source="gibdd").last()
+            if geo:
+                self.point = geo.point
+                self.address = geo.address
+                self.street = geo.street
+
 
         super(DTP, self).save(*args, **kwargs)
+
+
+class Geo(models.Model):
+    dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
+    source = models.CharField(max_length=100, help_text="data source", null=True, blank=True, default=None, choices=[
+        ("gibdd", "ГИБДД"),
+        ("user", "Пользователи"),
+        ("geocode", "Геокодер")
+    ])
+    street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None,db_index=True)
+    address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
+    point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
 
 
 class Violation(models.Model):

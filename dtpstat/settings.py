@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'ckeditor',
     'ckeditor_uploader',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -89,7 +90,7 @@ REST_FRAMEWORK = {
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
-USE_L10N = True
+USE_L10N = False
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
@@ -101,3 +102,7 @@ STATICFILES_DIRS = [env('STATICFILES_DIRS')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DECIMAL_SEPARATOR="."
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

@@ -1,0 +1,27 @@
+.ymaps-2-1-76-ground-pane {
+	filter: grayscale(1);
+	-webkit-filter: grayscale(1);
+	-moz-filter: grayscale(1);
+	-o-filter: grayscale(1);
+}
+
+.geo-option {
+	background: whitesmoke;
+}
+
+.geo-option.active {
+	background: #dbdacf;
+}
+
+.geo-option .submit {
+	text-align: center;
+	margin-top: 30px;
+}
+
+.g-recaptcha {
+	display: inline-block;
+}
+
+.errorlist {
+	color: #db3546;
+}
