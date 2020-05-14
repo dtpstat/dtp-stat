@@ -1,12 +1,9 @@
 from django.utils import timezone
 from . import models
 from django.shortcuts import get_object_or_404
-from django.contrib.gis.geos import Point, GEOSGeometry
-from django.contrib.gis.db.models.functions import Distance
 from django.db import transaction
 
 import json
-import ijson
 from tqdm import tqdm
 import datetime
 import requests
@@ -14,9 +11,6 @@ import pytz
 import re
 import os
 from lxml import html
-import pandas as pd
-from multiprocessing import Process
-from twisted.internet import reactor, defer
 
 
 import environ
@@ -409,71 +403,3 @@ def check_dtp(tags=False):
             "region_code": str(region.gibdd_code),
             "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
         })
-
-
-def get_region_by_request(request):
-    geo = request.query_params.get('geo')
-
-    if geo:
-        pnt = GEOSGeometry('POINT(' + geo + ')')
-
-        region = models.DTP.objects.filter(
-            point__dwithin=(pnt, 1)
-        ).annotate(
-            distance=Distance('point', pnt)
-        ).order_by('distance')[0].region
-
-        return region
-
-
-def generate_datasets():
-    data = [obj.as_dict() for obj in models.DTP.objects.all()]
-    with open('static/data/' + 'test.json', 'w') as data_file:
-        json.dump(data, data_file, ensure_ascii=False)
-
-
-def generate_datasets_geojson():
-    data = [obj.as_dict() for obj in models.DTP.objects.all()]
-    geo_data = { "type": "FeatureCollection", "features": [
-        {"type": "Feature",
-         "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
-         "properties": item
-         } for item in data
-    ]}
-    with open('static/data/' + 'test.geojson', 'w') as data_file:
-        json.dump(geo_data, data_file, ensure_ascii=False)
-
-    """
-    data = list(models.DTP.objects.all().annotate(
-        election_regions=StringAgg('election_item__regions__name', ordering="election_item__regions__level",
-                                   delimiter=", ")
-    ).values(
-        'id',
-        'datetime',
-        'slug',
-        'region__name',
-        'region__parent_region__name',
-        'address',
-        #'point',
-        'participants',
-        'injured',
-        'dead',
-        'category__name',
-        'light__name',
-        'candidate__data__birthplace',
-        'electoral_district',
-        'election_item__election__name',
-        'election_item__name',
-        'election_regions',
-        'election_item__date',
-        'election_item__level__name',
-        'election_item__stage__name',
-        'election_item__type__name',
-        'election_item__scheme__name',
-        'gas_url',
-
-    ))
-
-    df = pd.DataFrame(data)
-    df.to_csv('static/data/nominations.csv')
-    """

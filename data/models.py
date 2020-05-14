@@ -156,8 +156,8 @@ class DTP(models.Model):
         return {
             "id": self.id,
             "point": {
-                "lat": self.point.coords[1],
-                "long": self.point.coords[0],
+                "lat": self.point.coords[1] if self.point else None,
+                "long": self.point.coords[0] if self.point else None,
             },
             "region": self.region.name,
             "parent_region": self.region.parent_region.name,

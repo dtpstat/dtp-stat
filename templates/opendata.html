@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="m-auto text-center">
+        <h3 class="text-center">Скачать данные</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Регион</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opendata_item in opendata %}
+                    <tr>
+                        <td>{{ opendata_item.region.name }}</td>
+                        <td>{{ start_date|date:"F Y" }} - {{ opendata_item.date|date:"F Y" }}</td>
+                        <td><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson">.geojson ({{ opendata_item.mb_file_size|floatformat:"2" }} mb)</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+{% endblock %}

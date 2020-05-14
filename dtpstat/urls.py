@@ -30,12 +30,12 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
     path('pages/<slug>', app_views.page, name='page'),
+    path('opendata/', app_views.opendata, name='opendata'),
 
     path('admin/', admin.site.urls),
 
-    path('api/regions/', data_views.SearchRegionApiView.as_view()),
-    path('api/dtp/', data_views.DTPApiView.as_view()),
-    path('api/stat/', data_views.StatApiView.as_view({"get": "stat"})),
-    path('api/filters/', data_views.FiltersApiView.as_view()),
+    path('api/dtp/', app_views.DTPApiView.as_view()),
+    path('api/stat/', app_views.StatApiView.as_view({"get": "stat"})),
+    path('api/filters/', app_views.FiltersApiView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

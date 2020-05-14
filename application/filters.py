@@ -7,10 +7,6 @@ import django_filters
 from rest_framework import filters as drf_filters
 
 
-class SearchRegionFilterSet(django_filters.FilterSet):
-    search = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
-
-
 class DTPFilterSet(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')

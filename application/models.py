@@ -49,3 +49,12 @@ class Page(models.Model):
         if not self.slug and self.title:
             self.slug = get_slug(self, slug_string=self.title[:30])
         super(Page, self).save(*args, **kwargs)
+
+
+class OpenData(models.Model):
+    region = models.ForeignKey("data.Region", null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    date = models.DateField(help_text="date", null=True, blank=True, default=None, db_index=True)
+    file_size = models.IntegerField(null=True, blank=True, default=None)
+
+    def mb_file_size(self):
+        return self.file_size/(1024*1024)
