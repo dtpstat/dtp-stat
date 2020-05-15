@@ -12,3 +12,16 @@ class BlogPostAdmin(admin.ModelAdmin):
 class PageAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug')
     ordering = ('title',)
+
+
+@admin.register(models.Moderator)
+class ModeratorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'regions_list')
+    filter_horizontal = ('regions',)
+    search_fields = ('user__username', 'region__name')
+    ordering = ('created_at',)
+
+    list_select_related = (
+        'user',
+    )
+

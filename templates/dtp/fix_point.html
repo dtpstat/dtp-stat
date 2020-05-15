@@ -21,11 +21,11 @@
             {% endif %}
         </div>
 
-        <div class="container geo-fix-point mb-5">
+        <div class="container-fluid geo-fix-point mb-5">
             <div class="row mt-5">
                 {% if geo.gibdd %}
                     <div class="geo-option col p-4 m-2">
-                        <h5 style="height: 50px" class="text-center">Оставить старые координаты </h5>
+                        <h5 style="height: 50px" class="text-center">От ГИБДД</h5>
                         <div class="input-group">
                             <input type="text" class="form-control" name="lat" value="{{ geo.gibdd.0 }}" disabled>
                             <input type="text" class="form-control" name="long" value="{{ geo.gibdd.1 }}" disabled>
@@ -38,12 +38,25 @@
                 {% endif %}
                 {% if geo.geocode %}
                     <div class="geo-option col p-4 m-2">
-                        <h5 style="height: 50px" class="text-center">Автоматический подбор по адресу</h5>
+                        <h5 style="height: 50px" class="text-center">От Яндекса</h5>
                         <div class="input-group">
                             <input type="text" class="form-control" name="lat" value="{{ geo.geocode.0 }}" disabled>
                             <input type="text" class="form-control" name="long" value="{{ geo.geocode.1 }}" disabled>
                         </div>
                         <div id="geocode-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                        <div class="submit">
+                            <button class="btn btn-warning">Выбрать</button>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if geo.user %}
+                    <div class="geo-option col p-4 m-2">
+                        <h5 style="height: 50px" class="text-center">От пользователей</h5>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="lat" value="{{ geo.user.0 }}" disabled>
+                            <input type="text" class="form-control" name="long" value="{{ geo.user.1 }}" disabled>
+                        </div>
+                        <div id="user-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
                         <div class="submit">
                             <button class="btn btn-warning">Выбрать</button>
                         </div>
@@ -60,6 +73,14 @@
                         <input type="text" class="form-control" name="long" disabled>
                     </div>
                     <div id="ugc-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                    <div class="submit">
+                        <button class="btn btn-warning">Выбрать</button>
+                    </div>
+                </div>
+                <div class="geo-option no col p-4 m-2">
+                    <div class="d-flex align-items-center" style="height: 420px">
+                        <h5 class="text-center container">Просто сообщить о некорретных координатах</h5>
+                    </div>
                     <div class="submit">
                         <button class="btn btn-warning">Выбрать</button>
                     </div>
@@ -109,10 +130,15 @@
 
                 var lat = active_option.find("input[name*='lat']").val();
                 var long = active_option.find("input[name*='long']").val();
-                if (lat && long) {
-                    $("form input[name*='lat']").val(lat)
-                    $("form input[name*='long']").val(long)
-                    $("form").submit()
+                if ((lat && long) || active_option.hasClass("no")) {
+                    captcha = $("#g-recaptcha-response")
+                    if (captcha.length && captcha.val() === "") {
+                        error.text("Пройдите капчу");
+                    } else {
+                        $("form input[name*='lat']").val(lat)
+                        $("form input[name*='long']").val(long)
+                        $("form").submit()
+                    }
                 } else {
                     error.text("Нужно выбрать точку на карте или выбрать другой вариант");
                 }

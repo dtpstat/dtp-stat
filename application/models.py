@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from . import middlewares
 from django.contrib.postgres.fields import JSONField
+from django.conf import settings
+from django.contrib.gis.geos import Point
 
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -69,5 +71,32 @@ class Feedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     status = models.CharField(max_length=200, null=True, blank=True, default="new", choices=[
         ("new", "новое"),
-        ("done", "готово")
+        ("done", "готово"),
+        ("no", "невозможно пофиксить")
     ])
+
+    def save(self, *args, **kwargs):
+        if self.status == "done" and self.data.get('lat') and self.data.get('long'):
+            dtp = self.dtp
+            geo_item, created = dtp.geo_set.get_or_create(
+                dtp=dtp,
+                source="user",
+            )
+            geo_item.point = Point(self.data.get('long'), self.data.get('lat'))
+            geo_item.save()
+
+            dtp.point = geo_item.point
+            dtp.save()
+        super(Feedback, self).save(*args, **kwargs)
+
+
+class Moderator(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, db_index=True, default=None, null=True, blank=True)
+    username = models.CharField(max_length=200, default=None, null=True, blank=True)
+    regions = models.ManyToManyField("data.Region", db_index=True, default=None, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def regions_list(self):
+        return ", ".join([x.name for x in self.regions.all()])
+
+

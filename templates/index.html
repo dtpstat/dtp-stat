@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load account socialaccount %}
 
 {% block content %}
     <div class="m-auto text-center">
@@ -15,6 +16,9 @@
         <p><a href="/api/filters/?geo=34.18121337890624+53.20932249705369">API Фильтров</a></p>
         <hr>
         <p><a href="{% url "dtp" dtps.0.slug %}">Карточка ДТП</a></p>
+
+        <hr>
+        <p><a href="{% url 'account_login' %}">Войти</a></p>
 
         <hr>
 

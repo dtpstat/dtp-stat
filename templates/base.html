@@ -33,8 +33,21 @@
     {% include "navigation.html" %}
 {% endif %}
 
+{% if "account" in request.resolver_match.url_name %}
+    <div class="text-center account" style="max-width: 400px;margin: auto">
+{% endif %}
+
 {% block content %}
 {% endblock %}
+
+{% if "account" in request.resolver_match.url_name %}
+    </div>
+    <script>
+        $('.account form input[type=text],.account form input[type=password],.account form input[type=email]').addClass('form-control');
+        $('.account a.button').removeClass('button');
+        $('.account button, .account form input[type=submit]').addClass('button');
+    </script>
+{% endif %}
 
 {% if request.resolver_match.url_name != "home" %}
     {% include "footer.html" %}
@@ -46,3 +59,6 @@
 
 </body>
 </html>
+
+
+

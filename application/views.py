@@ -1,11 +1,13 @@
 from django.db.models import Sum, Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 from data import models as data_models
 from data import utils as data_utils
 from application import models
 from application import forms
+from application import utils
 
 
 import datetime
@@ -50,25 +52,42 @@ def opendata(request):
 
 
 def dtp(request, slug):
-    dtp = get_object_or_404(data_models.DTP, slug=slug)
+    dtp_item = get_object_or_404(data_models.DTP, slug=slug)
 
     return render(request, "dtp/dtp.html", context={
-        'dtp': dtp
+        'dtp': dtp_item
     })
 
 
 def dtp_fix_point(request, slug):
     dtp = get_object_or_404(data_models.DTP, slug=slug)
     error = ""
-    form = forms.FixPoint()
+
+    is_moderator = utils.is_moderator(request.user)
+
+    if is_moderator:
+        form = forms.FixPointModerator()
+    else:
+        form = forms.FixPoint()
 
     if request.method == 'POST':
-        form = forms.FixPoint(request.POST)
+        if is_moderator:
+            form = forms.FixPointModerator(request.POST)
+        else:
+            form = forms.FixPoint(request.POST)
+
         if form.is_valid():
-            feedback_item = models.Feedback(
-                dtp=dtp,
-                data={"lat": form.cleaned_data.get('lat'), "long": form.cleaned_data.get('long')}
+            feedback_item, created = models.Feedback.objects.get_or_create(
+                dtp=dtp
             )
+            feedback_item.data={"lat": form.cleaned_data.get('lat'), "long": form.cleaned_data.get('long')}
+
+            if is_moderator:
+                if form.cleaned_data.get('lat') and form.cleaned_data.get('long'):
+                    feedback_item.status = "done"
+                else:
+                    feedback_item.status = "no"
+
             feedback_item.save()
 
             return render(request, "dtp/fix_point.html", context={
@@ -79,13 +98,43 @@ def dtp_fix_point(request, slug):
 
     data_utils.get_geocode_point(dtp)
 
+    if is_moderator:
+        geo = {x.source:[x.point.coords[1], x.point.coords[0]] for x in dtp.geo_set.all()}
+    else:
+        geo = {x.source: [x.point.coords[1], x.point.coords[0]] for x in dtp.geo_set.all() if x.source != "user"}
+
     return render(request, "dtp/fix_point.html", context={
         'dtp': dtp,
         'form': form,
-        "geo": {x.source:[x.point.coords[1], x.point.coords[0]] for x in dtp.geo_set.all()},
+        "geo": geo,
         "error": error
     })
 
 
+@login_required(login_url="/accounts/login/")
+def board(request):
+    return render(request, "board/index.html", context={})
+
+
+@login_required(login_url="/accounts/login/")
+def feedback_list(request):
+    feedback_qs = utils.get_moderator_feedback(request)
+    return render(request, "board/feedback_list.html", context={
+        "feedback_new": feedback_qs.filter(status="new"),
+        "feedback_done": feedback_qs.filter(status__in=["done","no"])
+    })
+
+
+@login_required(login_url="/accounts/login/")
+def feedback(request, feedback_id):
+    feedback_item = get_object_or_404(models.Feedback, id=feedback_id)
+    feedback_qs = utils.get_moderator_feedback(request)
+
+    if not feedback_item in feedback_qs:
+        return redirect("feedback_list")
+    else:
+        return render(request, "board/feedback.html", context={
+            "feedback_item": feedback_item
+        })
 
 

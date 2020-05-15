@@ -2,6 +2,7 @@ from django.contrib.gis.geos import Point, GEOSGeometry
 from django.contrib.gis.db.models.functions import Distance
 from data import models as data_models
 from application import models
+from django.shortcuts import get_object_or_404, render
 
 import json
 import calendar
@@ -105,3 +106,22 @@ def generate_datasets_geojson():
     df = pd.DataFrame(data)
     df.to_csv('static/data/nominations.csv')
     """
+
+
+def get_moderator_feedback(request):
+    user = request.user
+    if user.is_superuser:
+        feedback = models.Feedback.objects.all()
+    else:
+        moderator = get_object_or_404(models.Moderator, user=request.user)
+        feedback = models.Feedback.objects.filter(dtp__region__parent_region__moderator=moderator)
+
+    return feedback
+
+
+def is_moderator(user):
+    try:
+        get_object_or_404(models.Moderator, user=user)
+        return True
+    except:
+        return False

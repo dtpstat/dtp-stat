@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="m-auto text-center">
+        <h3>Админка</h3>
+        <h5>Запросы по качеству данных</h5>
+        <p>Обработано в вашем регионе - {{ feedback_done|length }}</p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Тип</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in feedback_new %}
+                    <tr>
+                        <td><a href="">{{ item.dtp }}</a></td>
+                        <td>
+                            {% if item.comment %}
+                                Комментарий
+                            {% else %}
+                                Координаты
+                            {% endif %}
+                        </td>
+                        <td>{{ item.created_at }}</td>
+                        <td>{{ item.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+{% endblock %}

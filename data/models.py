@@ -125,7 +125,7 @@ class DTP(models.Model):
     weather = models.ManyToManyField(Weather, help_text="weather", db_index=True)
     road_conditions = models.ManyToManyField(RoadCondition, help_text="Road conditions", db_index=True)
     tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True)
-    participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", null=True, blank=True, default=None, db_index=True)
+    participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", db_index=True)
 
     data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)

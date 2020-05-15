@@ -25,6 +25,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', app_views.home, name='home'),
+    path('accounts/', include('allauth.urls')),
+    path('board/', app_views.board, name='board'),
+    path('board/feedback/', app_views.feedback_list, name='feedback_list'),
 
     path('dtp/<slug>/', app_views.dtp, name='dtp'),
     path('dtp/<slug>/fix_point/', app_views.dtp_fix_point, name='dtp_fix_point'),

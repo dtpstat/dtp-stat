@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="m-auto text-center">
+        <h3 class="text-center">Админка</h3>
+        {% if request.user.is_superuser %}
+            <p>
+                <a href="{% url 'admin:index' %}">Админка</a>
+            </p>
+            <p>
+                <a href="{% url 'admin:application_moderator_changelist' %}">Модераторы</a>
+            </p>
+            <p>
+                <a href="{% url 'admin:application_blogpost_changelist' %}">Блог</a>
+            </p>
+            <p>
+                <a href="{% url 'admin:application_page_changelist' %}">Статичные страницы</a>
+            </p>
+            <hr>
+        {% endif %}
+        <p>
+            <a href="{% url "feedback_list" %}">Корректировка данных</a>
+
+        </p>
+        <p>
+            <a href="">Дополнительные слои</a>
+        </p>
+        <hr>
+        <p>
+            <a href="{% url "account_logout" %}">Выйти</a>
+        </p>
+    </div>
+{% endblock %}
