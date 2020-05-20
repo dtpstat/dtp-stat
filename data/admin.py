@@ -23,7 +23,7 @@ class PrettyJSONWidget(widgets.Textarea):
 class DTPAdmin(admin.ModelAdmin):
     list_display = ('datetime', 'category', 'region')
     raw_id_fields = ('region',)
-    search_fields = ('region__name',)
+    search_fields = ('region__name', 'region__parent_region__name')
     date_hierarchy = 'datetime'
     filter_horizontal = ('weather', 'nearby', 'road_conditions', 'tags', 'participant_categories')
 
@@ -53,3 +53,10 @@ class DownloadAdmin(admin.ModelAdmin):
     list_select_related = (
         'region',
     )
+
+
+@admin.register(models.Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    ordering = ('name',)

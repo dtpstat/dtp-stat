@@ -353,10 +353,11 @@ def add_dtp_record(item):
     if dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
         return
 
-    if item["area_code"] == "63401" and item["parent_code"] == "63":
-        dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
-    else:
-        dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"], parent_region__gibdd_code=item["parent_code"])
+    if item.get("area_code") and item.get("parent_code"):
+        if item["area_code"] == "63401" and item["parent_code"] == "63":
+            dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
+        else:
+            dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"], parent_region__gibdd_code=item["parent_code"])
 
     get_geo_data(item, dtp)
 
@@ -493,22 +494,19 @@ def download_success(dates, region_code, tags=False):
     """
 
 def check_dtp(tags=False):
-    """
-    models.DTP.objects.all().delete()
-    models.Participant.objects.all().delete()
-    models.Vehicle.objects.all().delete()
-    models.Nearby.objects.all().delete()
-    models.Weather.objects.all().delete()
-    models.RoadCondition.objects.all().delete()
-    models.Download.objects.all().delete()
-    """
+    #models.DTP.objects.all().delete()
+    #models.Participant.objects.all().delete()
+    #models.Vehicle.objects.all().delete()
+    #models.Nearby.objects.all().delete()
+    #models.Weather.objects.all().delete()
+    #models.RoadCondition.objects.all().delete()
+    #models.Download.objects.all().delete()
 
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
-
-    for region in tqdm(models.Region.objects.filter(level=1, gibdd_code="63")):
+    for region in tqdm(models.Region.objects.filter(level=1)):
         if tags:
             dates = sorted([x['date'] for x in models.Download.objects.filter(
                 region=region,

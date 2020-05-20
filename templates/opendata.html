@@ -16,7 +16,7 @@
             <tbody>
                 {% for opendata_item in opendata %}
                     <tr>
-                        <td>{{ opendata_item.region.name }}</td>
+                        <td>{{ opendata_item.region.name|default:"Россия" }}</td>
                         <td>{{ start_date|date:"F Y" }} - {{ opendata_item.date|date:"F Y" }}</td>
                         <td><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson">GEOJSON ({{ opendata_item.mb_file_size|floatformat:"2" }} mb)</a></td>
                     </tr>

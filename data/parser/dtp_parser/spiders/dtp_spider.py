@@ -9,6 +9,7 @@ from scrapy.spidermiddlewares.httperror import HttpError
 
 import json
 from ast import literal_eval
+import datetime
 
 
 class DtpSpider(scrapy.Spider):
@@ -40,7 +41,8 @@ class DtpSpider(scrapy.Spider):
                         meta={
                             "tag_code": tag_code,
                             "area_code": area_code,
-                            "parent_code": self.region_code
+                            "parent_code": self.region_code,
+                            "date": date
                         },
                         body=json.dumps(payload),
                         headers={'Content-Type': 'application/json; charset=UTF-8'},
@@ -72,9 +74,12 @@ class DtpSpider(scrapy.Spider):
 
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
-                export_dtp['area_code'] = response.meta['area_code']
+
+                if response.meta['date'] in export_dtp['date']:
+                    export_dtp['area_code'] = response.meta['area_code']
+                    export_dtp['parent_code'] = response.meta['parent_code']
+
                 export_dtp['tag_code'] = response.meta['tag_code']
-                export_dtp['parent_code'] = response.meta['parent_code']
                 yield export_dtp
 
     @classmethod

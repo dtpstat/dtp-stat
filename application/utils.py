@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, render
 import json
 import calendar
 import os
+import shutil
+from tqdm import tqdm
 
 
 def get_region_by_request(request):
@@ -25,6 +27,40 @@ def get_region_by_request(request):
 
 
 def opendata():
+    # get russia dataset
+    latest_download = data_models.Download.objects.filter(base_data=True).latest('date')
+    latest_opendata = models.OpenData.objects.filter(region=None).last()
+
+    if latest_opendata and latest_opendata.date == latest_download.date:
+        pass
+    else:
+        data = []
+        for obj in tqdm(data_models.DTP.objects.filter(
+            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]))[0:100].iterator()):
+            data.append(obj.as_dict())
+
+        geo_data = {"type": "FeatureCollection", "features": [
+            {"type": "Feature",
+             "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
+             "properties": item
+             } for item in data
+        ]}
+
+        file_name = 'russia.geojson'
+        path = 'media/opendata/'
+        with open(path + file_name, 'w') as data_file:
+            json.dump(geo_data, data_file, ensure_ascii=False)
+
+        shutil.make_archive(path + file_name, 'zip', path, file_name)
+
+        latest_opendata, created = models.OpenData.objects.get_or_create(
+            region=None
+        )
+        latest_opendata.date = latest_download.date
+        latest_opendata.file_size = os.stat(path + file_name + ".zip").st_size
+        latest_opendata.save()
+
+    """
     for region in data_models.Region.objects.filter(level=1):
         downloads = region.download_set.filter(base_data=True)
         if downloads:
@@ -59,7 +95,7 @@ def opendata():
             latest_opendata.date = latest_download.date
             latest_opendata.file_size = os.stat(path).st_size
             latest_opendata.save()
-
+    """
 
 def generate_datasets_geojson():
     data = [obj.as_dict() for obj in data_models.DTP.objects.all()]
