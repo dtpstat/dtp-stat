@@ -18,7 +18,8 @@ sys.path.insert(0, env('PROJECT_PATH'))
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dtpstat.settings'
 
-import django; django.setup()
+import django
+django.setup()
 
 BOT_NAME = 'dtp_parser'
 

@@ -83,6 +83,8 @@ class RoadCondition(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None, db_index=True)
+    is_filter = models.BooleanField(default=False, db_index=True)
+    code = models.CharField(max_length=100, help_text="code", null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
@@ -93,10 +95,16 @@ class Severity(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None)
     keywords = JSONField(null=True, blank=True, default=list)
 
+    def __str__(self):
+        return self.name
+
 
 class ParticipantCategory(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None)
+
+    def __str__(self):
+        return self.name
 
 
 class DTP(models.Model):

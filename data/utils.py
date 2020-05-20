@@ -59,6 +59,17 @@ def extra_filters_data():
         participant_type_item.name = participant_type[1]
         participant_type_item.save()
 
+    # get_tags
+    tags = get_tags()
+    for key, tag in tags.items():
+        tag_item, created = models.Tag.objects.get_or_create(
+            code=key
+        )
+        tag_item.name = tag
+        if key in ['1', '96']:
+        #if key in ['1', '96', '98', '100', '98', '101', '102', '104', '105', '107', '109', '110', '111', '113', '114', '116', '118', '119', '120']:
+            tag_item.is_filter = True
+        tag_item.save()
 
 
 def get_geo_data(item, dtp):
@@ -100,7 +111,6 @@ def get_geo_data(item, dtp):
 
 
 def get_geocode_point(dtp):
-
     geocode_point, created = models.Geo.objects.get_or_create(
         dtp=dtp,
         source='geocode'
@@ -233,7 +243,7 @@ def add_participant_record(participant, dtp, vehicle=None):
 
 def add_participants_records(item, dtp):
     models.Vehicle.objects.filter(participant__dtp=dtp).delete()
-    dtp.participant_set.clear()
+    dtp.participant_set.all().delete()
 
     for vehicle_item in item['infoDtp']['ts_info']:
         if vehicle_item.get('t_ts'):
@@ -287,18 +297,21 @@ def add_related_data(item, dtp):
 
     for data_item in related_data:
         data_item['dtp_model'].clear()
+        data_list = []
+
         for data_object in data_item['data']:
             if not any(re.search(x, data_object, re.IGNORECASE) for x in data_item['exclude']):
                 new_item, created = data_item['model'].objects.get_or_create(
                     name=data_object
                 )
-                data_item['dtp_model'].add(new_item)
+                data_list.append(new_item)
+
+        data_item['dtp_model'].add(*data_list)
 
 
 def add_extra_filters(item, dtp):
     # severity
     severity_levels = [x.severity.level for x in dtp.participant_set.all() if x.severity]
-
     if severity_levels:
         dtp.severity = get_object_or_404(models.Severity, level=max(severity_levels))
     else:
@@ -333,27 +346,36 @@ def add_dtp_record(item):
     dtp, created = models.DTP.objects.get_or_create(
         slug=item['KartId']
     )
-    dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"])
+
+    tag = get_object_or_404(models.Tag, code=item["tag_code"])
+    dtp.tags.add(tag)
+
+    if dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
+        return
+
+    if item["area_code"] == "63401" and item["parent_code"] == "63":
+        dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
+    else:
+        dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"], parent_region__gibdd_code=item["parent_code"])
 
     get_geo_data(item, dtp)
 
-    tag, created = models.Tag.objects.get_or_create(name=item['tag']) if item['tag'] else None
-    dtp.tags.add(tag)
-
     dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
+
     dtp.participants = item['K_UCH']
     dtp.injured = item['RAN']
     dtp.dead = item['POG']
     dtp.scheme = item['infoDtp']['s_dtp'] if item['infoDtp']['s_dtp'] not in ["290", "390", "490", "590", "690", "790", "890", "990"] else None
-    dtp.data['source'] = item
     dtp.save()
 
     add_participants_records(item, dtp)
     add_related_data(item, dtp)
     add_extra_filters(item, dtp)
 
+    dtp.data['source'] = item
     dtp.save()
 
 
@@ -382,7 +404,7 @@ def check_dates_from_gibdd():
 
     with transaction.atomic():
         if date_data:
-            for region in tqdm(models.Region.objects.all()):
+            for region in tqdm(models.Region.objects.filter(level=1)):
                 for date in date_data:
                     download_item, created = models.Download.objects.get_or_create(
                         region=region,
@@ -400,8 +422,12 @@ def get_tags_data(data, parent_name=None):
     return export_data
 
 
-def get_tags(scripts):
+def get_tags():
     tags = {}
+
+    r = requests.get('http://stat.gibdd.ru/')
+    r = html.fromstring(r.content.decode('UTF-8'))
+    scripts = r.xpath('//script')
 
     for script in scripts:
         if script.text and "pokComboData" in script.text:
@@ -409,8 +435,6 @@ def get_tags(scripts):
             p = re.compile(r"pokComboData = (.*?);", re.MULTILINE)
             data = json.loads(p.search(string).groups()[0])
             tags = get_tags_data(data)
-            for k in ['1']:
-                tags.pop(k, None)
 
     return tags
 
@@ -427,12 +451,15 @@ def crawl(spider_name, params=None):
     os.chdir(first_dir)
 
 
-def dates_generator(start, end):
+def dates_generator(start, end, gap=0):
     dates_set = set()
 
-    while start <= end:
-        start += datetime.timedelta(days=1)
-        dates_set.add(datetime.datetime(start.year, start.month, 1).strftime('%m.%Y'))
+    start_with_gap = start - datetime.timedelta(days=gap)
+    start_with_gap = start_with_gap if start_with_gap >= datetime.date(2015, 1, 1) else start
+
+    while start_with_gap <= end:
+        start_with_gap += datetime.timedelta(days=1)
+        dates_set.add(datetime.datetime(start_with_gap.year, start_with_gap.month, 1).strftime('%m.%Y'))
 
     return list(dates_set)
 
@@ -440,6 +467,15 @@ def dates_generator(start, end):
 def download_success(dates, region_code, tags=False):
     region = get_object_or_404(models.Region, gibdd_code=region_code)
 
+    for date in [datetime.datetime.strptime(x, '%m.%Y') for x in dates.split(",")]:
+        download_item, created = models.Download.objects.get_or_create(
+            region=region,
+            date=date
+        )
+        download_item.base_data = True
+        download_item.tags = tags
+        download_item.save()
+    """
     if region.level == 1:
         region_ids = [x.id for x in region.region_set.all()] + [region.id]
     else:
@@ -454,28 +490,54 @@ def download_success(dates, region_code, tags=False):
             download_item.base_data = True
             download_item.tags = tags
             download_item.save()
-
+    """
 
 def check_dtp(tags=False):
+    """
     models.DTP.objects.all().delete()
     models.Participant.objects.all().delete()
     models.Vehicle.objects.all().delete()
     models.Nearby.objects.all().delete()
     models.Weather.objects.all().delete()
     models.RoadCondition.objects.all().delete()
-    #models.Download.objects.all().delete()
+    models.Download.objects.all().delete()
+    """
 
     # проверяем обновления на сайте ГИБДД
-    #check_dates_from_gibdd()
+    check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
-    for region in tqdm(models.Region.objects.filter(level=1)[0:1]):
-        dates = sorted([x['date'] for x in models.Download.objects.filter(region=region, base_data=False).values("date")])
-        dates = dates[0:10]
-        export_dates = dates_generator(start=min(dates), end=max(dates))
 
-        crawl("dtp", params={
-            "dates": ",".join(export_dates),
-            "region_code": str(region.gibdd_code),
-            "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-        })
+    for region in tqdm(models.Region.objects.filter(level=1, gibdd_code="63")):
+        if tags:
+            dates = sorted([x['date'] for x in models.Download.objects.filter(
+                region=region,
+                base_data=True,
+                tags=False
+            ).values("date")])
+
+            if dates:
+                export_dates = dates_generator(start=min(dates), end=max(dates))
+
+                for date in export_dates:
+                    crawl("dtp", params={
+                        "tags": "True",
+                        "dates": ",".join([date]),
+                        "region_code": str(region.gibdd_code),
+                        "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+                    })
+        else:
+            dates = sorted([x['date'] for x in models.Download.objects.filter(
+                region=region,
+                base_data=False
+            ).values("date")])
+
+            if dates:
+                export_dates = dates_generator(start=min(dates), end=max(dates), gap=60)
+
+                crawl("dtp", params={
+                    "tags": "False",
+                    "dates": ",".join(export_dates),
+                    "region_code": str(region.gibdd_code),
+                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+                })

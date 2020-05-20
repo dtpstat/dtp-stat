@@ -3,11 +3,16 @@ django.setup()
 
 from data import utils
 
+import traceback
+
 
 class DtpParserPipeline(object):
     def process_item(self, item, spider):
-        utils.add_dtp_record(item)
-        pass
+        try:
+            utils.add_dtp_record(item)
+        except:
+            traceback.print_exc()
+            spider.crawler.engine.close_spider(self, reason='failed')
 
 
 class RegionParserPipeline(object):

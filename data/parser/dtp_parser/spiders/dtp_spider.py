@@ -1,4 +1,5 @@
 from data import utils
+from data import models
 
 import scrapy
 from scrapy.http.request import Request
@@ -23,19 +24,23 @@ class DtpSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        tags = {"1":"Дорожно-транспортные происшествия"}
+        if self.tags == "True":
+            tags = models.Tag.objects.filter(is_filter=False)
+        else:
+            tags = models.Tag.objects.filter(is_filter=True)
 
         for area_code in self.area_codes.split(','):
             for date in self.dates.split(","):
-                for tag_code, tag_name in tags.items():
+                for tag_code in [x.code for x in tags]:
                     payload = dict()
                     payload["data"] = '{"date":["MONTHS:' + date + '"],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
                     yield Request(
                         'http://stat.gibdd.ru/map/getDTPCardData',
                         method="POST",
                         meta={
-                            "tag_name": tag_name,
-                            "area_code": area_code
+                            "tag_code": tag_code,
+                            "area_code": area_code,
+                            "parent_code": self.region_code
                         },
                         body=json.dumps(payload),
                         headers={'Content-Type': 'application/json; charset=UTF-8'},
@@ -68,7 +73,8 @@ class DtpSpider(scrapy.Spider):
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
                 export_dtp['area_code'] = response.meta['area_code']
-                export_dtp['tag'] = response.meta['tag_name']
+                export_dtp['tag_code'] = response.meta['tag_code']
+                export_dtp['parent_code'] = response.meta['parent_code']
                 yield export_dtp
 
     @classmethod
@@ -86,5 +92,5 @@ class DtpSpider(scrapy.Spider):
 
     def spider_closed(self, reason):
         if reason == "finished":
-            utils.download_success(self.dates, self.region_code)
+            utils.download_success(self.dates, self.region_code, tags=True if self.tags == "True" else False)
 
