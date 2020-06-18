@@ -343,21 +343,26 @@ def add_extra_filters(item, dtp):
 
 
 def add_dtp_record(item):
+    area_code = item.get("area_code")
+    parent_code = item.get("parent_code")
+    tag_code = item.get("tag_code")
+    item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
+
     dtp, created = models.DTP.objects.get_or_create(
-        slug=item['KartId']
+        slug=str(item['KartId']) + "_" + item['date'].replace(".","")
     )
 
-    tag = get_object_or_404(models.Tag, code=item["tag_code"])
+    tag = get_object_or_404(models.Tag, code=tag_code)
     dtp.tags.add(tag)
 
-    if dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
+    if dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
         return
 
-    if item.get("area_code") and item.get("parent_code"):
-        if item["area_code"] == "63401" and item["parent_code"] == "63":
+    if area_code and parent_code:
+        if area_code == "63401" and parent_code == "63":
             dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
         else:
-            dtp.region = get_object_or_404(models.Region, gibdd_code=item["area_code"], parent_region__gibdd_code=item["parent_code"])
+            dtp.region = get_object_or_404(models.Region, gibdd_code=area_code, parent_region__gibdd_code=parent_code)
 
     get_geo_data(item, dtp)
 
@@ -466,7 +471,7 @@ def dates_generator(start, end, gap=0):
 
 
 def download_success(dates, region_code, tags=False):
-    region = get_object_or_404(models.Region, gibdd_code=region_code)
+    region = get_object_or_404(models.Region, gibdd_code=region_code, level=1)
 
     for date in [datetime.datetime.strptime(x, '%m.%Y') for x in dates.split(",")]:
         download_item, created = models.Download.objects.get_or_create(
@@ -493,15 +498,17 @@ def download_success(dates, region_code, tags=False):
             download_item.save()
     """
 
-def check_dtp(tags=False):
-    #models.DTP.objects.all().delete()
-    #models.Participant.objects.all().delete()
-    #models.Vehicle.objects.all().delete()
-    #models.Nearby.objects.all().delete()
-    #models.Weather.objects.all().delete()
-    #models.RoadCondition.objects.all().delete()
-    #models.Download.objects.all().delete()
 
+def check_dtp(tags=False):
+    """
+    models.DTP.objects.all().delete()
+    models.Participant.objects.all().delete()
+    models.Vehicle.objects.all().delete()
+    models.Nearby.objects.all().delete()
+    models.Weather.objects.all().delete()
+    models.RoadCondition.objects.all().delete()
+    models.Download.objects.all().delete()
+    """
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 

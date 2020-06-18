@@ -7,6 +7,8 @@ import traceback
 
 
 class DtpParserPipeline(object):
+    name = "dtp parser pipeline"
+
     def process_item(self, item, spider):
         try:
             utils.add_dtp_record(item)

@@ -35,8 +35,15 @@ def opendata():
         pass
     else:
         data = []
-        for obj in tqdm(data_models.DTP.objects.filter(
-            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]))[0:100].iterator()):
+        for obj in tqdm(data_models.DTP.objects.select_related(
+                'region', 'category', 'light', 'severity'
+        ).prefetch_related(
+            'nearby', 'weather', 'tags', 'participant_categories', 'road_conditions'
+        ).filter(
+            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]),
+            #tags__code='96',
+            datetime__year=2019
+        ).iterator()):
             data.append(obj.as_dict())
 
         geo_data = {"type": "FeatureCollection", "features": [
@@ -61,7 +68,7 @@ def opendata():
         latest_opendata.save()
 
     """
-    for region in data_models.Region.objects.filter(level=1):
+    for region in data_models.Region.objects.filter(level=1, gibdd_code='45'):
         downloads = region.download_set.filter(base_data=True)
         if downloads:
             latest_download = downloads.latest('date')

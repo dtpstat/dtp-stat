@@ -104,7 +104,6 @@ CKEDITOR_UPLOAD_PATH = 'blog/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = env('STATIC_ROOT')
-STATICFILES_DIRS = [env('STATICFILES_DIRS')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

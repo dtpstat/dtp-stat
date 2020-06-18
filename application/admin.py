@@ -25,3 +25,7 @@ class ModeratorAdmin(admin.ModelAdmin):
         'user',
     )
 
+
+@admin.register(models.OpenData)
+class OpenDataAdmin(admin.ModelAdmin):
+    list_display = ('region', 'date')

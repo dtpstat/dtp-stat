@@ -140,7 +140,7 @@ class DTP(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.category.name + " " + self.region.name + " " + str(self.datetime)
+        return self.category.name + str(self.datetime)
 
     def full_address(self):
         return ", ".join([x for x in [self.region.parent_region.name, self.region.name, self.address] if x])
