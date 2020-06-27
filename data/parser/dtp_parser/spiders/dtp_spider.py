@@ -1,15 +1,18 @@
-from data import utils
-from data import models
+import datetime
+import json
+import logging
+from ast import literal_eval
 
 import scrapy
-from scrapy.http.request import Request
+from datadog import statsd
 from scrapy import signals
 from scrapy.exceptions import CloseSpider
+from scrapy.http.request import Request
 from scrapy.spidermiddlewares.httperror import HttpError
 
-import json
-from ast import literal_eval
-import datetime
+from data import models, utils
+
+log = logging.getLogger(__name__)
 
 
 class DtpSpider(scrapy.Spider):
@@ -21,6 +24,8 @@ class DtpSpider(scrapy.Spider):
         'RETRY_HTTP_CODES': [502, 503, 504, 522, 524, 408, 429],
         'RETRY_TIMES': 10,
         "LOG_LEVEL": 'INFO',
+        "CONCURRENT_ITEMS": 8,
+        "CONCURRENT_REQUESTS": 8,
         "DOWNLOAD_TIMEOUT": 40
     }
 
@@ -34,7 +39,8 @@ class DtpSpider(scrapy.Spider):
             for date in self.dates.split(","):
                 for tag_code in [x.code for x in tags]:
                     payload = dict()
-                    payload["data"] = '{"date":["MONTHS:' + date + '"],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
+                    payload_data = '{"date": ["MONTHS:%s"], "ParReg": %s, "order": { "type":"1", "fieldName":"dat" }, "reg": %s, "ind": %s, "st": 1, "en": "10000",}' % (date, self.region_code, area_code, tag_code)
+                    payload["data"] = payload_data
                     yield Request(
                         'http://stat.gibdd.ru/map/getDTPCardData',
                         method="POST",
@@ -67,6 +73,7 @@ class DtpSpider(scrapy.Spider):
                     errback=self.handle_error
                 )
         """
+    @statsd.timed('dtpstat.spider.parse_area')
     def parse_area(self, response):
         export = json.loads(response.body_as_unicode())
         if export['data']:
@@ -75,9 +82,8 @@ class DtpSpider(scrapy.Spider):
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
 
-                if response.meta['date'] in export_dtp['date']:
-                    export_dtp['area_code'] = response.meta['area_code']
-                    export_dtp['parent_code'] = response.meta['parent_code']
+                export_dtp['area_code'] = response.meta['area_code']
+                export_dtp['parent_code'] = response.meta['parent_code']
 
                 export_dtp['tag_code'] = response.meta['tag_code']
                 yield export_dtp

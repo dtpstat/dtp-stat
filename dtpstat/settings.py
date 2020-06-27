@@ -1,5 +1,8 @@
-import environ
 import os
+
+import environ
+
+from datadog import initialize, statsd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -9,6 +12,8 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 environ.Env.read_env()
+
+initialize(statsd_host='dd-agent', statsd_port=8125)
 
 DEBUG = env('DEBUG')
 SECRET_KEY = env('SECRET_KEY')
@@ -71,6 +76,31 @@ FIRST_DAY_OF_WEEK=1
 
 DATABASES = {
     'default': env.db(),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [

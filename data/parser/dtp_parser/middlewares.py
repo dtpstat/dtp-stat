@@ -5,6 +5,9 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import time
+
+from datadog import statsd
 from scrapy import signals
 
 
@@ -69,6 +72,8 @@ class DtpParserDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        request.meta['__start_time'] = time.time()
+
         # Called for each request that goes through the downloader
         # middleware.
 
@@ -81,6 +86,7 @@ class DtpParserDownloaderMiddleware(object):
         return None
 
     def process_response(self, request, response, spider):
+        statsd.gauge('dtpstat.scrapy.download_time', time.time() - request.meta['__start_time'])
         # Called with the response returned from the downloader.
 
         # Must either;
