@@ -31,7 +31,7 @@ class Region(models.Model):
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     def save(self, *args, **kwargs):
         if not self.slug and self.name:
