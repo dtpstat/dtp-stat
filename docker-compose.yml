@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  db:
+    image: kartoza/postgis:12.0
+    networks:
+      - backend
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+        - .:/code
+    working_dir: /code
+    command: sh -c 'sleep 5 && python manage.py runserver 0.0.0.0:5000'
+    networks:
+      - backend
+    environment:
+      PYTHONUNBUFFERED: 1
+      SECRET_KEY: secret
+      DATABASE_URL: 'postgis://docker:docker@db:5432/gis'
+      STATIC_ROOT: '/static'
+      STATICFILES_DIRS: '/staticfiles'
+      RECAPTCHA_PUBLIC_KEY: test
+      RECAPTCHA_PRIVATE_KEY: test
+      DEBUG: 1
+      PROJECT_PATH: /code
+
+networks:
+  backend:

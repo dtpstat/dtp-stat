@@ -134,3 +134,4 @@ dmypy.json
 /ansible
 /media
 *.gz
+tags
