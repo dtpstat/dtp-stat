@@ -3,12 +3,14 @@ from django.contrib.gis.db.models.functions import Distance
 from data import models as data_models
 from application import models
 from django.shortcuts import get_object_or_404, render
+from django.db.models import Sum
 
 import json
 import calendar
 import os
 import shutil
 from tqdm import tqdm
+import pandas as pd
 
 
 def get_region_by_request(request):
@@ -104,6 +106,7 @@ def opendata():
             latest_opendata.save()
     """
 
+
 def generate_datasets_geojson():
     data = [obj.as_dict() for obj in data_models.DTP.objects.all()]
     geo_data = { "type": "FeatureCollection", "features": [
@@ -112,43 +115,18 @@ def generate_datasets_geojson():
          "properties": item
          } for item in data
     ]}
+
     with open('static/data/' + 'test.geojson', 'w') as data_file:
         json.dump(geo_data, data_file, ensure_ascii=False)
 
-    """
-    data = list(models.DTP.objects.all().annotate(
-        election_regions=StringAgg('election_item__regions__name', ordering="election_item__regions__level",
-                                   delimiter=", ")
-    ).values(
-        'id',
-        'datetime',
-        'slug',
-        'region__name',
-        'region__parent_region__name',
-        'address',
-        #'point',
-        'participants',
-        'injured',
-        'dead',
-        'category__name',
-        'light__name',
-        'candidate__data__birthplace',
-        'electoral_district',
-        'election_item__election__name',
-        'election_item__name',
-        'election_regions',
-        'election_item__date',
-        'election_item__level__name',
-        'election_item__stage__name',
-        'election_item__type__name',
-        'election_item__scheme__name',
-        'gas_url',
 
-    ))
+def soc_risk():
+    data = data_models.DTP.objects.filter(datetime__year__in=[2018,2019])
+
+    data = data.values('region__parent_region__name', "datetime__year").annotate(dead_count=Sum('dead'))
 
     df = pd.DataFrame(data)
-    df.to_csv('static/data/nominations.csv')
-    """
+    df.to_csv('static/soc_risk.csv')
 
 
 def get_moderator_feedback(request):
