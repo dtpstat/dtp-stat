@@ -4,7 +4,13 @@ from data import models
 
 
 class Command(BaseCommand):
-    help = 'Test'
+    help = 'Tests'
 
     def handle(self, *args, **kwargs):
-        print([x['health_status'] for x in models.Participant.objects.all().values('health_status').distinct() if x['health_status']])
+        models.DTP.objects.all().delete()
+        models.Participant.objects.all().delete()
+        models.Vehicle.objects.all().delete()
+        models.Nearby.objects.all().delete()
+        models.Weather.objects.all().delete()
+        models.RoadCondition.objects.all().delete()
+        models.Download.objects.all().delete()

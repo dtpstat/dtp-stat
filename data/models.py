@@ -254,5 +254,5 @@ class Participant(models.Model):
 class Download(models.Model):
     date = models.DateField(help_text="date", null=True, blank=True, default=None, db_index=True)
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
-    base_data = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
-    tags = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
+    last_update = models.DateTimeField(help_text="last_update", null=True, blank=True, default=None)
+    last_tags_update = models.DateTimeField(help_text="last_tags_update", null=True, blank=True, default=None)

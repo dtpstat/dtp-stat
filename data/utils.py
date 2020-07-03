@@ -233,7 +233,7 @@ def add_participant_record(participant, dtp, vehicle=None):
     )
     participant_item.save()
 
-    for violation_item in (participant['NPDD'] + participant['NPDD']):
+    for violation_item in (participant['NPDD'] + participant['SOP_NPDD']):
         if violation_item != "Нет нарушений":
             violation, created = models.Violation.objects.get_or_create(
                 name=violation_item
@@ -478,71 +478,48 @@ def download_success(dates, region_code, tags=False):
             region=region,
             date=date
         )
-        download_item.base_data = True
-        download_item.tags = tags
+        download_item.last_update = timezone.now()
+        if tags:
+            download_item.last_tags_update = timezone.now()
         download_item.save()
-    """
-    if region.level == 1:
-        region_ids = [x.id for x in region.region_set.all()] + [region.id]
-    else:
-        region_ids = [region.id]
-
-    for region_id in region_ids:
-        for date in [datetime.datetime.strptime(x, '%m.%Y') for x in dates.split(",")]:
-            download_item, created = models.Download.objects.get_or_create(
-                region_id=region_id,
-                date=date
-            )
-            download_item.base_data = True
-            download_item.tags = tags
-            download_item.save()
-    """
 
 
-def check_dtp(tags=False):
-    """
-    models.DTP.objects.all().delete()
-    models.Participant.objects.all().delete()
-    models.Vehicle.objects.all().delete()
-    models.Nearby.objects.all().delete()
-    models.Weather.objects.all().delete()
-    models.RoadCondition.objects.all().delete()
-    models.Download.objects.all().delete()
-    """
+def region_crawl(downloads, tags=False):
+    for region in tqdm(models.Region.objects.filter(level=1, slug="belgorodskaia-oblast")):
+        region_downloads = downloads.filter(region=region)
+
+        if region_downloads:
+            dates = sorted([x['date'] for x in region_downloads.values("date")])
+            export_dates = dates_generator(start=min(dates), end=max(dates))
+
+            for date in export_dates:
+                crawl("dtp", params={
+                    "tags": str(tags),
+                    "dates": ",".join([date]),
+                    "region_code": str(region.gibdd_code),
+                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+                })
+
+
+def check_dtp():
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
-    for region in tqdm(models.Region.objects.filter(level=1)):
-        if tags:
-            dates = sorted([x['date'] for x in models.Download.objects.filter(
-                region=region,
-                base_data=True,
-                tags=False
-            ).values("date")])
+    downloads = models.Download.objects.all()
+    downloads_no_update = downloads.filter(last_update=None)
+    downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
+    downloads_no_tags = downloads.filter(last_tags_update=None)
 
-            if dates:
-                export_dates = dates_generator(start=min(dates), end=max(dates))
+    # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
+    if downloads_no_update.count() > 0:
+        region_crawl(downloads_no_update, tags=False)
+    """
+    # потом смотрим на архивные данные
+    elif downloads_old_update.count() > 0:
+        region_crawl(downloads_old_update, tags=False)
 
-                for date in export_dates:
-                    crawl("dtp", params={
-                        "tags": "True",
-                        "dates": ",".join([date]),
-                        "region_code": str(region.gibdd_code),
-                        "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                    })
-        else:
-            dates = sorted([x['date'] for x in models.Download.objects.filter(
-                region=region,
-                base_data=False
-            ).values("date")])
-
-            if dates:
-                export_dates = dates_generator(start=min(dates), end=max(dates), gap=60)
-
-                crawl("dtp", params={
-                    "tags": "False",
-                    "dates": ",".join(export_dates),
-                    "region_code": str(region.gibdd_code),
-                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                })
+    # потом смотрим на теги
+    elif downloads_no_tags.count() > 0:
+        region_crawl(downloads_no_tags, tags=True)
+    """

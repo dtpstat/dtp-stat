@@ -40,7 +40,7 @@ class RegionAdmin(admin.ModelAdmin):
     ordering = ('level', 'name')
     list_filter = ('level',)
 
-
+"""
 @admin.register(models.Download)
 class DownloadAdmin(admin.ModelAdmin):
     list_display = ('region', 'date', 'base_data', 'tags')
@@ -53,7 +53,7 @@ class DownloadAdmin(admin.ModelAdmin):
     list_select_related = (
         'region',
     )
-
+"""
 
 @admin.register(models.Category)
 class CategoryAdmin(admin.ModelAdmin):
