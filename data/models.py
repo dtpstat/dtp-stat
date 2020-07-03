@@ -29,6 +29,7 @@ class Region(models.Model):
     gibdd_code = models.CharField(max_length=20, help_text="gibdd code", null=True, blank=True, default=None, db_index=True)
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
+    is_active = models.BooleanField(help_text="last_tags_update", default=True)
 
     def __str__(self):
         return self.name or ''

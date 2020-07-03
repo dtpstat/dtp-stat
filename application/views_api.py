@@ -24,52 +24,51 @@ class DTPApiView(generics.ListAPIView):
     queryset = data_models.DTP.objects.all()
     serializer_class = data_serializers.DTPSerializer
     filterset_class = data_filters.DTPFilterSet
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
-    pagination_class = LimitOffsetPagination
-
-    def post(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
 
 class StatApiView(viewsets.ModelViewSet):
     queryset = data_models.DTP.objects.all()
     serializer_class = data_serializers.DTPSerializer
-    filterset_class = data_filters.DTPFilterSet
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, data_filters.GeoFilterBackend,)
+    filterset_class = data_filters.DTPStatFilterSet
 
     @action(detail=False, methods=['get'])
     def stat(self, request):
-        geo = request.query_params.get('geo')
-        scale = request.query_params.get('scale')
+        data = {}
 
         queryset = self.filter_queryset(self.queryset)
 
-        if "," in geo:
-            name = "Полигон"
-        else:
-            region = utils.get_region_by_request(request)
-            if region:
-                if not scale or int(scale) < 7:
-                    name = region.name
-                    queryset = queryset.filter(Q(region=region))
-                else:
-                    name = region.parent_region.name
-                    queryset = queryset.filter(Q(region__parent_region=region.parent_region))
+        # определяем регион и фильтруем по нему
+        region = utils.get_region_by_center_point(request.query_params.get('center_point'))
+        if region:
+            scale = request.query_params.get('scale')
+            if not scale or int(scale) <= 12:
+                region = region.parent_region
+                queryset = queryset.filter(region__parent_region=region)
             else:
-                name = "Россия"
+                queryset = queryset.filter(region=region)
+                data['parent_region_name'] = region.parent_region.name
 
-        data = {
-            "name": name,
+            data['region_name'] = region.name
+            data['region_slug'] = region.slug
+
+        # вытаскиваем статистику
+        data = {**data, **{
             "count": queryset.count(),
             "dead": queryset.aggregate(Sum("dead")).get('dead__sum'),
             "injured": queryset.aggregate(Sum("injured")).get('injured__sum')
-        }
+        }}
+
         return Response(data)
+
 
 
 class FiltersApiView(APIView):
     def get(self, request):
-        data = {}
+        filters = {}
+
+
+
+        """
         region = utils.get_region_by_request(request)
 
         if not region:
@@ -81,11 +80,6 @@ class FiltersApiView(APIView):
                 last_base_data = data_models.Download.objects.filter(region=region, base_data=True).latest("date").date
             except:
                 last_base_data = None
-
-            try:
-                last_tags_data = data_models.Download.objects.filter(region=region, base_data=True).latest("date").date
-            except:
-                last_tags_data = None
 
             if not last_base_data:
                 data = {
@@ -158,3 +152,4 @@ class FiltersApiView(APIView):
                     }
                 }
         return Response(data)
+        """

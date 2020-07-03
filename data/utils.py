@@ -484,8 +484,8 @@ def download_success(dates, region_code, tags=False):
         download_item.save()
 
 
-def region_crawl(downloads, tags=False):
-    for region in tqdm(models.Region.objects.filter(level=1, slug="belgorodskaia-oblast")):
+def regions_crawl(downloads, tags=False):
+    for region in tqdm(models.Region.objects.filter(level=1)):
         region_downloads = downloads.filter(region=region)
 
         if region_downloads:
@@ -507,19 +507,21 @@ def check_dtp():
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
     downloads = models.Download.objects.all()
+
     downloads_no_update = downloads.filter(last_update=None)
-    downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
-    downloads_no_tags = downloads.filter(last_tags_update=None)
 
     # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
     if downloads_no_update.count() > 0:
-        region_crawl(downloads_no_update, tags=False)
+        regions_crawl(downloads_no_update, tags=False)
+
     """
     # потом смотрим на архивные данные
-    elif downloads_old_update.count() > 0:
+    downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
+    if downloads_old_update.count() > 0:
         region_crawl(downloads_old_update, tags=False)
 
     # потом смотрим на теги
+    downloads_no_tags = downloads.filter(last_tags_update=None)
     elif downloads_no_tags.count() > 0:
         region_crawl(downloads_no_tags, tags=True)
     """
