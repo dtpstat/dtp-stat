@@ -22,12 +22,11 @@ class DTPStatFilterSet(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte', required=True)
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte', required=True)
     severity = django_filters.BaseInFilter(field_name='severity__level', lookup_expr='in')
+    participant_categories = django_filters.BaseInFilter(field_name='participant_categories__slug', lookup_expr='in')
 
     """
     category = django_filters.BaseInFilter(field_name='category__name', lookup_expr='in')
     tags = django_filters.BaseInFilter(field_name='tags__name', lookup_expr='in')
-    participant_categories = django_filters.BaseInFilter(field_name='participant_categories__slug', lookup_expr='in')
-
     light = django_filters.BaseInFilter(field_name='light__name', lookup_expr='in')
     weather = django_filters.BaseInFilter(field_name='weather__name', lookup_expr='in')
     nearby = django_filters.BaseInFilter(field_name='nearby__name', lookup_expr='in')

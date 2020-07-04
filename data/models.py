@@ -156,6 +156,7 @@ class DTP(models.Model):
                 "lat": self.point.coords[1] if self.point else None,
                 "long": self.point.coords[0] if self.point else None,
             },
+            "participant_categories": [x.name for x in self.participant_categories.all()],
             "region": self.region.name if self.region else None,
             "parent_region": self.region.parent_region.name if self.region else None,
             "datetime": self.datetime.strftime("%Y-%m-%d %H:%M:%S"),

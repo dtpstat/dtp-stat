@@ -29,9 +29,7 @@
 
 </head>
 <body>
-{% if request.resolver_match.url_name != "home" %}
-    {% include "navigation.html" %}
-{% endif %}
+{% include "navigation.html" %}
 
 {% if "account" in request.resolver_match.url_name %}
     <div class="text-center account" style="max-width: 400px;margin: auto">

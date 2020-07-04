@@ -38,6 +38,7 @@ urlpatterns = [
 
     path('pages/<slug>/', app_views.page, name='page'),
     path('opendata/', app_views.opendata, name='opendata'),
+    path('donate/', app_views.donate, name='donate'),
 
     path('admin/', admin.site.urls),
 

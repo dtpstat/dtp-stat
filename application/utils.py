@@ -29,7 +29,7 @@ def get_region_by_center_point(center_point):
                     return None
 
             # проверяем координаты через ближайшие ДТП
-            for dist in [1, 5, 10, 25, 50, 75, 100]:
+            for dist in [0.1, 1, 5, 10, 25, 50, 75, 100]:
                 nearest_dtps = data_models.DTP.objects.filter(
                     point__dwithin=(point, dist)
                 )
@@ -38,6 +38,7 @@ def get_region_by_center_point(center_point):
                         distance=Distance('point', point)
                     )
                     region = nearest_dtps.order_by('distance')[0].region
+                    break
 
     return region
 

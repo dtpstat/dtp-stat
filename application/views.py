@@ -51,6 +51,10 @@ def opendata(request):
     })
 
 
+def donate(request):
+    return render(request, "donate.html", context={})
+
+
 def dtp(request, slug):
     dtp_item = get_object_or_404(data_models.DTP, slug=slug)
 

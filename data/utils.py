@@ -28,7 +28,7 @@ def open_json(path):
 def extra_filters_data():
     # severity
     severity_levels = {
-        0: {'name': 'Без пострадавших', 'keywords': ['не пострадал']},
+        0: {'name': 'Без пострадавших (нет данных)', 'keywords': ['не пострадал']},
         1: {'name': 'Легкая', 'keywords': ['разовой']},
         2: {'name': 'Средняя', 'keywords': ['амбулатор']},
         3: {'name': 'Тяжкая', 'keywords': ['стационар']},
@@ -45,11 +45,12 @@ def extra_filters_data():
 
     # participant types
     participant_types = {
-        'pedestrians': "С пешеходами",
-        'velo': "C велосипедистами",
-        'moto': "C мотоциклистами",
-        'public_transport': "C общественным транспортом",
-        'kids': "C детьми"
+        'all': "Все участники",
+        'pedestrians': "Пешеходы",
+        'velo': "Велосипедисты",
+        'moto': "Мотоциклисты",
+        'public_transport': "Общ. транспорт",
+        'kids': "Дети"
     }
 
     for participant_type in participant_types.items():
@@ -66,7 +67,7 @@ def extra_filters_data():
             code=key
         )
         tag_item.name = tag
-        if key in ['1', '96']:
+        if key in ['1', '96', '70', '81', '83']:
         #if key in ['1', '96', '98', '100', '98', '101', '102', '104', '105', '107', '109', '110', '111', '113', '114', '116', '118', '119', '120']:
             tag_item.is_filter = True
         tag_item.save()
@@ -326,6 +327,8 @@ def add_extra_filters(item, dtp):
     dtp_vehicles_categories_string = ",".join([x.category.name for x in models.Vehicle.objects.filter(participant__in=dtp_participants) if x.category]).lower()
     all_tags_string = ";".join([x.name for x in dtp.tags.all()]).lower()
 
+    dtp.participant_categories.add(participant_categories.get("all"))
+
     if any("пешеход" in x.role.lower() for x in dtp_participants if x.role):
         dtp.participant_categories.add(participant_categories.get("pedestrians"))
 
@@ -338,7 +341,7 @@ def add_extra_filters(item, dtp):
     if "до 16 лет" in all_tags_string:
         dtp.participant_categories.add(participant_categories.get("kids"))
 
-    if any(x.lower() in dtp_vehicles_categories_string + all_tags_string for x in ['автобус', 'троллейбус', 'трамвай']):
+    if any(x.lower() in dtp_vehicles_categories_string + all_tags_string for x in ['автобус', 'троллейбус', 'трамва']):
         dtp.participant_categories.add(participant_categories.get("public_transport"))
 
 
@@ -485,7 +488,7 @@ def download_success(dates, region_code, tags=False):
 
 
 def regions_crawl(downloads, tags=False):
-    for region in tqdm(models.Region.objects.filter(level=1)):
+    for region in tqdm(models.Region.objects.filter(level=1, slug="belgorodskaia-oblast")):
         region_downloads = downloads.filter(region=region)
 
         if region_downloads:
