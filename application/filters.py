@@ -19,8 +19,8 @@ class DTPFilterSet(django_filters.FilterSet):
 
 
 class DTPStatFilterSet(django_filters.FilterSet):
-    start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte', required=True)
-    end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte', required=True)
+    start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte')
+    end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')
     severity = django_filters.BaseInFilter(field_name='severity__level', lookup_expr='in')
     participant_categories = django_filters.BaseInFilter(field_name='participant_categories__slug', lookup_expr='in')
 

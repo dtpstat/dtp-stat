@@ -351,8 +351,13 @@ def add_dtp_record(item):
     tag_code = item.get("tag_code")
     item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
 
-    dtp, created = models.DTP.objects.get_or_create(
-        slug=str(item['KartId']) + "_" + item['date'].replace(".","")
+    dtp_datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+
+    dtp, created = models.DTP.objects.filter(
+        datetime__year=dtp_datetime.year,
+        datetime__month=dtp_datetime.month
+    ).get_or_create(
+        slug=item['KartId'],
     )
 
     tag = get_object_or_404(models.Tag, code=tag_code)
@@ -369,7 +374,7 @@ def add_dtp_record(item):
 
     get_geo_data(item, dtp)
 
-    dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+    dtp.datetime = dtp_datetime
 
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None

@@ -22,6 +22,14 @@ label:focus,
     box-shadow: none !important;
 }
 
+.button, .button:hover {
+	border-radius: 20px;
+	padding: 8px 16px 8px 16px!important;
+	text-decoration: none;
+	color: inherit;
+	font-weight: 500;
+}
+
 nav.navbar {
 	padding: 13px;
 	background: white;
@@ -113,4 +121,46 @@ nav li a.button {
 
   display: flex;
   align-items: center;
+}
+
+footer {
+	background: #F4F8FA;
+	min-height: 300px;
+}
+
+footer .container {
+	max-width: 900px;
+	text-align: center;
+}
+
+footer img.logo {
+	max-height: 25px;
+}
+
+footer .partners {
+	margin-top: 10px;
+}
+
+footer img.partner {
+	max-width: 70px;
+	max-height: 70px;
+	margin: 20px;
+	-webkit-filter: grayscale(1);
+}
+
+footer .description {
+	margin-top: 30px;
+	margin-bottom: 30px;
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 600px;
+}
+
+footer a.button {
+	background: #EBEEF0;
+}
+
+footer .footer, footer .footer a,footer .footer p  {
+	font-size: 16px;
+	color: rgba(24, 51, 74, 0.5);
 }

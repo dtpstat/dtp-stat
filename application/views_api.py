@@ -55,6 +55,7 @@ class StatApiView(viewsets.ModelViewSet):
             data['region_name'] = region.name
             data['region_slug'] = region.slug
 
+        if request.query_params.get('start_date') and request.query_params.get('end_date'):
             data = {**data, **{
                 "count": queryset.count(),
                 "injured": queryset.aggregate(Sum("injured")).get('injured__sum'),

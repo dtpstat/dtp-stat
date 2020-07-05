@@ -1,0 +1,41 @@
+{% load static %}
+
+<footer>
+    <div class="container pt-4">
+        <img src="{% static "media/logo.png" %}" class="logo">
+        <div class="description">
+            Проект посвящен проблеме дорожно-транспортных происшествий в России. Цель проекта — повышение безопасности дорожного движения и снижение смертности в ДТП.
+        </div>
+        <div>
+            <a href="{% url "donate" %}" class="button">
+            Поддержать проект
+        </a>
+        </div>
+
+        <div class="partners">
+            <a href="http://shtab.co/" target="_blank"><img src="{% static "media/gor.svg" %}" class="partner"></a>
+            <a href="https://city4people.ru/" target="_blank"><img src="{% static "media/stab.svg" %}" class="partner"></a>
+        </div>
+    </div>
+    <hr style="margin: 0">
+    <div class="container footer">
+        <div class="row">
+            <div class="col-12 col-md-6 p-3">
+                <p class="m-0">Лицензия</p>
+            </div>
+            <div class="col-12 col-md-6 p-2 justify-content-center">
+                <ul class="nav">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'blog' %}">Что почитать</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/pages/about/">О проекте</a>
+                  </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
