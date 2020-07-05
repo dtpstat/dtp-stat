@@ -23,6 +23,7 @@ class DTPStatFilterSet(django_filters.FilterSet):
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')
     severity = django_filters.BaseInFilter(field_name='severity__level', lookup_expr='in')
     participant_categories = django_filters.BaseInFilter(field_name='participant_categories__slug', lookup_expr='in')
+    geo_frame = django_filters.CharFilter(method=geo_filter)
 
     """
     category = django_filters.BaseInFilter(field_name='category__name', lookup_expr='in')
