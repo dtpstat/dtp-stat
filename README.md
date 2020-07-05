@@ -12,6 +12,10 @@
 - зайти в веб-интерфейс: http://localhost:5000/
 - открыть шелл для запуска `manage.py` команд: `make sh`
 
+#### Запуск тестов локально
+
+`make test`
+
 ### Deploy
 
 ansible-playbook -i production site.yml
