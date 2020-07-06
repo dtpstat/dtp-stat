@@ -65,8 +65,9 @@ class DtpSpider(scrapy.Spider):
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
 
-                export_dtp['area_code'] = response.meta['area_code']
-                export_dtp['parent_code'] = response.meta['parent_code']
+                if response.meta['date'] in export_dtp['date']:
+                    export_dtp['area_code'] = response.meta['area_code']
+                    export_dtp['parent_code'] = response.meta['parent_code']
 
                 export_dtp['tag_code'] = response.meta['tag_code']
                 yield export_dtp
