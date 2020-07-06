@@ -31,7 +31,7 @@ def open_json(path):
 def extra_filters_data():
     # severity
     severity_levels = {
-        0: {'name': 'Без пострадавших', 'keywords': ['не пострадал']},
+        0: {'name': 'Без пострадавших (нет данных)', 'keywords': ['не пострадал']},
         1: {'name': 'Легкая', 'keywords': ['разовой']},
         2: {'name': 'Средняя', 'keywords': ['амбулатор']},
         3: {'name': 'Тяжкая', 'keywords': ['стационар']},
@@ -48,11 +48,12 @@ def extra_filters_data():
 
     # participant types
     participant_types = {
-        'pedestrians': "С пешеходами",
-        'velo': "C велосипедистами",
-        'moto': "C мотоциклистами",
-        'public_transport': "C общественным транспортом",
-        'kids': "C детьми"
+        'all': "Все участники",
+        'pedestrians': "Пешеходы",
+        'velo': "Велосипедисты",
+        'moto': "Мотоциклисты",
+        'public_transport': "Общ. транспорт",
+        'kids': "Дети"
     }
 
     for participant_type in participant_types.items():
@@ -69,7 +70,7 @@ def extra_filters_data():
             code=key
         )
         tag_item.name = tag
-        if key in ['1', '96']:
+        if key in ['1', '96', '70', '81', '83']:
         #if key in ['1', '96', '98', '100', '98', '101', '102', '104', '105', '107', '109', '110', '111', '113', '114', '116', '118', '119', '120']:
             tag_item.is_filter = True
         tag_item.save()
@@ -237,7 +238,7 @@ def add_participant_record(participant, dtp, vehicle=None):
     )
     participant_item.save()
 
-    for violation_item in (participant['NPDD'] + participant['NPDD']):
+    for violation_item in (participant['NPDD'] + participant['SOP_NPDD']):
         if violation_item != "Нет нарушений":
             violation, created = models.Violation.objects.get_or_create(
                 name=violation_item
@@ -333,6 +334,8 @@ def add_extra_filters(item, dtp):
     dtp_vehicles_categories_string = ",".join([x.category.name for x in models.Vehicle.objects.filter(participant__in=dtp_participants) if x.category]).lower()
     all_tags_string = ";".join([x.name for x in dtp.tags.all()]).lower()
 
+    dtp.participant_categories.add(participant_categories.get("all"))
+
     if any("пешеход" in x.role.lower() for x in dtp_participants if x.role):
         dtp.participant_categories.add(participant_categories.get("pedestrians"))
 
@@ -345,7 +348,7 @@ def add_extra_filters(item, dtp):
     if "до 16 лет" in all_tags_string:
         dtp.participant_categories.add(participant_categories.get("kids"))
 
-    if any(x.lower() in dtp_vehicles_categories_string + all_tags_string for x in ['автобус', 'троллейбус', 'трамвай']):
+    if any(x.lower() in dtp_vehicles_categories_string + all_tags_string for x in ['автобус', 'троллейбус', 'трамва']):
         dtp.participant_categories.add(participant_categories.get("public_transport"))
 
 
@@ -356,8 +359,13 @@ def add_dtp_record(item):
     tag_code = item.get("tag_code")
     item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
 
-    dtp, created = models.DTP.objects.get_or_create(
-        slug=str(item['KartId']) + "_" + item['date'].replace(".","")
+    dtp_datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+
+    dtp, created = models.DTP.objects.filter(
+        datetime__year=dtp_datetime.year,
+        datetime__month=dtp_datetime.month
+    ).get_or_create(
+        slug=item['KartId'],
     )
 
     tag = get_object_or_404(models.Tag, code=tag_code)
@@ -376,7 +384,7 @@ def add_dtp_record(item):
 
     get_geo_data(item, dtp)
 
-    dtp.datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+    dtp.datetime = dtp_datetime
 
     dtp.category, created = models.Category.objects.get_or_create(name=item['DTP_V']) if item['DTP_V'] else None
     dtp.light, created = models.Light.objects.get_or_create(name=item['infoDtp']['osv']) if item['infoDtp']['osv'] else None
@@ -489,72 +497,51 @@ def download_success(dates, region_code, tags=False):
             region=region,
             date=date
         )
-        download_item.base_data = True
-        download_item.tags = tags
+        download_item.last_update = timezone.now()
+        if tags:
+            download_item.last_tags_update = timezone.now()
         download_item.save()
-    """
-    if region.level == 1:
-        region_ids = [x.id for x in region.region_set.all()] + [region.id]
-    else:
-        region_ids = [region.id]
 
-    for region_id in region_ids:
-        for date in [datetime.datetime.strptime(x, '%m.%Y') for x in dates.split(",")]:
-            download_item, created = models.Download.objects.get_or_create(
-                region_id=region_id,
-                date=date
-            )
-            download_item.base_data = True
-            download_item.tags = tags
-            download_item.save()
-    """
+
+def regions_crawl(downloads, tags=False):
+    for region in tqdm(models.Region.objects.filter(level=1, slug="belgorodskaia-oblast")):
+        region_downloads = downloads.filter(region=region)
+
+        if region_downloads:
+            dates = sorted([x['date'] for x in region_downloads.values("date")])
+            export_dates = dates_generator(start=min(dates), end=max(dates))
+
+            for date in export_dates:
+                crawl("dtp", params={
+                    "tags": str(tags),
+                    "dates": ",".join([date]),
+                    "region_code": str(region.gibdd_code),
+                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+                })
+
 
 @statsd.timed('dtpstat.check_dtp')
-def check_dtp(tags=False):
-    """
-    models.DTP.objects.all().delete()
-    models.Participant.objects.all().delete()
-    models.Vehicle.objects.all().delete()
-    models.Nearby.objects.all().delete()
-    models.Weather.objects.all().delete()
-    models.RoadCondition.objects.all().delete()
-    models.Download.objects.all().delete()
-    """
+def check_dtp():
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
-    for region in tqdm(models.Region.objects.filter(level=1)):
-        log.info('processing region: {}'.format(region))
-        if tags:
-            dates = sorted([x['date'] for x in models.Download.objects.filter(
-                region=region,
-                base_data=True,
-                tags=False
-            ).values("date")])
+    downloads = models.Download.objects.all()
 
-            if dates:
-                export_dates = dates_generator(start=min(dates), end=max(dates))
+    downloads_no_update = downloads.filter(last_update=None)
 
-                for date in export_dates:
-                    crawl("dtp", params={
-                        "tags": "True",
-                        "dates": ",".join([date]),
-                        "region_code": str(region.gibdd_code),
-                        "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                    })
-        else:
-            dates = sorted([x['date'] for x in models.Download.objects.filter(
-                region=region,
-                base_data=False
-            ).values("date")])
+    # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
+    if downloads_no_update.count() > 0:
+        regions_crawl(downloads_no_update, tags=False)
 
-            if dates:
-                export_dates = dates_generator(start=min(dates), end=max(dates), gap=60)
+    """
+    # потом смотрим на архивные данные
+    downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
+    if downloads_old_update.count() > 0:
+        region_crawl(downloads_old_update, tags=False)
 
-                crawl("dtp", params={
-                    "tags": "False",
-                    "dates": ",".join(export_dates),
-                    "region_code": str(region.gibdd_code),
-                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                })
+    # потом смотрим на теги
+    downloads_no_tags = downloads.filter(last_tags_update=None)
+    elif downloads_no_tags.count() > 0:
+        region_crawl(downloads_no_tags, tags=True)
+    """

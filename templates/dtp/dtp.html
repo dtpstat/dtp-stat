@@ -2,11 +2,129 @@
 
 {% load static %}
 
+{% block extra-head %}
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec" type="text/javascript"></script>
+{% endblock %}
+
 {% block content %}
+    <div class="dtp">
+        <div id="map"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-auto">
+                    {% if dtp.scheme %}
+                        <img src="http://stat.gibdd.ru/img/SDTP/{{ dtp.scheme }}.png" class="scheme">
+                    {% endif %}
+                </div>
+                <div class="col-md col-12 pt-3">
+                    <p>{{ dtp.datetime|date:'l' }}, {{ dtp.datetime|date:'d.m.Y' }} в  {{ dtp.datetime|date:'H:i' }}
+                    <span style="color:#ddd">|</span>
+                    {{ dtp.address| default_if_none:"<span style='color:#ddd'>Адрес неизвестен</span>" }}</p>
+                    <h1>{{ dtp.category.name }}</h1>
+                    <div class="row">
+
+                        <div class="col-auto indicator">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img src="{% static 'media/car.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col-9">
+                                    <p class="name">Транспорт</p>
+                                    <p class="value">{{ vehicles.count }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto indicator">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img src="{% static 'media/participants.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col-9">
+                                    <p class="name">Участники</p>
+                                    <p class="value">{{ dtp.participant_set.count }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto indicator">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img src="{% static 'media/injured.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col-9">
+                                    <p class="name">Пострадали</p>
+                                    <p class="value">{{ injured }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto indicator">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img src="{% static 'media/dead.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col-9">
+                                    <p class="name">Погибли</p>
+                                    <p class="value">{{ dead }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <h2>Участники ДТП</h2>
+            <div class="participants">
+                <div class="row">
+                    {% for participant in participants %}
+                        <div class="col-auto participant">
+                            1123
+                        </div>
+                {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <div class="m-auto text-center">
-        <h3 class="text-center">Тут будет карточка ДТП</h3>
+
         <p>
             <a href="{% url "dtp_fix_point" dtp.slug %}">Пожаловаться на некорректные координаты</a>
         </p>
     </div>
+{% endblock %}
+
+{% block page-scripts %}
+    <script>
+        ymaps.ready(function () {
+            var myMap = new ymaps.Map('map', {
+                center: [{{ dtp.point.1 }}+0.0005, {{ dtp.point.0 }}],
+                zoom: 16,
+                controls: []
+            }, {
+                suppressMapOpenBlock: true
+            });
+            myMap.behaviors.disable( ['scrollZoom', 'rightMouseButtonMagnifier' ] );
+
+
+            myPlacemark = new ymaps.Placemark([{{ dtp.point.1 }}, {{ dtp.point.0 }}], {}, {
+                // Опции.
+                // Необходимо указать данный тип макета.
+                iconLayout: 'default#image',
+                // Своё изображение иконки метки.
+                iconImageHref: '{% static "media/pin.svg" %}',
+                // Размеры метки.
+                iconImageSize: [36, 50],
+                // Смещение левого верхнего угла иконки относительно
+                // её "ножки" (точки привязки).
+                iconImageOffset: [-18, -50]
+            });
+
+        myMap.geoObjects
+            .add(myPlacemark)
+    });
+    </script>
 {% endblock %}

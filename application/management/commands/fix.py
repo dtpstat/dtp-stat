@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand
-from data import utils
+from application import utils
 
 
 class Command(BaseCommand):
-    help = 'Download dtp'
+    help = 'fix'
 
     def handle(self, *args, **kwargs):
-        utils.check_dtp()
+        utils.soc_risk()
+

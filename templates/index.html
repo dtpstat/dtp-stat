@@ -9,23 +9,27 @@
         <hr>
 
         <h5>API</h5>
-        <p><a href="/api/dtp/?start_date=2015-01-01&end_date=2015-12-31&severity=2%2C3&geo=34.18121337890624+53.20932249705369%2C+34.46685791015625+53.20932249705369%2C+34.46685791015625+53.28656352061583%2C+34.18121337890624+53.28656352061583%2C+34.18121337890624+53.20932249705369&participant_categories=public_transport%2Cpedestrians">API выдачи ДТП</a></p>
-        <p><a href="/api/stat/?geo=34.18121337890624+53.20932249705369">API Статистики</a></p>
+        <p>
+            <a href="/api/dtp/?start_date=2015-01-01&end_date=2015-12-31&geo_frame=36.51+50.55%2C+36.65+50.55%2C+36.65+50.63%2C+36.51+50.63%2C+36.51+50.55">
+                API выдачи ДТП
+            </a>
+        </p>
+        <p>
+            <a href="/api/stat/?center_point=36.51+50.55&scale=15&start_date=2015-01-01&end_date=2015-12-01">
+                API Статистики
+            </a>
+        </p>
+        <p>
+            <a href="/api/filters/?region_slug=belgorodskaia-oblast">
+                API Фильтров
+            </a>
+        </p>
         <p>API Расширенной статистики</p>
-        <p><a href="/api/filters/?geo=34.18121337890624+53.20932249705369">API Фильтров</a></p>
+
         <hr>
         <p><a href="{% url "dtp" dtps.0.slug %}">Карточка ДТП</a></p>
 
         <hr>
         <p><a href="{% url 'account_login' %}">Войти</a></p>
-
-        <hr>
-
-        <h5>Статика</h5>
-        <p><a href="{% url "blog" %}">Блог</a></p>
-        <p><a href="{% url "page" "about" %}">О проекте</a></p>
-        <p><a href="{% url "opendata" %}">Выгрузка данных</a></p>
-        <p></p>
-        <p></p>
     </div>
 {% endblock %}

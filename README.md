@@ -13,6 +13,10 @@
 - открыть шелл для запуска `manage.py` команд: `make sh`
 - [настроить сборщик метрик](docs/metrics.md)
 
+#### Запуск тестов локально
+
+`make test`
+
 ### Deploy
 
 ansible-playbook -i production site.yml

@@ -16,6 +16,9 @@ python-slugify==4.0.0
 djangorestframework==3.11.0
 django-extra-fields==2.0.3
 django-filter==2.2.0
+pytest==5.4.3
+pytest-django==3.9.0
+pytest-mock==3.1.1
 scrapy==2.0.1
 pandas==1.0.3
 ansible==2.9.7

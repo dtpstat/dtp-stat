@@ -1,9 +1,35 @@
 {% load static %}
 
-<div class="container">
-    <div class="header">
-        <a href="{% url "home" %}">
-            Карта ДТП
-        </a>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="{% url 'home' %}">
+        <img src="{% static "media/logo.png" %}">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <form class="form-inline mr-auto mt-2 mt-lg-0 d-none d-lg-block" role="form">
+        <div class="form-group">
+            <input class="form-control" type="text" />
+            <i class="fas fa-search"></i>
+        </div>
+    </form>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto my-2 my-lg-0">
+            <li class="nav-item {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">
+                <a class="nav-link" href="{% url 'blog' %}">Что почитать</a>
+            </li>
+            <li class="nav-item {% if 'data' in request.resolver_match.url_name %}active{% endif %}">
+                <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
+            </li>
+            <li class="nav-item {% if 'about' in request.resolver_match.url_name %}active{% endif %}">
+                <a class="nav-link" href="/pages/about/">О проекте</a>
+            </li>
+            <li class="nav-item support">
+                <a class="nav-link button" href="{% url 'donate' %}">Поддержать проект</a>
+            </li>
+        </ul>
     </div>
-</div>
+</nav>

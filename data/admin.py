@@ -43,12 +43,12 @@ class RegionAdmin(admin.ModelAdmin):
 
 @admin.register(models.Download)
 class DownloadAdmin(admin.ModelAdmin):
-    list_display = ('region', 'date', 'base_data', 'tags')
+    list_display = ('region', 'date', 'last_update', 'last_tags_update')
     raw_id_fields = ('region',)
     search_fields = ('region__name',)
     ordering = ('-date', 'region__name')
     date_hierarchy = 'date'
-    list_filter = ('base_data', 'tags',)
+    list_filter = ('last_update', )
 
     list_select_related = (
         'region',

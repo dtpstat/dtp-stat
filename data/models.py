@@ -29,9 +29,10 @@ class Region(models.Model):
     gibdd_code = models.CharField(max_length=20, help_text="gibdd code", null=True, blank=True, default=None, db_index=True)
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
+    is_active = models.BooleanField(help_text="last_tags_update", default=True)
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     def save(self, *args, **kwargs):
         if not self.slug and self.name:
@@ -155,6 +156,7 @@ class DTP(models.Model):
                 "lat": self.point.coords[1] if self.point else None,
                 "long": self.point.coords[0] if self.point else None,
             },
+            "participant_categories": [x.name for x in self.participant_categories.all()],
             "region": self.region.name if self.region else None,
             "parent_region": self.region.parent_region.name if self.region else None,
             "datetime": self.datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -254,5 +256,5 @@ class Participant(models.Model):
 class Download(models.Model):
     date = models.DateField(help_text="date", null=True, blank=True, default=None, db_index=True)
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
-    base_data = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
-    tags = models.BooleanField(help_text="tags", null=True, blank=True, default=False)
+    last_update = models.DateTimeField(help_text="last_update", null=True, blank=True, default=None)
+    last_tags_update = models.DateTimeField(help_text="last_tags_update", null=True, blank=True, default=None)

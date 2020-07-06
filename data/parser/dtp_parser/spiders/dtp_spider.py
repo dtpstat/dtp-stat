@@ -55,24 +55,7 @@ class DtpSpider(scrapy.Spider):
                         callback=self.parse_area,
                         errback=self.handle_error
                     )
-        """
-        for date in self.dates:
-            for tag_code, tag_name in list(self.tags.items()):
-                payload = dict()
-                payload["data"] = '{"date":["MONTHS:' + date.strftime('%m.%Y') + '"],"ParReg":"' + self.area.parent_region.gibdd_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + self.area.gibdd_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
-                yield Request(
-                    'http://stat.gibdd.ru/map/getDTPCardData',
-                    method="POST",
-                    meta={
-                      "tag_name": tag_name,
-                      "area_code": self.area.gibdd_code
-                    },
-                    body=json.dumps(payload),
-                    headers={'Content-Type': 'application/json; charset=UTF-8'},
-                    callback=self.parse_area,
-                    errback=self.handle_error
-                )
-        """
+
     @statsd.timed('dtpstat.spider.parse_area')
     def parse_area(self, response):
         export = json.loads(response.body_as_unicode())
