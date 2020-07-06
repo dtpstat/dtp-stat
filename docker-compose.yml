@@ -25,6 +25,7 @@ services:
       RECAPTCHA_PRIVATE_KEY: test
       DEBUG: 1
       PROJECT_PATH: /code
+      STATSD_HOST: dd-agent
 
 networks:
   backend:

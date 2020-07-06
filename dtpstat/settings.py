@@ -1,7 +1,6 @@
 import os
 
 import environ
-
 from datadog import initialize, statsd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -9,11 +8,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env(
     ALLOWED_HOSTS=(list, []),
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    STATSD_HOST=(str, 'localhost'),
 )
 environ.Env.read_env()
 
-initialize(statsd_host='dd-agent', statsd_port=8125)
+initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
 
 DEBUG = env('DEBUG')
 SECRET_KEY = env('SECRET_KEY')
