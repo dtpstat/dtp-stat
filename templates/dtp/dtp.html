@@ -123,8 +123,13 @@
                 iconImageOffset: [-18, -50]
             });
 
-        myMap.geoObjects
-            .add(myPlacemark)
+            myMap.events.once('click', function () {
+                myMap.behaviors
+                    .enable('scrollZoom')
+                    .enable('multiTouch');
+            });
+
+            myMap.geoObjects.add(myPlacemark)
     });
     </script>
 {% endblock %}

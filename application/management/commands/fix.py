@@ -6,5 +6,5 @@ class Command(BaseCommand):
     help = 'fix'
 
     def handle(self, *args, **kwargs):
-        utils.soc_risk()
+        utils.load_data()
 
