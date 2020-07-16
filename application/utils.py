@@ -17,7 +17,6 @@ import pandas as pd
 
 def get_region_by_center_point(center_point):
     region = None
-    parent_region_name = None
 
     if center_point:
         if "," not in center_point:
@@ -27,7 +26,6 @@ def get_region_by_center_point(center_point):
                 if "Россия" not in ya_data.get("address") or any(x in ya_data.get("address") for x in [y.name for y in data_models.Region.objects.filter(level=1, is_active=False)]):
                     return None
                 if ya_data.get('parent_region'):
-                    parent_region_name = ya_data.get('parent_region')
 
                     if ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
                         try:
@@ -35,13 +33,15 @@ def get_region_by_center_point(center_point):
                         except:
                             pass
 
+            # смотреть внутри полигонов osm
+
+
             # проверяем координаты через ближайшие ДТП
             if not region:
                 point = GEOSGeometry('POINT(' + center_point + ')')
-                for dist in [0.1, 1, 5, 10, 25, 50, 75, 100]:
+                nearest_dtps = data_models.DTP.objects.all()
 
-                    nearest_dtps = data_models.DTP.objects.all()
-
+                for dist in [0.1, 0.5, 1, 5, 10, 25, 50, 75]:
                     nearest_dtps = nearest_dtps.filter(
                         point__dwithin=(point, dist)
                     )

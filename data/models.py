@@ -32,6 +32,7 @@ class Region(models.Model):
     oktmo = models.CharField(max_length=1000, help_text="oktmo", null=True, blank=True, default=None, db_index=True)
     okato = models.CharField(max_length=1000, help_text="okato", null=True, blank=True, default=None, db_index=True)
     geo = models.MultiPolygonField(srid=4326, null=True, blank=True, default=None, db_index=True)
+    osm_index = models.CharField(max_length=1000, help_text="geo osm id", null=True, blank=True, default=None, db_index=True)
 
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)

@@ -208,20 +208,12 @@ def geocode(dtp):
     return data
 
 
-
 def get_region(region_code, region_name, parent_region_code, parent_region_name):
-    #ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
-
     parent_region, created = models.Region.objects.get_or_create(
         level=1,
         gibdd_code=parent_region_code
     )
     parent_region.name = parent_region_name
-    """
-    if not parent_region.ya_name and ya_data.get('parent_region'):
-        parent_region.ya_name = ya_data['parent_region']
-    """
-
     parent_region.save()
 
     region, created = models.Region.objects.get_or_create(
@@ -230,10 +222,19 @@ def get_region(region_code, region_name, parent_region_code, parent_region_name)
         parent_region=parent_region
     )
     region.name = region_name
-    """
-    if not region.ya_name:
-        region.ya_name = ya_data['region']
-    """
+    region.save()
+
+    if not region.ya_name or not parent_region.ya_name:
+        ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
+
+        if not parent_region.ya_name and ya_data.get('parent_region'):
+            ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
+            parent_region.ya_name = ya_data['parent_region']
+
+        if not region.ya_name and ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
+            region.ya_name = ya_data['region']
+
+    parent_region.save()
     region.save()
 
     return region
