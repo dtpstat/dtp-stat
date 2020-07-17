@@ -68,9 +68,9 @@ ROBOTSTXT_OBEY = True
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 
-#DOWNLOADER_MIDDLEWARES = {
-    #'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

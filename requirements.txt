@@ -26,4 +26,5 @@ django-ckeditor==5.9.0
 herepy==2.1.1
 django-recaptcha==2.0.6
 django-allauth==0.41.0
+datadog==0.37.1
 django-cors-headers==3.4.0

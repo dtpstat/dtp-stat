@@ -1,22 +1,25 @@
-from django.utils import timezone
-from django.contrib.gis.geos import Point
-from . import models
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-
-import json
-from tqdm import tqdm
 import datetime
-import requests
-import pytz
-import re
+import json
+import logging
 import os
-from lxml import html
-import herepy
-
+import re
 
 import environ
+import herepy
+import pytz
+import requests
+from datadog import statsd
+from django.contrib.gis.geos import Point
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from lxml import html
+from tqdm import tqdm
+
+from . import models
+
 env = environ.Env()
+log = logging.getLogger(__name__)
 
 
 def open_json(path):
@@ -73,6 +76,7 @@ def extra_filters_data():
         tag_item.save()
 
 
+@statsd.timed('dtpstat.get_geo_data')
 def get_geo_data(item, dtp):
     try:
         gibdd_lat, gibdd_long = float(item['infoDtp']['COORD_L']), float(item['infoDtp']['COORD_W'])
@@ -267,6 +271,7 @@ def add_participant_record(participant, dtp, vehicle=None):
             participant_item.violations.add(violation)
 
 
+@statsd.timed('dtpstat.add_participants_records')
 def add_participants_records(item, dtp):
     models.Vehicle.objects.filter(participant__dtp=dtp).delete()
     dtp.participant_set.all().delete()
@@ -293,6 +298,7 @@ def add_participants_records(item, dtp):
         add_participant_record(participant, dtp)
 
 
+@statsd.timed('dtpstat.add_related_data')
 def add_related_data(item, dtp):
     related_data = [
         {
@@ -335,6 +341,7 @@ def add_related_data(item, dtp):
         data_item['dtp_model'].add(*data_list)
 
 
+@statsd.timed('dtpstat.add_extra_filters')
 def add_extra_filters(item, dtp):
     # severity
     severity_levels = [x.severity.level for x in dtp.participant_set.all() if x.severity]
@@ -370,6 +377,7 @@ def add_extra_filters(item, dtp):
         dtp.participant_categories.add(participant_categories.get("public_transport"))
 
 
+@statsd.timed('dtpstat.add_dtp_record')
 def add_dtp_record(item):
     area_code = item.get("area_code")
     parent_code = item.get("parent_code")
@@ -389,7 +397,9 @@ def add_dtp_record(item):
     dtp.tags.add(tag)
 
     if dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
+        statsd.increment('dtpstat.add_dtp_record.update_not_needed')
         return
+    statsd.increment('dtpstat.add_dtp_record.update_started')
 
     if area_code and parent_code:
         if area_code == "63401" and parent_code == "63":
@@ -418,6 +428,7 @@ def add_dtp_record(item):
     dtp.save()
 
 
+@statsd.timed('dtpstat.check_dates_from_gibdd')
 def check_dates_from_gibdd():
     r = requests.get('http://stat.gibdd.ru/')
     r = html.fromstring(r.content.decode('UTF-8'))
@@ -534,6 +545,7 @@ def regions_crawl(downloads, tags=False):
                 })
 
 
+@statsd.timed('dtpstat.check_dtp')
 def check_dtp():
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
