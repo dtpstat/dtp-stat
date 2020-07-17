@@ -1,37 +1,59 @@
-from django.contrib.gis.geos import Point, GEOSGeometry
-from django.contrib.gis.db.models.functions import Distance
-from data import models as data_models
-from data import utils as data_utils
-from application import models
-from django.shortcuts import get_object_or_404, render
-from django.db.models import Sum
-from django.contrib.gis.measure import D
-
-import json
 import calendar
+import json
+import logging
 import os
 import shutil
-from tqdm import tqdm
+
 import pandas as pd
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.measure import D
+from django.db.models import Q, Sum
+from django.shortcuts import get_object_or_404, render
+from tqdm import tqdm
+
+from application import models
+from data import models as data_models
+from data import utils as data_utils
+
+log = logging.getLogger(__name__)
 
 
 def get_region_by_center_point(center_point):
+    """
+    принимает координаты в виде строки в формате 'долгота широта'
+    например: '37.64 55.76'
+    """
     region = None
 
     if center_point:
         if "," not in center_point:
             # проверяем координаты через Яндекс
             ya_data = data_utils.geocoder_yandex(center_point)
+            if ya_data and ya_data.get('region') == ya_data.get('parent_region'):
+                ya_data_district = data_utils.geocoder_yandex(center_point, kind='district')
+                if ya_data_district:
+                    ya_data = ya_data_district
+            log.debug('ya_data: %s', ya_data)
+            parent_region = None
             if ya_data and ya_data.get("address"):
-                if "Россия" not in ya_data.get("address") or any(x in ya_data.get("address") for x in [y.name for y in data_models.Region.objects.filter(level=1, is_active=False)]):
-                    return None
-                if ya_data.get('parent_region'):
-
-                    if ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
-                        try:
-                            region = get_object_or_404(data_models.Region, name=ya_data['region'], parent_region__name=ya_data['parent_region'])
-                        except:
-                            pass
+                parent_region = data_models.Region.objects.filter(Q(name=ya_data.get('parent_region')) | Q(ya_name=ya_data.get('parent_region'))).first()
+                log.debug('parent_region: %s', parent_region)
+                if parent_region:
+                    region = data_models.Region.objects.filter(Q(parent_region=parent_region) & (Q(name=ya_data.get('region')) | Q(ya_name=ya_data.get('region')))).first()
+                    log.debug('region_by_region_name: %s %s', region, ya_data.get('region'))
+                    if not region:
+                        region_name_from_address = ya_data.get('address').split(',')[-1]
+                        region = data_models.Region.objects.filter(parent_region=parent_region, name=region_name_from_address).first()
+                        log.debug('region_by_address: %s %s', region, region_name_from_address)
+                        if not region:
+                            for component in ya_data.get('components', []):
+                                region = data_models.Region.objects.filter(Q(parent_region=parent_region) & ((Q(name=component) | Q(ya_name=component)))).first()
+                                log.debug('region_by_component: %s %s', region, component)
+                                if region:
+                                    break
+                if not region:
+                    log.error('Region not found in ya_data; parent_region: %s ya_data.region: %s component: %s' % (parent_region, ya_data.get('region'), ','.join(ya_data.get('components'))))
 
             # смотреть внутри полигонов osm
 
