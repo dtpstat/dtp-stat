@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, MultiPolygon
 from django.contrib.postgres.fields import JSONField
 from django.utils.crypto import get_random_string
 
@@ -25,11 +25,21 @@ def get_slug(instance, slug_string=None, length=5):
 
 class Region(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None, db_index=True)
+    ya_name = models.CharField(max_length=1000, help_text="yandex name", null=True, blank=True, default=None, db_index=True)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
     gibdd_code = models.CharField(max_length=20, help_text="gibdd code", null=True, blank=True, default=None, db_index=True)
+    official_code = models.CharField(max_length=20, help_text="official code", null=True, blank=True, default=None, db_index=True)
+    oktmo = models.CharField(max_length=1000, help_text="oktmo", null=True, blank=True, default=None, db_index=True)
+    okato = models.CharField(max_length=1000, help_text="okato", null=True, blank=True, default=None, db_index=True)
+    geo = models.MultiPolygonField(srid=4326, null=True, blank=True, default=None, db_index=True)
+    osm_index = models.CharField(max_length=1000, help_text="geo osm id", null=True, blank=True, default=None, db_index=True)
+
     level = models.IntegerField(help_text="level", null=True, blank=True, default=None, db_index=True)
     parent_region = models.ForeignKey('self', help_text="Parent region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     is_active = models.BooleanField(help_text="last_tags_update", default=True)
+
+
+
 
     def __str__(self):
         return self.name or ''
@@ -157,6 +167,7 @@ class DTP(models.Model):
                 "long": self.point.coords[0] if self.point else None,
             },
             "participant_categories": [x.name for x in self.participant_categories.all()],
+            "severity": self.severity.name,
             "region": self.region.name if self.region else None,
             "parent_region": self.region.parent_region.name if self.region else None,
             "datetime": self.datetime.strftime("%Y-%m-%d %H:%M:%S"),

@@ -20,32 +20,59 @@ def get_region_by_center_point(center_point):
 
     if center_point:
         if "," not in center_point:
-            point = GEOSGeometry('POINT(' + center_point + ')')
-
             # проверяем координаты через Яндекс
             ya_data = data_utils.geocoder_yandex(center_point)
             if ya_data and ya_data.get("address"):
                 if "Россия" not in ya_data.get("address") or any(x in ya_data.get("address") for x in [y.name for y in data_models.Region.objects.filter(level=1, is_active=False)]):
                     return None
+                if ya_data.get('parent_region'):
+
+                    if ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
+                        try:
+                            region = get_object_or_404(data_models.Region, name=ya_data['region'], parent_region__name=ya_data['parent_region'])
+                        except:
+                            pass
+
+            # смотреть внутри полигонов osm
+
 
             # проверяем координаты через ближайшие ДТП
-            for dist in [0.1, 1, 5, 10, 25, 50, 75, 100]:
-                nearest_dtps = data_models.DTP.objects.filter(
-                    point__dwithin=(point, dist)
-                )
-                if nearest_dtps.count() > 0:
-                    nearest_dtps = nearest_dtps.annotate(
-                        distance=Distance('point', point)
+            if not region:
+                point = GEOSGeometry('POINT(' + center_point + ')')
+                nearest_dtps = data_models.DTP.objects.all()
+
+                for dist in [0.1, 0.5, 1, 5, 10, 25, 50, 75]:
+                    nearest_dtps = nearest_dtps.filter(
+                        point__dwithin=(point, dist)
                     )
-                    region = nearest_dtps.order_by('distance')[0].region
-                    break
+
+                    if nearest_dtps.count() > 4:
+                        nearest_dtps = nearest_dtps.annotate(
+                            distance=Distance('point', point)
+                        )
+                        dtps = [x.region.id for x in nearest_dtps.order_by('distance')[0:5]]
+                        region_id = max(set(dtps), key=dtps.count)
+                        region = get_object_or_404(data_models.Region, id=region_id)
+                        break
 
     return region
 
 
-def opendata():
+def opendata(region=None):
+    """
+    if region:
+        downloads = region.download_set.filter(last_update__isnull=False)
+
+        if downloads:
+            latest_update_date=downloads.latest('date').date
+
+
+        else:
+            return
+    """
+
     # get russia dataset
-    latest_download = data_models.Download.objects.filter(base_data=True).latest('date')
+    latest_download = data_models.Download.objects.filter(last_update__isnull=False).latest('date')
     latest_opendata = models.OpenData.objects.filter(region=None).last()
 
     if latest_opendata and latest_opendata.date == latest_download.date:
@@ -57,9 +84,7 @@ def opendata():
         ).prefetch_related(
             'nearby', 'weather', 'tags', 'participant_categories', 'road_conditions'
         ).filter(
-            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]),
-            #tags__code='96',
-            datetime__year=2019
+            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1])
         ).iterator()):
             data.append(obj.as_dict())
 
@@ -135,13 +160,13 @@ def generate_datasets_geojson():
         json.dump(geo_data, data_file, ensure_ascii=False)
 
 
-def soc_risk():
-    data = data_models.DTP.objects.filter(datetime__year__in=[2018,2019])
+def load_data():
+    data = data_models.Region.objects.all()
 
-    data = data.values('region__parent_region__name', "datetime__year").annotate(dead_count=Sum('dead'))
+    data = data.values('name', 'parent_region__name','gibdd_code', "ya_name", "slug")
 
     df = pd.DataFrame(data)
-    df.to_csv('static/soc_risk.csv')
+    df.to_csv('static/regions.csv', index=False)
 
 
 def get_moderator_feedback(request):

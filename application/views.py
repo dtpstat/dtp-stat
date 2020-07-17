@@ -59,8 +59,8 @@ def dtp(request, slug):
     dtp_item = get_object_or_404(data_models.DTP, slug=slug)
     participants = dtp_item.participant_set.order_by('violations')
     vehicles = data_models.Vehicle.objects.filter(participant__dtp=dtp_item).distinct()
-    injured = dtp_item.participant_set.filter(severity__level__in=[2,3,4]).count()
-    dead = dtp_item.participant_set.filter(severity__level__in=[5]).count()
+    injured = dtp_item.participant_set.filter(severity__level__in=[1,2,3]).count()
+    dead = dtp_item.participant_set.filter(severity__level__in=[4]).count()
 
     return render(request, "dtp/dtp.html", context={
         'dtp': dtp_item,

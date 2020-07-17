@@ -158,6 +158,22 @@ def geocoder_yandex(address):
                                      x['kind'] == "street"]
         if address_components_street:
             data['street'] = address_components_street[0]['name']
+
+        parent_region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
+                              x['kind'] == "province"]
+        if len(parent_region_data) > 1:
+            data['parent_region'] = parent_region_data[1]['name']
+
+        if "Россия" in data['address']:
+            region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
+                           x['kind'] in ["locality"]]
+            if region_data:
+                data['region'] = region_data[0]['name']
+            else:
+                region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
+                               x['kind'] in ["area"]]
+                if region_data:
+                    data['region'] = region_data[0]['name']
     except:
         pass
 
@@ -201,20 +217,29 @@ def get_region(region_code, region_name, parent_region_code, parent_region_name)
         level=1,
         gibdd_code=parent_region_code
     )
-    if created:
-        parent_region.name = parent_region_name
-        #parent_region.point = Point(geocode(parent_region.name))
-        parent_region.save()
+    parent_region.name = parent_region_name
+    parent_region.save()
 
     region, created = models.Region.objects.get_or_create(
         level=2,
         gibdd_code=region_code,
         parent_region=parent_region
     )
-    if created:
-        region.name = region_name
-        #region.point = Point(geocode(region.name + " " + parent_region.name))
-        region.save()
+    region.name = region_name
+    region.save()
+
+    if not region.ya_name or not parent_region.ya_name:
+        ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
+
+        if not parent_region.ya_name and ya_data.get('parent_region'):
+            ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
+            parent_region.ya_name = ya_data['parent_region']
+
+        if not region.ya_name and ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
+            region.ya_name = ya_data['region']
+
+    parent_region.save()
+    region.save()
 
     return region
 
