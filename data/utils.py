@@ -21,7 +21,6 @@ from . import models
 env = environ.Env()
 log = logging.getLogger(__name__)
 
-
 def open_json(path):
     with open(path) as data_file:
         data = json.load(data_file)
@@ -134,12 +133,14 @@ def get_geocode_point(dtp):
             return None
 
 
-def geocoder_yandex(address):
+def geocoder_yandex(address, kind=None):
     params = {
         "geocode": address,
         "apikey": "ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec",
         "format": "json"
     }
+    if kind is not None:
+        params['kind'] = kind
 
     url = "https://geocode-maps.yandex.ru/1.x"
     r = requests.get(url, params=params)
@@ -147,7 +148,11 @@ def geocoder_yandex(address):
     data = {}
 
     try:
-        geo = r.json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
+        json = r.json()
+        if not json['response']['GeoObjectCollection']['featureMember']:
+            log.error('geocoder_yandex result is empty')
+            return None
+        geo = json['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
 
         data['lat'] = float(geo['Point']['pos'].split(" ")[1])
         data['long'] = float(geo['Point']['pos'].split(" ")[0])
@@ -164,6 +169,9 @@ def geocoder_yandex(address):
         if len(parent_region_data) > 1:
             data['parent_region'] = parent_region_data[1]['name']
 
+        data['components'] = [x['name'] for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
+                           x['kind'] in ["locality", "area"]]
+
         if "Россия" in data['address']:
             region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
                            x['kind'] in ["locality"]]
@@ -174,8 +182,8 @@ def geocoder_yandex(address):
                                x['kind'] in ["area"]]
                 if region_data:
                     data['region'] = region_data[0]['name']
-    except:
-        pass
+    except Exception as e:
+        log.error('geocoder_yandex error: %s', e)
 
     return data if data != {} else None
 
