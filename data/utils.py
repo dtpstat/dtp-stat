@@ -18,7 +18,10 @@ from tqdm import tqdm
 
 from . import models
 
-env = environ.Env()
+env = environ.Env(
+    PROXY_LIST=(list, [])
+)
+environ.Env.read_env()
 log = logging.getLogger(__name__)
 
 def open_json(path):
@@ -28,6 +31,7 @@ def open_json(path):
 
 
 def extra_filters_data():
+    print("filter")
     # severity
     severity_levels = {
         0: {'name': 'Без пострадавших (нет данных)', 'keywords': ['не пострадал']},
@@ -210,13 +214,11 @@ def geocoder_here(address=None, coords=None):
 
 def geocode(dtp):
     data = geocoder_yandex(dtp.full_address())
-    print(data)
     if data:
         here_data = geocoder_here(coords=[data['lat'], data['long']])
         if here_data:
             data['lat'] = here_data['lat']
             data['long'] = here_data['long']
-    print(data)
     return data
 
 
@@ -438,7 +440,7 @@ def add_dtp_record(item):
 
 @statsd.timed('dtpstat.check_dates_from_gibdd')
 def check_dates_from_gibdd():
-    r = requests.get('http://stat.gibdd.ru/')
+    r = requests.get('http://stat.gibdd.ru/', proxies={'http': 'http://' + env('PROXY_LIST')[0]})
     r = html.fromstring(r.content.decode('UTF-8'))
     scripts = r.xpath('//script')
 
@@ -483,7 +485,7 @@ def get_tags_data(data, parent_name=None):
 def get_tags():
     tags = {}
 
-    r = requests.get('http://stat.gibdd.ru/')
+    r = requests.get('http://stat.gibdd.ru/', proxies={'http': 'http://' + env('PROXY_LIST')[0]})
     r = html.fromstring(r.content.decode('UTF-8'))
     scripts = r.xpath('//script')
 
@@ -498,6 +500,7 @@ def get_tags():
 
 
 def crawl(spider_name, params=None):
+    print(spider_name)
     first_dir = os.getcwd()
     os.chdir("data/parser")
     command = 'scrapy crawl ' + spider_name

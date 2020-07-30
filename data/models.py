@@ -39,8 +39,6 @@ class Region(models.Model):
     is_active = models.BooleanField(help_text="last_tags_update", default=True)
 
 
-
-
     def __str__(self):
         return self.name or ''
 

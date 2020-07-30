@@ -10,7 +10,10 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 import environ
-env = environ.Env()
+env = environ.Env(
+    PROXY_LIST=(list, [])
+)
+environ.Env.read_env()
 
 import sys
 sys.path.insert(0, env('PROJECT_PATH'))
@@ -34,6 +37,8 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
+
+ROTATING_PROXY_LIST = env('PROXY_LIST')
 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -69,7 +74,9 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 
 DOWNLOADER_MIDDLEWARES = {
-    'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
+    #'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
+    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
 }
 
 # Enable or disable extensions

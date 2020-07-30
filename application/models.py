@@ -30,12 +30,25 @@ def get_slug(instance, slug_string=None, length=5):
     return slug
 
 
+class BlogTag(models.Model):
+    name = models.CharField(help_text="Текст тега", max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
 class BlogPost(models.Model):
-    created_at = models.DateTimeField(help_text="datetime publish", default=timezone.now, null=True, blank=True)
-    title = models.CharField(help_text="Post title", max_length=200, null=True, blank=True, default=None)
-    text = RichTextUploadingField(help_text="text", null=True, blank=True, default=None)
-    slug = models.CharField(help_text="slug", max_length=200, null=True, blank=True, default=None, db_index=True)
-    created_by = models.ForeignKey(User, default=middlewares.get_current_user, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(help_text="Дата и время, с которого пост станет виден в блоге (по гринвичу, +3 Москве)", default=timezone.now, null=True, blank=True)
+    title = models.CharField(help_text="Заголовок", max_length=200, null=True, blank=True, default=None)
+    author_name = models.CharField(help_text="Имена авторов строчкой через запятую (можно не указывтаь никого)",
+                                   max_length=1000, null=True, blank=True, default=None, db_index=True)
+    tags = models.ManyToManyField("BlogTag", db_index=True, blank=True)
+    cover = models.ImageField(upload_to='blog_covers',help_text='Заглавная картинка (желательно в соотношении 16:9 - 960×540, 1280×720)', null=True, blank=True, default=None)
+    abstract = models.TextField(help_text='Краткая аннотация', null=True, blank=True, default=None)
+    text = RichTextUploadingField(help_text="Текст", null=True, blank=True, default=None)
+    slug = models.CharField(help_text="Ссылка на пост (если оставить пустым, заполнится автоматически из названия)", max_length=200, null=True, blank=True, default=None, db_index=True)
+    created_by = models.ForeignKey(User, help_text="Кто добавил пост (заполнится автоматически)", default=middlewares.get_current_user, on_delete=models.SET_NULL, null=True)
+
 
     def save(self, *args, **kwargs):
         if not self.slug and self.title:
@@ -93,7 +106,7 @@ class Feedback(models.Model):
 class Moderator(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, db_index=True, default=None, null=True, blank=True)
     username = models.CharField(max_length=200, default=None, null=True, blank=True)
-    regions = models.ManyToManyField("data.Region", db_index=True, default=None, blank=True)
+    regions = models.ManyToManyField("data.Region", db_index=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def regions_list(self):

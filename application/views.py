@@ -21,10 +21,17 @@ def home(request):
     })
 
 
-def blog(request):
+def blog(request, tag=None):
     posts = models.BlogPost.objects.filter(created_at__lte=timezone.now())
+    header = "Статьи и исследования"
+
+    if tag:
+        posts = posts.filter(tags__name=tag)
+        header = header + " – " + tag
+
     return render(request, "blog/index.html", context={
-        "posts": posts
+        "posts": posts,
+        "header": header
     })
 
 

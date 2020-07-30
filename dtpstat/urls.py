@@ -33,6 +33,7 @@ urlpatterns = [
     path('dtp/<slug>/fix_point/', app_views.dtp_fix_point, name='dtp_fix_point'),
 
     path('blog/', app_views.blog, name='blog'),
+    path('blog/tag/<tag>/', app_views.blog, name='blog_tag'),
     path('blog/<slug>/', app_views.blog_post, name='blog_post'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
@@ -45,5 +46,8 @@ urlpatterns = [
     path('api/dtp/', api_views.DTPApiView.as_view()),
     path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
     path('api/filters/', api_views.FiltersApiView.as_view()),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

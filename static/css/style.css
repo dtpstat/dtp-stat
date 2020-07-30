@@ -65,14 +65,15 @@ nav form .fas {
 }
 
 nav li {
-	font-weight: 500;
-	padding-right: 6px;
-	padding-left: 6px;
+	font-weight: normal;
+	padding-right: 10px;
+	padding-left: 10px;
 	text-align: center;
 }
 
-nav li.active {
-	font-weight: bold;
+nav li.active a.nav-link {
+	border-bottom: 2px solid #18334A;
+	color: #18334A!important;
 }
 
 nav li.support {
@@ -81,8 +82,12 @@ nav li.support {
 }
 
 nav li a.nav-link {
-	color: #18334A!important;
+	color: rgba(24, 51, 74, 0.5)!important;
 	font-size: 16px;
+	padding-left: 0!important;
+	padding-right: 0!important;
+	padding-bottom: 0;
+
 }
 
 nav li a.button {
@@ -239,4 +244,79 @@ footer a.button {
 footer .footer, footer .footer a,footer .footer p  {
 	font-size: 16px;
 	color: rgba(24, 51, 74, 0.5);
+}
+
+h1 {
+	font-size: 48px;
+	font-weight: bold;
+}
+
+h2 {
+	font-size: 30px;
+	font-weight: bold;
+}
+
+h3 {
+	font-size: 20px;
+	font-weight: bold;
+	margin-top: 8px;
+}
+
+.blog .preview {
+	border-radius: 16px;
+	padding: 12px;
+}
+
+.blog .preview:hover {
+	background: #EBEEF0;
+}
+
+.blog .preview .img-wrap {
+	height: 250px;
+	text-align: center;
+}
+
+.blog .preview img {
+	max-width: 100%;
+	max-height: 250px;
+	border-radius: 12px;
+}
+
+.blog .tag {
+	border-radius: 4px;
+	background: #F4F8FA;
+	padding: 5px 8px;
+	font-weight: 500;
+	font-size: 12px;
+	margin-right: 8px;
+
+}
+
+.blog .preview a, .blog .preview a:hover {
+	text-decoration: none;
+}
+
+.blog .extra {
+	color: rgba(24, 51, 74, 0.72);
+	font-size: 16px;
+}
+
+.blog img {
+	max-width: 100%!important;
+	height: auto!important;
+}
+
+.post {
+	max-width: 900px;
+}
+
+.post .text {
+	max-width: 700px;
+}
+
+.post .text p{
+
+	font-family: Merriweather!important;
+	font-size: 18px;
+	text-align: justify;
 }

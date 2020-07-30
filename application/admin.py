@@ -6,6 +6,14 @@ from . import models
 class BlogPostAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'title', 'created_by')
     ordering = ('created_at',)
+    readonly_fields = ('created_by',)
+    filter_horizontal = ('tags',)
+
+
+@admin.register(models.BlogTag)
+class BlogTagAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    ordering = ('name',)
 
 
 @admin.register(models.Page)

@@ -28,3 +28,5 @@ django-recaptcha==2.0.6
 django-allauth==0.41.0
 datadog==0.37.1
 django-cors-headers==3.4.0
+scrapy-rotating-proxies==0.6.2
+Pillow==7.2.0

@@ -1,10 +1,42 @@
-
-
 {% extends "base.html" %}
 
+{% load static %}
+
+{% block meta-tags %}
+    <meta property="og:title" content="{{ post.title }} – Карта ДТП">
+    <meta property="og:description" content="{{ post.abstract }}">
+    <meta name="description" content="{{ post.abstract }}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover.url }}"/>
+    <title>{{ post.title }} – Карта ДТП</title>
+{% endblock %}
+
+{% block extra-head %}
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
+
+    <script src="https://yastatic.net/share2/share.js" async="async"></script>
+
+{% endblock %}
+
 {% block content %}
-    <div class="m-auto text-center">
-        <h3 class="text-center">{{ post.title }}</h3>
-        {{ post.text | safe }}
+    <div class="container blog post mt-5 mb-5">
+        <div class="text-center">
+            {% for tag in post.tags.all %}
+                <a href="{% url "blog_tag" tag %}">
+                    <span class="tag">
+                        {{ tag }}
+                    </span>
+                </a>
+            {% endfor %}
+            <h2 class="mt-3 mb-3">{{ post.title }}</h2>
+            <p class="extra">{{ post.created_at|date:'d.m.Y' }}{% if post.author_name %} | {{ post.author_name }} {% endif %}</p>
+            <img src="{{ post.cover.url }}" class="mt-4 mb-4">
+        </div>
+        <div class="container text">
+            <p class="mb-5">
+                {{ post.abstract|safe }}
+            </p>
+            {{ post.text|safe }}
+        </div>
+
     </div>
 {% endblock %}
