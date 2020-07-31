@@ -65,7 +65,6 @@ def donate(request):
         text = None
 
     return render(request, "donate.html", context={
-        "donate_data": utils.get_donate_data(),
         "text": text
     })
 

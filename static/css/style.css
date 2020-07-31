@@ -26,6 +26,10 @@ a {
 	text-decoration: underline;
 }
 
+a:hover {
+	font-weight: normal!important;
+}
+
 
 .button, .button:hover {
 	border-radius: 20px;
@@ -219,30 +223,35 @@ footer {
 }
 
 footer .container {
-	max-width: 940px;
-	text-align: center;
+	max-width: 1000px;
 }
+
+footer .donate-box {
+	max-width: 500px;
+}
+
 
 footer img.logo {
 	max-height: 25px;
 }
 
-footer .partners {
-	margin-top: 10px;
-}
 
 footer img.partner {
-	max-width: 70px;
+	max-width: 150px;
 	max-height: 70px;
-	margin: 20px;
+	margin: 10px;
+	margin-top: 0;
 	-webkit-filter: grayscale(1);
 }
 
+footer .partners img:hover {
+	-webkit-filter: none !important;
+	filter: none !important;
+}
+
 footer .description {
-	margin-top: 30px;
-	margin-bottom: 30px;
-	margin-left: auto;
-	margin-right: auto;
+	margin-top: 15px;
+	margin-bottom: 15px;
 	max-width: 600px;
 }
 
@@ -338,14 +347,33 @@ h3 {
 	margin: auto;
 	margin-top: 20px;
 	margin-bottom: 5px;
+	border-radius: 8px;
 }
 
 .progress .progress-bar {
 	background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
 	background-color: inherit!important;
+	border-radius: 8px;
 }
 
 .donate-status-extra {
 	color: rgba(24, 51, 74, 0.5);
 }
 
+footer .soc_media a{
+	margin: 5px;
+	font-weight: normal;
+}
+
+footer .license i, footer .license p {
+	color: rgba(24, 51, 74, 0.5);
+}
+
+footer .license p {
+	font-size: 14px;
+	margin: 0;
+}
+
+footer a {
+	text-decoration: none;
+}

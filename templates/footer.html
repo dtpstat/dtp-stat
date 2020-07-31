@@ -1,29 +1,65 @@
 {% load static %}
+{% load tags %}
 
 <footer>
     <div class="container pt-4">
-        <img src="{% static "media/logo.png" %}" class="logo">
-        <div class="description">
-            Проект посвящен проблеме дорожно-транспортных происшествий в России. Цель проекта — повышение безопасности дорожного движения и снижение смертности в ДТП.
+        <div class="row">
+            <div class="col-12 col-lg-6 mb-4">
+                <img src="{% static "media/logo.png" %}" class="logo">
+                <div class="description">
+                    Проект посвящен проблеме дорожно-транспортных происшествий в России. Цель проекта — повышение безопасности дорожного движения и снижение смертности в ДТП.
+                </div>
+            </div>
+            <div class="donate-box col-12 col-lg-6 mb-4">
+                <h3>Сбор ежемесячных пожертвований на проект</h3>
+                <div class="progress">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ donate_data.progress }}%;"></div>
+                </div>
+                <div class="row justify-content-between ">
+                    <div class="col">Собрано:  {% thousand_sep donate_data.paymentsInfo.sum_total %} р. из {% thousand_sep donate_data.paymentsInfo.sum_goal %} р.</div>
+                    <div class="col text-right donate-status-extra">До конца сбора {% get_word_after_num 'день' donate_data.days_left %}</div>
+                </div>
+                <div class="text-right mt-4 mb-4">
+                    <a class="button support" href="{% url 'donate' %}">Поддержать проект</a>
+                </div>
+            </div>
         </div>
-        <div>
-            <a href="{% url "donate" %}" class="button">
-            Поддержать проект
-        </a>
-        </div>
+        <div class="row">
+            <div class="col-12 col-lg-6 mb-5">
+                <h3>Мы в социальных сетях</h3>
+                <div class="mt-4 soc_media">
+                    <a href="https://twitter.com/dtp_stat" class="button"><i class="fab fa-twitter"></i> Карта ДТП в Twitter</a>
+                    <a href="https://t.me/dtp_stat" class="button"><i class="fab fa-telegram-plane"></i> Карта ДТП в Telegram</a>
+                </div>
 
-        <div class="partners">
-            <a href="http://shtab.co/" target="_blank"><img src="{% static "media/gor.svg" %}" class="partner"></a>
-            <a href="https://city4people.ru/" target="_blank"><img src="{% static "media/stab.svg" %}" class="partner"></a>
+            </div>
+            <div class="col-12 col-lg-6 mb-5">
+                <h3>Наши партнёры</h3>
+                <div class="partners">
+                    <a href="https://city4people.ru/" target="_blank"><img src="{% static "media/gor.svg" %}" class="partner"></a>
+                    <a href="http://shtab.co/" target="_blank"><img src="{% static "media/stab.svg" %}" class="partner"></a>
+                </div>
+            </div>
         </div>
     </div>
+
     <hr style="margin: 0">
+
     <div class="container footer">
         <div class="row">
-            <div class="col-12 col-md-6 p-3">
-                <p class="m-0">Лицензия</p>
+            <div class="col-12 col-md-6 p-3 license">
+                <div class="row">
+                    <div class="col-auto" style="font-size: 30px">
+                        <i class="fab fa-creative-commons"></i>
+                        <i class="fab fa-creative-commons-by"></i>
+                    </div>
+                    <div class="col">
+                        <p>Использование материалов возможно с указанием активной ссылки на сайт</p>
+                    </div>
+
+                </div>
             </div>
-            <div class="col-12 col-md-6 p-2 justify-content-center">
+            <div class="col-12 col-md-6 p-3 justify-content-center">
                 <ul class="nav">
                   <li class="nav-item">
                     <a class="nav-link active" href="{% url 'blog' %}">Что почитать</a>
