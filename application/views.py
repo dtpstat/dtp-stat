@@ -9,7 +9,7 @@ from application import models
 from application import forms
 from application import utils
 
-
+import requests
 import datetime
 
 
@@ -59,7 +59,15 @@ def opendata(request):
 
 
 def donate(request):
-    return render(request, "donate.html", context={})
+    try:
+        text = get_object_or_404(models.Page, slug="donate").text
+    except:
+        text = None
+
+    return render(request, "donate.html", context={
+        "donate_data": utils.get_donate_data(),
+        "text": text
+    })
 
 
 def dtp(request, slug):

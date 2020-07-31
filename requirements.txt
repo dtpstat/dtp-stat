@@ -30,3 +30,4 @@ datadog==0.37.1
 django-cors-headers==3.4.0
 scrapy-rotating-proxies==0.6.2
 Pillow==7.2.0
+pymorphy2==0.8

@@ -22,6 +22,11 @@ label:focus,
     box-shadow: none !important;
 }
 
+a {
+	text-decoration: underline;
+}
+
+
 .button, .button:hover {
 	border-radius: 20px;
 	padding: 8px 16px 8px 16px!important;
@@ -87,14 +92,18 @@ nav li a.nav-link {
 	padding-left: 0!important;
 	padding-right: 0!important;
 	padding-bottom: 0;
-
+	text-decoration: none;
 }
 
-nav li a.button {
+a.button.support {
 	background: #18334A;
-	border-radius: 20px;
 	color: white!important;
 	padding: 8px 16px 8px 16px!important;
+}
+
+nav li a.button.support {
+	background: #18334A;
+	border-radius: 20px;
 }
 
 .dtp #map {
@@ -237,7 +246,7 @@ footer .description {
 	max-width: 600px;
 }
 
-footer a.button {
+a.button{
 	background: #EBEEF0;
 }
 
@@ -311,7 +320,7 @@ h3 {
 }
 
 
-.post .text p{
+.text p{
 	font-family: Merriweather!important;
 	font-size: 18px;
 	text-align: justify;
@@ -320,3 +329,23 @@ h3 {
 .post .ya-share2__title {
 	display: none;
 }
+
+.donate-box {
+	max-width: 500px;
+}
+
+.progress {
+	margin: auto;
+	margin-top: 20px;
+	margin-bottom: 5px;
+}
+
+.progress .progress-bar {
+	background: linear-gradient(to right, red 0%, yellow 50%, green 100%);
+	background-color: inherit!important;
+}
+
+.donate-status-extra {
+	color: rgba(24, 51, 74, 0.5);
+}
+

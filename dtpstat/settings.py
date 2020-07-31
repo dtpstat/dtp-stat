@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'corsheaders',
+    'application.templatetags.tags',
 ]
 
 SITE_ID = 1
