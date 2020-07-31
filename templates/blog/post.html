@@ -12,9 +12,8 @@
 
 {% block extra-head %}
     <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
-
-    <script src="https://yastatic.net/share2/share.js" async="async"></script>
-
+    <script src="https://yastatic.net/es5-shims/0.0.2/es5-shims.min.js"></script>
+    <script src="https://yastatic.net/share2/share.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -31,11 +30,22 @@
             <p class="extra">{{ post.created_at|date:'d.m.Y' }}{% if post.author_name %} | {{ post.author_name }} {% endif %}</p>
             <img src="{{ post.cover.url }}" class="mt-4 mb-4">
         </div>
-        <div class="container text">
-            <p class="mb-5">
-                {{ post.abstract|safe }}
-            </p>
-            {{ post.text|safe }}
+        <div class="text">
+            <div class="row">
+                <div class="d-sm-none d-md-block col-md-1 ">
+                    <div class="ya-share2 sticky-top" data-services="vkontakte,twitter,facebook,telegram,odnoklassniki" data-direction="vertical"></div>
+                </div>
+                <div class="col-sm-12 col-md-10">
+                    <p class="mb-5">
+                        {{ post.abstract|safe }}
+                    </p>
+                    {{ post.text|safe }}
+                </div>
+                <div class="d-sm-none d-md-block col-md-1">
+
+                </div>
+            </div>
+
         </div>
 
     </div>

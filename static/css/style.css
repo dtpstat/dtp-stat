@@ -310,13 +310,13 @@ h3 {
 	max-width: 900px;
 }
 
-.post .text {
-	max-width: 700px;
-}
 
 .post .text p{
-
 	font-family: Merriweather!important;
 	font-size: 18px;
 	text-align: justify;
+}
+
+.post .ya-share2__title {
+	display: none;
 }
