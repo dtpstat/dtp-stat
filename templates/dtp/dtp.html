@@ -4,31 +4,48 @@
 
 {% block extra-head %}
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec" type="text/javascript"></script>
+    <script src="{% static 'js/buttonstrip.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}
     <div class="dtp">
-        <div id="map"></div>
+        <div id="toggle">
+            <div id="map"></div>
+            <div id="panorama" class="d-none"></div>
+        </div>
         <div class="container">
             <div class="row">
-                <div class="col-auto">
-                    {% if dtp.scheme %}
-                        <img src="http://stat.gibdd.ru/img/SDTP/{{ dtp.scheme }}.png" class="scheme">
-                    {% endif %}
-                </div>
+                {% if dtp.scheme %}
+                    <div class="col-12 col-md-auto justify-content-center d-md-block d-none">
+                        <div class="scheme-wrap d-flex flex-wrap align-items-center">
+                            <img src="http://stat.gibdd.ru/img/SDTP/{{ dtp.scheme }}.png" class="scheme">
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="col-md col-12 pt-3">
+                    <div class="map-buttons row justify-content-between">
+                        <div class="col-auto">
+                            <a href="{% url 'home' %}" class="button" target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
+                        </div>
+                        <div class="col-auto toggle-map" id ='toggle-check'>
+                            <a class="button toggle active" id="toggle-map" data-to="map"><i class="fas fa-map-marker-alt"></i> Карта</a>
+                            <a class="button toggle"  id="toggle-panorama" data-to="panorama"><i class="fas fa-video"></i> Панорама</a>
+                        </div>
+
+                    </div>
+
                     <p>{{ dtp.datetime|date:'l' }}, {{ dtp.datetime|date:'d.m.Y' }} в  {{ dtp.datetime|date:'H:i' }}
                     <span style="color:#ddd">|</span>
                     {{ dtp.address| default_if_none:"<span style='color:#ddd'>Адрес неизвестен</span>" }}</p>
                     <h1>{{ dtp.category.name }}</h1>
-                    <div class="row">
 
+                    <div class="row">
                         <div class="col-auto indicator">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-auto pr-0">
                                     <img src="{% static 'media/car.svg' %}" class="dtp-icon">
                                 </div>
-                                <div class="col-9">
+                                <div class="col">
                                     <p class="name">Транспорт</p>
                                     <p class="value">{{ vehicles.count }}</p>
                                 </div>
@@ -37,10 +54,10 @@
 
                         <div class="col-auto indicator">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-auto pr-0">
                                     <img src="{% static 'media/participants.svg' %}" class="dtp-icon">
                                 </div>
-                                <div class="col-9">
+                                <div class="col">
                                     <p class="name">Участники</p>
                                     <p class="value">{{ dtp.participant_set.count }}</p>
                                 </div>
@@ -49,10 +66,10 @@
 
                         <div class="col-auto indicator">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-auto pr-0">
                                     <img src="{% static 'media/injured.svg' %}" class="dtp-icon">
                                 </div>
-                                <div class="col-9">
+                                <div class="col">
                                     <p class="name">Пострадали</p>
                                     <p class="value">{{ injured }}</p>
                                 </div>
@@ -61,10 +78,10 @@
 
                         <div class="col-auto indicator">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-auto pr-0">
                                     <img src="{% static 'media/dead.svg' %}" class="dtp-icon">
                                 </div>
-                                <div class="col-9">
+                                <div class="col">
                                     <p class="name">Погибли</p>
                                     <p class="value">{{ dead }}</p>
                                 </div>
@@ -110,7 +127,9 @@
             myMap.behaviors.disable( ['scrollZoom', 'rightMouseButtonMagnifier' ] );
 
 
-            myPlacemark = new ymaps.Placemark([{{ dtp.point.1 }}, {{ dtp.point.0 }}], {}, {
+            myPlacemark = new ymaps.Placemark([{{ dtp.point.1 }}, {{ dtp.point.0 }}], {
+                balloonContent: '{{ dtp.point.1 }}, {{ dtp.point.0 }}'
+            }, {
                 // Опции.
                 // Необходимо указать данный тип макета.
                 iconLayout: 'default#image',
@@ -130,6 +149,40 @@
             });
 
             myMap.geoObjects.add(myPlacemark)
-    });
+
+
+            var createPlayer = ymaps.panorama.createPlayer(
+               'panorama',
+               [{{ dtp.point.1 }}, {{ dtp.point.0 }}],
+               {controls:[]}
+            )
+
+            createPlayer.then(function (player) {
+
+            }, function(reason) {
+                $('#toggle-check').hide()
+            });
+        });
+
+
+
     </script>
+    <script>
+        var active_toggle = 'toggle-map'
+
+        $('.toggle').click(function() {
+            if ($(this).attr('id') !== active_toggle) {
+                $('.toggle').removeClass('active');
+                $(this).addClass('active');
+
+                $('#toggle').children().addClass('d-none')
+                $('#' + $(this).attr("data-to")).removeClass('d-none')
+
+                active_toggle = $(this).attr('id')
+            }
+
+
+        });
+    </script>
+
 {% endblock %}
