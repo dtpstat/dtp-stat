@@ -3,33 +3,26 @@
 {% load static %}
 
 {% block content %}
-    <div class="m-auto text-center">
-        <h3 class="text-center">Админка</h3>
-        {% if request.user.is_superuser %}
-            <p>
-                <a href="{% url 'admin:index' %}">Админка</a>
-            </p>
-            <p>
-                <a href="{% url 'admin:application_moderator_changelist' %}">Модераторы</a>
-            </p>
-            <p>
-                <a href="{% url 'admin:application_blogpost_changelist' %}">Блог</a>
-            </p>
-            <p>
-                <a href="{% url 'admin:application_page_changelist' %}">Статичные страницы</a>
-            </p>
-            <hr>
-        {% endif %}
-        <p>
-            <a href="{% url "feedback_list" %}">Корректировка данных</a>
+    <div class="container mt-5 mb-5" style="min-height: 50vh">
+        <ul class="nav justify-content-center mt-3 mb-3">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:application_blogpost_changelist' %}">Блог</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin:application_page_changelist' %}">Статичные страницы</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'ticket' in request.resolver_match.url_name %}active{% endif %}" href="{% url "tickets_list" %}">Тикеты</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "account_logout" %}">Выйти из профиля</a>
+            </li>
+        </ul>
 
-        </p>
-        <p>
-            <a href="">Дополнительные слои</a>
-        </p>
-        <hr>
-        <p>
-            <a href="{% url "account_logout" %}">Выйти</a>
-        </p>
+        {% block board_content %}
+        {% endblock %}
     </div>
 {% endblock %}

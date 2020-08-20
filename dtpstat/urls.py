@@ -27,7 +27,8 @@ urlpatterns = [
     path('', app_views.home, name='home'),
     path('accounts/', include('allauth.urls')),
     path('board/', app_views.board, name='board'),
-    path('board/feedback/', app_views.feedback_list, name='feedback_list'),
+    path('board/tickets/', app_views.tickets_list, name='tickets_list'),
+    path('board/tickets/<ticket_id>/', app_views.ticket, name='ticket'),
 
     path('dtp/<slug>/', app_views.dtp, name='dtp'),
     path('dtp/<slug>/fix_point/', app_views.dtp_fix_point, name='dtp_fix_point'),

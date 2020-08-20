@@ -2,6 +2,7 @@ from django.db.models import Sum, Q
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import Point
 
 from data import models as data_models
 from data import utils as data_utils
@@ -103,64 +104,79 @@ def dtp_fix_point(request, slug):
             form = forms.FixPoint(request.POST)
 
         if form.is_valid():
-            feedback_item, created = models.Feedback.objects.get_or_create(
+            ticket_item, created = models.Ticket.objects.get_or_create(
                 dtp=dtp
             )
-            feedback_item.data={"lat": form.cleaned_data.get('lat'), "long": form.cleaned_data.get('long')}
-
+            ticket_item.data={"lat": form.cleaned_data.get('lat'), "long": form.cleaned_data.get('long')}
+            ticket_item.category = 'fix_point'
             if is_moderator:
                 if form.cleaned_data.get('lat') and form.cleaned_data.get('long'):
-                    feedback_item.status = "done"
+                    ticket_item.status = "done"
+                    dtp.point = Point(form.cleaned_data.get('long'), form.cleaned_data.get('lat'))
+                    dtp.save()
                 else:
-                    feedback_item.status = "no"
+                    ticket_item.status = "no"
 
-            feedback_item.save()
+            ticket_item.save()
 
             return render(request, "dtp/fix_point.html", context={
+                'dtp': dtp,
+                "is_moderator": is_moderator,
                 'message': "Спасибо за помощь! Мы проверим и скорректируем координаты!",
             })
         else:
             error = form.errors
 
-    data_utils.get_geocode_point(dtp)
+    geocode_point_data = data_utils.geocode(dtp)
+
+    geo = {
+        "source": [dtp.point.coords[1], dtp.point.coords[0]],
+        "geocode": [geocode_point_data['lat'], geocode_point_data['long']]
+    }
 
     if is_moderator:
-        geo = {x.source:[x.point.coords[1], x.point.coords[0]] for x in dtp.geo_set.all()}
-    else:
-        geo = {x.source: [x.point.coords[1], x.point.coords[0]] for x in dtp.geo_set.all() if x.source != "user"}
+        coordinates_tickets = dtp.ticket_set.filter(status="new", category="fix_point")
+        if coordinates_tickets:
+            coordinates_ticket = coordinates_tickets.latest('created_at')
+            if coordinates_ticket and coordinates_ticket.data.get('lat') and coordinates_ticket.data.get('long'):
+                geo['ticket'] = [coordinates_ticket.data.get('lat'), coordinates_ticket.data.get('long')]
 
     return render(request, "dtp/fix_point.html", context={
         'dtp': dtp,
         'form': form,
         "geo": geo,
-        "error": error
+        "error": error,
+        "is_moderator": is_moderator
     })
 
 
 @login_required(login_url="/accounts/login/")
 def board(request):
-    return render(request, "board/index.html", context={})
+    return redirect("tickets_list")
+    #return render(request, "board/index.html", context={})
 
 
 @login_required(login_url="/accounts/login/")
-def feedback_list(request):
-    feedback_qs = utils.get_moderator_feedback(request)
-    return render(request, "board/feedback_list.html", context={
-        "feedback_new": feedback_qs.filter(status="new"),
-        "feedback_done": feedback_qs.filter(status__in=["done","no"])
+def tickets_list(request):
+    tickets_qs = utils.get_moderator_tickets(request)
+    return render(request, "board/tickets_list.html", context={
+        "tickets_new": tickets_qs.all().order_by('-created_at'),
+        "tickets_done": tickets_qs.filter(status__in=["done","no"])
     })
 
 
 @login_required(login_url="/accounts/login/")
-def feedback(request, feedback_id):
-    feedback_item = get_object_or_404(models.Feedback, id=feedback_id)
-    feedback_qs = utils.get_moderator_feedback(request)
+def ticket(request, ticket_id):
+    ticket_item = get_object_or_404(models.Ticket, id=ticket_id)
+    ticket_qs = utils.get_moderator_tickets(request)
 
-    if not feedback_item in feedback_qs:
-        return redirect("feedback_list")
+    if not ticket_item in ticket_qs:
+        return redirect("tickets_list")
+    elif ticket_item.category == "fix_point" and ticket_item.status == "new":
+        return redirect("dtp_fix_point", ticket_item.dtp.slug)
     else:
-        return render(request, "board/feedback.html", context={
-            "feedback_item": feedback_item
+        return render(request, "board/ticket.html", context={
+            "ticket_item": ticket_item
         })
 
 

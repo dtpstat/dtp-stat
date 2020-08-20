@@ -76,31 +76,20 @@ class OpenData(models.Model):
         return self.file_size/(1024*1024)
 
 
-class Feedback(models.Model):
+class Ticket(models.Model):
     dtp = models.ForeignKey("data.DTP",  null=True, blank=True, default=None, on_delete=models.SET_NULL)
+    category = models.CharField(max_length=200, null=True, blank=True, default=None, choices=[
+        ("fix_point", "Корректировка координат"),
+    ])
     comment = models.TextField(null=True, blank=True, default=None)
     data = JSONField(default=dict, null=True, blank=True)
-    edited_by = models.ForeignKey(User, default=middlewares.get_current_user, on_delete=models.SET_NULL, null=True)
+    moderated_by = models.ForeignKey(User, default=middlewares.get_current_user, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     status = models.CharField(max_length=200, null=True, blank=True, default="new", choices=[
         ("new", "новое"),
         ("done", "готово"),
         ("no", "невозможно пофиксить")
     ])
-
-    def save(self, *args, **kwargs):
-        if self.status == "done" and self.data.get('lat') and self.data.get('long'):
-            dtp = self.dtp
-            geo_item, created = dtp.geo_set.get_or_create(
-                dtp=dtp,
-                source="user",
-            )
-            geo_item.point = Point(self.data.get('long'), self.data.get('lat'))
-            geo_item.save()
-
-            dtp.point = geo_item.point
-            dtp.save()
-        super(Feedback, self).save(*args, **kwargs)
 
 
 class Moderator(models.Model):

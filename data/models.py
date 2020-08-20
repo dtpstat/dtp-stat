@@ -117,14 +117,18 @@ class ParticipantCategory(models.Model):
 
 
 class DTP(models.Model):
-    region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None, on_delete=models.SET_NULL, db_index=True)
     slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
-    datetime = models.DateTimeField(help_text="datetime", null=True, blank=True, default=None, db_index=True)
+    status = models.BooleanField(help_text="show or hide dtp", default=True)
+    only_manual_edit = models.BooleanField(help_text="only manul adit and update", default=False)
 
+    region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None,
+                               on_delete=models.SET_NULL, db_index=True)
     address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
     street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None, db_index=True)
     point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
+    point_is_verified = models.BooleanField(help_text="point is valid and verified", default=False)
 
+    datetime = models.DateTimeField(help_text="datetime", null=True, blank=True, default=None, db_index=True)
     participants = models.IntegerField(help_text="participants count", null=True, blank=True, default=None,
                                        db_index=True)
     injured = models.IntegerField(help_text="injured count", null=True, blank=True, default=None, db_index=True)
@@ -149,7 +153,7 @@ class DTP(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.category.name + str(self.datetime)
+        return self.category.name + " " + str(self.datetime) + " " + self.region.parent_region.name
 
     def full_address(self):
         return ", ".join([x for x in [self.region.parent_region.name, self.region.name, self.address] if x])
@@ -200,29 +204,6 @@ class DTP(models.Model):
             } for x in self.participant_set.filter(vehicle__isnull=True)],
             "tags": [x.name for x in self.tags.all()]
         }
-
-    def save(self, *args, **kwargs):
-        if not self.point:
-            geo = self.geo_set.filter(source="gibdd").last()
-            if geo:
-                self.point = geo.point
-                self.address = geo.address
-                self.street = geo.street
-
-
-        super(DTP, self).save(*args, **kwargs)
-
-
-class Geo(models.Model):
-    dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
-    source = models.CharField(max_length=100, help_text="data source", null=True, blank=True, default=None, choices=[
-        ("gibdd", "ГИБДД"),
-        ("user", "Пользователи"),
-        ("geocode", "Геокодер")
-    ])
-    street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None,db_index=True)
-    address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
-    point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
 
 
 class Violation(models.Model):

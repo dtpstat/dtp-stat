@@ -5,34 +5,42 @@
 
 {% block content %}
     {% if message %}
-        <div class="m-auto">
-            <h4>{{ message }}</h4>
+        <div class="container text-center" style="min-height: 50vh">
+            <h2 class="mt-5 mb-3">{{ message }}</h2>
+            <a href="{% url 'dtp' dtp.slug %}">Перейти на страницу ДТП</a>
+            {% if is_moderator %}
+                <a href="{% url 'tickets_list' %}">Вернуться к списку тикетов</a>
+            {% endif %}
         </div>
     {% else %}
     <div class="m-auto">
         <div class="text-center">
-            <h3>Корректировка координат ДТП</h3>
+            <h2 class="mt-5 mb-1">Корректировка координат ДТП</h2>
+            <div class="m-auto" style="border: 1px solid #EBEDF0;box-sizing: border-box;border-radius: 20px;max-width: 600px;margin-top: 30px!important;padding:10px">
+            <h3><a href="{% url 'dtp' dtp.slug %}">{{ dtp.category.name }} {{ dtp.datetime }}</a></h3>
             <br>
-            <h5>Выберите наиболее подходящие координаты или предложите свои</h5>
-            <br>
-            <p>Адрес - {{ dtp.full_address }}</p>
+            <h5>Адрес</h5>
+            <p>{{ dtp.full_address }}</p>
             {% if dtp.nearby.all %}
-                <p>Поблизости - {{ dtp.nearby.all|join:", " }}</p>
+                <h5 class="mt-3">Поблизости</h5>
+                <p>{{ dtp.nearby.all|join:", " }}</p>
             {% endif %}
+            </div>
+            <h3 class="mt-5">Выберите наиболее подходящие координаты или предложите свои</h3>
         </div>
 
         <div class="container-fluid geo-fix-point mb-5">
             <div class="row mt-5">
-                {% if geo.gibdd %}
+                {% if geo.source %}
                     <div class="geo-option col p-4 m-2">
-                        <h5 style="height: 50px" class="text-center">От ГИБДД</h5>
+                        <h5 style="height: 50px" class="text-center">Исходные координаты</h5>
                         <div class="input-group">
-                            <input type="text" class="form-control" name="lat" value="{{ geo.gibdd.0 }}" disabled>
-                            <input type="text" class="form-control" name="long" value="{{ geo.gibdd.1 }}" disabled>
+                            <input type="text" class="form-control" name="lat" value="{{ geo.source.0 }}" disabled>
+                            <input type="text" class="form-control" name="long" value="{{ geo.source.1 }}" disabled>
                         </div>
-                        <div id="gibdd-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                        <div id="source-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
                         <div class="submit">
-                            <button class="btn btn-warning">Выбрать</button>
+                            <button class="button">Выбрать</button>
                         </div>
                     </div>
                 {% endif %}
@@ -45,20 +53,20 @@
                         </div>
                         <div id="geocode-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
                         <div class="submit">
-                            <button class="btn btn-warning">Выбрать</button>
+                            <button class="button">Выбрать</button>
                         </div>
                     </div>
                 {% endif %}
-                {% if geo.user %}
+                {% if geo.ticket %}
                     <div class="geo-option col p-4 m-2">
-                        <h5 style="height: 50px" class="text-center">От пользователей</h5>
+                        <h5 style="height: 50px" class="text-center">От создателя тикета</h5>
                         <div class="input-group">
-                            <input type="text" class="form-control" name="lat" value="{{ geo.user.0 }}" disabled>
-                            <input type="text" class="form-control" name="long" value="{{ geo.user.1 }}" disabled>
+                            <input type="text" class="form-control" name="lat" value="{{ geo.ticket.0 }}" disabled>
+                            <input type="text" class="form-control" name="long" value="{{ geo.ticket.1 }}" disabled>
                         </div>
-                        <div id="user-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
+                        <div id="ticket-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
                         <div class="submit">
-                            <button class="btn btn-warning">Выбрать</button>
+                            <button class="button">Выбрать</button>
                         </div>
                     </div>
                 {% endif %}
@@ -74,7 +82,7 @@
                     </div>
                     <div id="ugc-map" style="width: 100%;height: 300px;margin-top: 20px"></div>
                     <div class="submit">
-                        <button class="btn btn-warning">Выбрать</button>
+                        <button class="button">Выбрать</button>
                     </div>
                 </div>
                 <div class="geo-option no col p-4 m-2">
@@ -82,7 +90,7 @@
                         <h5 class="text-center container">Просто сообщить о некорретных координатах</h5>
                     </div>
                     <div class="submit">
-                        <button class="btn btn-warning">Выбрать</button>
+                        <button class="button">Выбрать</button>
                     </div>
                 </div>
             </div>
@@ -102,7 +110,7 @@
                     {% endfor %}
                 </form>
                 <p class="text-danger">{{ error }}</p>
-                <button class="btn btn-secondary btn-lg" id="submit-button">Отправить</button>
+                <button class="button" id="submit-button">Отправить</button>
 
 
             </div>
@@ -155,14 +163,14 @@
             $(this).hide()
             $(this).parent().parent().addClass("active")
         });
-
+        console.log();
         ymaps.ready(init);
         function init(){
             {% for item in geo.items %}
                 var {{ item.0 }}_map = new ymaps.Map("{{ item.0 }}-map", {
                     center: {{ item.1 }},
                     zoom: 15,
-                    controls: ['geolocationControl', 'typeSelector', 'zoomControl'],
+                    controls: ['typeSelector', 'zoomControl'],
                 }, {suppressMapOpenBlock: true});
 
                 var {{ item.0 }}_placemark = new ymaps.Placemark({{ item.1 }});
@@ -170,7 +178,7 @@
             {% endfor %}
 
             var myPlacemark, ugc_map = new ymaps.Map("ugc-map", {
-                    center: {{ geo.gibdd }},
+                    center: {{ geo.source }},
                     zoom: 15,
                     controls: ['geolocationControl', 'typeSelector', 'zoomControl'],
                 }, {suppressMapOpenBlock: true});

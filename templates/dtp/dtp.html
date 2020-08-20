@@ -27,7 +27,7 @@
                         <div class="col-auto">
                             <a href="{% url 'home' %}" class="button" target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
                         </div>
-                        <div class="col-auto toggle-map" id ='toggle-check'>
+                        <div class="col-auto toggle-map d-none" id ='toggle-check'>
                             <a class="button toggle active" id="toggle-map" data-to="map"><i class="fas fa-map-marker-alt"></i> Карта</a>
                             <a class="button toggle"  id="toggle-panorama" data-to="panorama"><i class="fas fa-video"></i> Панорама</a>
                         </div>
@@ -158,10 +158,8 @@
             )
 
             createPlayer.then(function (player) {
-
-            }, function(reason) {
-                $('#toggle-check').hide()
-            });
+                $('#toggle-check').removeClass('d-none')
+            }, function(reason) {});
         });
 
 

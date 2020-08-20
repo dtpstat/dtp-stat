@@ -34,6 +34,10 @@ p {
 	margin-bottom: 12px;
 }
 
+.button {
+	border: none;
+}
+
 
 .button, .button:hover {
 	border-radius: 20px;
@@ -87,6 +91,15 @@ nav li {
 nav li.active a.nav-link {
 	border-bottom: 2px solid #18334A;
 	color: #18334A!important;
+}
+
+.nav li a, .nav li a:hover {
+	text-decoration: none;
+	color: black
+}
+
+.nav li a.active {
+	font-weight: bold;
 }
 
 nav li.support {
@@ -250,11 +263,16 @@ nav li a.button.support {
 
 
 .geo-option {
-	background: whitesmoke;
+	border: 1px solid #EBEDF0;
+	box-sizing: border-box;
+	border-radius: 20px;
+	max-width: 600px;
+	margin-top: 30px!important;
+	padding:10px
 }
 
 .geo-option.active {
-	background: #dbdacf;
+	background: #F4F8FA;
 }
 
 .geo-option .submit {
@@ -437,4 +455,9 @@ footer .license p {
 
 footer a {
 	text-decoration: none;
+}
+
+.account {
+	margin-top: 30px!important;
+	margin-bottom: 30px!important;
 }

@@ -193,15 +193,15 @@ def load_data():
     df.to_csv('static/regions.csv', index=False)
 
 
-def get_moderator_feedback(request):
+def get_moderator_tickets(request):
     user = request.user
     if user.is_superuser:
-        feedback = models.Feedback.objects.all()
+        tickets = models.Ticket.objects.all()
     else:
         moderator = get_object_or_404(models.Moderator, user=request.user)
-        feedback = models.Feedback.objects.filter(dtp__region__parent_region__moderator=moderator)
+        tickets = models.Ticket.objects.filter(dtp__region__parent_region__moderator=moderator)
 
-    return feedback
+    return tickets
 
 
 def is_moderator(user):
@@ -209,7 +209,10 @@ def is_moderator(user):
         get_object_or_404(models.Moderator, user=user)
         return True
     except:
-        return False
+        if user.is_superuser:
+            return True
+
+    return False
 
 
 

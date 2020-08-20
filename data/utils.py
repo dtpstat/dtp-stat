@@ -82,9 +82,9 @@ def extra_filters_data():
 @statsd.timed('dtpstat.get_geo_data')
 def get_geo_data(item, dtp):
     try:
-        gibdd_lat, gibdd_long = float(item['infoDtp']['COORD_L']), float(item['infoDtp']['COORD_W'])
+        lat, long = float(item['infoDtp']['COORD_L']), float(item['infoDtp']['COORD_W'])
     except:
-        gibdd_lat, gibdd_long = None, None
+        lat, long = None, None
 
     address_components = [
         item['infoDtp']['n_p'],
@@ -99,42 +99,23 @@ def get_geo_data(item, dtp):
 
     if address_components[1]:
         street = address_components[1]
-        gibdd_address = ", ".join([x for x in address_components if x]).strip()
+        address = ", ".join([x for x in address_components if x]).strip()
     elif road_components[1]:
         street = road_components[1]
-        gibdd_address = ", ".join([x for x in road_components if x]).strip()
+        address = ", ".join([x for x in road_components if x]).strip()
     else:
         street = None
-        gibdd_address = None
+        address = None
 
-    if gibdd_lat and gibdd_long:
-        geo_item, created = models.Geo.objects.get_or_create(
-            dtp=dtp,
-            source="gibdd"
-        )
-        geo_item.point = Point(gibdd_lat, gibdd_long)
-        geo_item.address = gibdd_address
-        geo_item.street = street
-        geo_item.save()
+    if address:
+        dtp.address = address
 
+    if street:
+        dtp.street = street
 
-def get_geocode_point(dtp):
-    geocode_point, created = models.Geo.objects.get_or_create(
-        dtp=dtp,
-        source='geocode'
-    )
-
-    if created:
-        geocode_point_data = geocode(dtp)
-        if geocode_point_data and geocode_point_data.get('lat') and geocode_point_data.get('long'):
-            geocode_point.point = Point(geocode_point_data['long'], geocode_point_data['lat'])
-            geocode_point.address = geocode_point_data.get('address')
-            geocode_point.street = geocode_point_data.get('street')
-            geocode_point.save()
-            return geocode_point
-        else:
-            geocode_point.delete()
-            return None
+    if lat and long:
+        if not dtp.point_is_verified:
+            dtp.point = Point(lat, long)
 
 
 def geocoder_yandex(address, kind=None):
@@ -406,10 +387,12 @@ def add_dtp_record(item):
     tag = get_object_or_404(models.Tag, code=tag_code)
     dtp.tags.add(tag)
 
-    if dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item:
+    if dtp.only_manual_edit or (dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item):
         statsd.increment('dtpstat.add_dtp_record.update_not_needed')
         return
     statsd.increment('dtpstat.add_dtp_record.update_started')
+
+    # start update
 
     if area_code and parent_code:
         if area_code == "63401" and parent_code == "63":
