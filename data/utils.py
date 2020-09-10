@@ -11,6 +11,7 @@ import requests
 from datadog import statsd
 from django.contrib.gis.geos import Point
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from lxml import html
@@ -35,9 +36,8 @@ def extra_filters_data():
     # severity
     severity_levels = {
         0: {'name': 'Без пострадавших (нет данных)', 'keywords': ['не пострадал']},
-        1: {'name': 'Легкая', 'keywords': ['разовой']},
-        2: {'name': 'Средняя', 'keywords': ['амбулатор']},
-        3: {'name': 'Тяжкая', 'keywords': ['стационар']},
+        1: {'name': 'Легкий', 'keywords': ['разовой', 'амбулатор']},
+        3: {'name': 'Тяжёлый', 'keywords': ['стационар']},
         4: {'name': 'С погибшими', 'keywords': ['скончался']}
     }
 
@@ -79,7 +79,7 @@ def extra_filters_data():
         tag_item.save()
 
 
-@statsd.timed('dtpstat.get_geo_data')
+#@statsd.timed('dtpstat.get_geo_data')
 def get_geo_data(item, dtp):
     try:
         lat, long = float(item['infoDtp']['COORD_L']), float(item['infoDtp']['COORD_W'])
@@ -96,6 +96,8 @@ def get_geo_data(item, dtp):
         item['infoDtp']['n_p'],
         item['infoDtp']['dor']
     ]
+
+    dtp.street_category = item['infoDtp']['dor_z']
 
     if address_components[1]:
         street = address_components[1]
@@ -121,7 +123,7 @@ def get_geo_data(item, dtp):
 def geocoder_yandex(address, kind=None):
     params = {
         "geocode": address,
-        "apikey": "ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec",
+        "apikey": env('YANDEX_TOKEN'),
         "format": "json"
     }
     if kind is not None:
@@ -149,6 +151,7 @@ def geocoder_yandex(address, kind=None):
         if address_components_street:
             data['street'] = address_components_street[0]['name']
 
+
         parent_region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
                               x['kind'] == "province"]
         if len(parent_region_data) > 1:
@@ -159,14 +162,15 @@ def geocoder_yandex(address, kind=None):
 
         if "Россия" in data['address']:
             region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
-                           x['kind'] in ["locality"]]
+                           (x['kind'] in ["locality"] and x['name'] != data['parent_region'])]
             if region_data:
                 data['region'] = region_data[0]['name']
             else:
                 region_data = [x for x in geo['metaDataProperty']['GeocoderMetaData']['Address']['Components'] if
-                               x['kind'] in ["area"]]
+                               (x['kind'] in ["area"] and x['name'] != data['parent_region'])]
                 if region_data:
                     data['region'] = region_data[0]['name']
+
     except Exception as e:
         log.error('geocoder_yandex error: %s', e)
 
@@ -174,11 +178,11 @@ def geocoder_yandex(address, kind=None):
 
 
 def geocoder_here(address=None, coords=None):
-    api_key = 'RiiGcCcn0R9NGRwFZN311cD12LIyDil7BvOJLliMjdg'
+    api_key = env('HERE_TOKEN')
     response = None
 
     if address:
-        geocoderApi = herepy.GeocoderApi('RiiGcCcn0R9NGRwFZN311cD12LIyDil7BvOJLliMjdg')
+        geocoderApi = herepy.GeocoderApi(api_key)
         response = geocoderApi.free_form(address).as_dict()
     elif coords:
         geocoderReverseApi = herepy.GeocoderReverseApi(api_key)
@@ -204,26 +208,28 @@ def geocode(dtp):
 
 
 def get_region(region_code, region_name, parent_region_code, parent_region_name):
-    parent_region, created = models.Region.objects.get_or_create(
+    parent_region, parent_region_created = models.Region.objects.get_or_create(
         level=1,
         gibdd_code=parent_region_code
     )
-    parent_region.name = parent_region_name
+    if parent_region_created:
+        parent_region.name = parent_region_name
     parent_region.save()
 
-    region, created = models.Region.objects.get_or_create(
+    region, region_created = models.Region.objects.get_or_create(
         level=2,
         gibdd_code=region_code,
         parent_region=parent_region
     )
-    region.name = region_name
+    if region_created:
+        region.name = region_name
     region.save()
 
     if not region.ya_name or not parent_region.ya_name:
+        print(region.name ,region.parent_region.name)
         ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
-
+        print(ya_data)
         if not parent_region.ya_name and ya_data.get('parent_region'):
-            ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
             parent_region.ya_name = ya_data['parent_region']
 
         if not region.ya_name and ya_data.get('region') and ya_data.get('region') != ya_data.get('parent_region'):
@@ -239,7 +245,7 @@ def add_participant_record(participant, dtp, vehicle=None):
     # тяжесть
     participant_severity = None
     for severity in models.Severity.objects.all():
-        if participant['S_T'] and severity.keywords[0] in participant['S_T'].lower():
+        if participant['S_T'] and any(x in participant['S_T'].lower() for x in severity.keywords):
             participant_severity = severity
             break
 
@@ -262,7 +268,7 @@ def add_participant_record(participant, dtp, vehicle=None):
             participant_item.violations.add(violation)
 
 
-@statsd.timed('dtpstat.add_participants_records')
+#@statsd.timed('dtpstat.add_participants_records')
 def add_participants_records(item, dtp):
     models.Vehicle.objects.filter(participant__dtp=dtp).delete()
     dtp.participant_set.all().delete()
@@ -289,7 +295,7 @@ def add_participants_records(item, dtp):
         add_participant_record(participant, dtp)
 
 
-@statsd.timed('dtpstat.add_related_data')
+#@statsd.timed('dtpstat.add_related_data')
 def add_related_data(item, dtp):
     related_data = [
         {
@@ -332,14 +338,18 @@ def add_related_data(item, dtp):
         data_item['dtp_model'].add(*data_list)
 
 
-@statsd.timed('dtpstat.add_extra_filters')
+#@statsd.timed('dtpstat.add_extra_filters')
 def add_extra_filters(item, dtp):
     # severity
-    severity_levels = [x.severity.level for x in dtp.participant_set.all() if x.severity]
-    if severity_levels:
-        dtp.severity = get_object_or_404(models.Severity, level=max(severity_levels))
+
+    if dtp.dead:
+        dtp.severity = get_object_or_404(models.Severity, level=4)
     else:
-        dtp.severity = get_object_or_404(models.Severity, level=1)
+        severity_levels = [x.severity.level for x in dtp.participant_set.all() if x.severity and x.severity.level]
+        if severity_levels:
+            dtp.severity = get_object_or_404(models.Severity, level=max(severity_levels))
+        else:
+            dtp.severity = get_object_or_404(models.Severity, level=1)
 
     # participatn categories
     dtp.participant_categories.clear()
@@ -368,7 +378,7 @@ def add_extra_filters(item, dtp):
         dtp.participant_categories.add(participant_categories.get("public_transport"))
 
 
-@statsd.timed('dtpstat.add_dtp_record')
+#@statsd.timed('dtpstat.add_dtp_record')
 def add_dtp_record(item):
     area_code = item.get("area_code")
     parent_code = item.get("parent_code")
@@ -381,16 +391,16 @@ def add_dtp_record(item):
         datetime__year=dtp_datetime.year,
         datetime__month=dtp_datetime.month
     ).get_or_create(
-        slug=item['KartId'],
+        gibdd_slug=item['KartId'],
     )
 
     tag = get_object_or_404(models.Tag, code=tag_code)
     dtp.tags.add(tag)
 
     if dtp.only_manual_edit or (dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item):
-        statsd.increment('dtpstat.add_dtp_record.update_not_needed')
+        #statsd.increment('dtpstat.add_dtp_record.update_not_needed')
         return
-    statsd.increment('dtpstat.add_dtp_record.update_started')
+    #statsd.increment('dtpstat.add_dtp_record.update_started')
 
     # start update
 
@@ -421,9 +431,15 @@ def add_dtp_record(item):
     dtp.save()
 
 
-@statsd.timed('dtpstat.check_dates_from_gibdd')
+#@statsd.timed('dtpstat.check_dates_from_gibdd')
 def check_dates_from_gibdd():
-    r = requests.get('http://stat.gibdd.ru/', proxies={'http': 'http://' + env('PROXY_LIST')[0]})
+    if env('PROXY_LIST'):
+        proxies = {'http': 'http://' + env('PROXY_LIST')[0]}
+    else:
+        proxies = None
+
+    r = requests.get('http://stat.gibdd.ru/', proxies=proxies)
+
     r = html.fromstring(r.content.decode('UTF-8'))
     scripts = r.xpath('//script')
 
@@ -468,7 +484,12 @@ def get_tags_data(data, parent_name=None):
 def get_tags():
     tags = {}
 
-    r = requests.get('http://stat.gibdd.ru/', proxies={'http': 'http://' + env('PROXY_LIST')[0]})
+    if env('PROXY_LIST'):
+        proxies = {'http': 'http://' + env('PROXY_LIST')[0]}
+    else:
+        proxies = None
+
+    r = requests.get('http://stat.gibdd.ru/', proxies=proxies)
     r = html.fromstring(r.content.decode('UTF-8'))
     scripts = r.xpath('//script')
 
@@ -486,7 +507,7 @@ def crawl(spider_name, params=None):
     print(spider_name)
     first_dir = os.getcwd()
     os.chdir("data/parser")
-    command = 'scrapy crawl ' + spider_name
+    command = 'scrapy crawl ' + spider_name + ' -L INFO'
     if params:
         for key, value in params.items():
             command += ' -a ' + key + "=" + value
@@ -523,12 +544,12 @@ def download_success(dates, region_code, tags=False):
 
 
 def regions_crawl(downloads, tags=False):
-    for region in tqdm(models.Region.objects.filter(level=1, slug="belgorodskaia-oblast")):
+    for region in tqdm(models.Region.objects.filter(level=1, slug__in=["belgorodskaia-oblast"])):
         region_downloads = downloads.filter(region=region)
 
         if region_downloads:
             dates = sorted([x['date'] for x in region_downloads.values("date")])
-            export_dates = dates_generator(start=min(dates), end=max(dates))
+            export_dates = dates_generator(start=min(dates), end=max(dates), gap=70)
 
             for date in export_dates:
                 crawl("dtp", params={
@@ -536,17 +557,17 @@ def regions_crawl(downloads, tags=False):
                     "dates": ",".join([date]),
                     "region_code": str(region.gibdd_code),
                     "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+                    #"area_codes": "45280567"
                 })
 
 
-@statsd.timed('dtpstat.check_dtp')
+#@statsd.timed('dtpstat.check_dtp')
 def check_dtp():
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 
     # сверяем с нашей базой и, если расходится, то загружаем данные
     downloads = models.Download.objects.all()
-
     downloads_no_update = downloads.filter(last_update=None)
 
     # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты

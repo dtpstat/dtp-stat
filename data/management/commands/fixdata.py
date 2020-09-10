@@ -5,14 +5,22 @@ from tqdm import tqdm
 
 
 class Command(BaseCommand):
-    help = 'Tests'
+    help = 'Fixes'
 
     def handle(self, *args, **kwargs):
-        for DTP in tqdm(models.DTP.objects.all().iterator()):
+
+        for Vehicle in tqdm(models.Vehicle.objects.filter(participant__isnull=True)):
+            Vehicle.delete()
+        """
+        
+        for DTP in tqdm(models.DTP.objects.filter().iterator()):
             DTP.delete()
+        models.Download.objects.all().delete()
         models.Participant.objects.all().delete()
         models.Vehicle.objects.all().delete()
         models.Nearby.objects.all().delete()
         models.Weather.objects.all().delete()
         models.RoadCondition.objects.all().delete()
         models.Download.objects.all().delete()
+        #models.Region.objects.all().delete()
+        """

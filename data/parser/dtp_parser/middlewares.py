@@ -86,7 +86,7 @@ class DtpParserDownloaderMiddleware(object):
         return None
 
     def process_response(self, request, response, spider):
-        statsd.gauge('dtpstat.scrapy.download_time', time.time() - request.meta['__start_time'])
+        #statsd.gauge('dtpstat.scrapy.download_time', time.time() - request.meta['__start_time'])
         # Called with the response returned from the downloader.
 
         # Must either;

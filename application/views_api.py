@@ -17,6 +17,8 @@ from application import models
 from django.utils import timezone
 from django.templatetags.static import static
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 import calendar
 import datetime
@@ -58,8 +60,8 @@ class StatApiView(viewsets.ModelViewSet):
         if request.query_params.get('start_date') and request.query_params.get('end_date'):
             data = {**data, **{
                 "count": queryset.count(),
-                "injured": queryset.aggregate(Sum("injured")).get('injured__sum'),
-                "dead": queryset.aggregate(Sum("dead")).get('dead__sum')
+                "injured": queryset.aggregate(Sum("injured")).get('injured__sum') or 0,
+                "dead": queryset.aggregate(Sum("dead")).get('dead__sum') or 0
             }}
 
         return Response(data)
@@ -67,6 +69,7 @@ class StatApiView(viewsets.ModelViewSet):
 
 # API конструктора фильтров
 class FiltersApiView(APIView):
+    @method_decorator(cache_page(60 * 60 * 24))
     def get(self, request):
         filters = []
 
@@ -103,7 +106,7 @@ class FiltersApiView(APIView):
                         {
                             "preview": x.name,
                             "value": x.slug,
-                            "icon": static('media/icon-all.svg'),
+                            "icon": static('media/' + x.slug + '.svg'),
                             "default": True if x.slug == 'all' else False
                         } for x in data_models.ParticipantCategory.objects.all()]
                 })
@@ -111,10 +114,9 @@ class FiltersApiView(APIView):
                 # фильтр по тяжести
                 severity_colors = {
                     0: 'rgba(24, 51, 74, 0.5)',
-                    1: '#FFFFB2',
-                    2: '#F9C52E',
-                    3: '#FD8D3C',
-                    4: '#E31A1C'
+                    1: '#FFB81F',
+                    3: '#FF7F24',
+                    4: '#FF001A'
                 }
                 filters.append(
                     {
@@ -131,6 +133,19 @@ class FiltersApiView(APIView):
                             } for x in data_models.Severity.objects.all().order_by("level")
                         ]
                     },
+                )
+
+                filters.append(
+                    {
+                        "name": "category",
+                        "label": "Типы ДТП",
+                        "multiple": True,
+                        "values": [
+                            {
+                            "preview": x.name,
+                            "value": x.id
+                            } for x in data_models.Category.objects.all().order_by("name")],
+                    }
                 )
 
         return Response(filters)

@@ -41,13 +41,16 @@ def get_region_by_center_point(center_point):
             if ya_data and ya_data.get("address"):
                 parent_region = data_models.Region.objects.filter(Q(name=ya_data.get('parent_region')) | Q(ya_name=ya_data.get('parent_region'))).first()
                 log.debug('parent_region: %s', parent_region)
+
                 if parent_region:
-                    region = data_models.Region.objects.filter(Q(parent_region=parent_region) & (Q(name=ya_data.get('region')) | Q(ya_name=ya_data.get('region')))).first()
+                    region = data_models.Region.objects.filter(Q(parent_region=parent_region) & (Q(name=ya_data.get('region')) | (Q(ya_name__isnull=False) & Q(ya_name=ya_data.get('region'))))).first()
                     log.debug('region_by_region_name: %s %s', region, ya_data.get('region'))
+
                     if not region:
                         region_name_from_address = ya_data.get('address').split(',')[-1]
                         region = data_models.Region.objects.filter(parent_region=parent_region, name=region_name_from_address).first()
                         log.debug('region_by_address: %s %s', region, region_name_from_address)
+
                         if not region:
                             for component in ya_data.get('components', []):
                                 region = data_models.Region.objects.filter(Q(parent_region=parent_region) & ((Q(name=component) | Q(ya_name=component)))).first()
@@ -93,7 +96,7 @@ def opendata(region=None):
 
         else:
             return
-    """
+
 
     # get russia dataset
     latest_download = data_models.Download.objects.filter(last_update__isnull=False).latest('date')
@@ -132,18 +135,22 @@ def opendata(region=None):
         latest_opendata.date = latest_download.date
         latest_opendata.file_size = os.stat(path + file_name + ".zip").st_size
         latest_opendata.save()
-
     """
-    for region in data_models.Region.objects.filter(level=1, gibdd_code='45'):
-        downloads = region.download_set.filter(base_data=True)
-        if downloads:
-            latest_download = downloads.latest('date')
 
-            latest_opendata = region.opendata_set.last()
+    active_region_ids = data_models.Download.objects.filter(last_update__isnull=False).values('region').distinct()
+    for region_id in tqdm(active_region_ids):
+        region = get_object_or_404(data_models.Region, id=region_id['region'])
+        latest_download = region.download_set.filter(last_update__isnull=False).latest('date')
 
-            if latest_opendata and latest_opendata.date == latest_download.date:
-                continue
+        opendata = region.opendata_set.all()
+        if opendata:
+            latest_opendata = opendata.latest('date')
+        else:
+            latest_opendata = None
 
+        if latest_opendata and latest_opendata.date == latest_download.date:
+            continue
+        else:
             data = [obj.as_dict() for obj in data_models.DTP.objects.filter(
                 region__in=region.region_set.all(),
                 datetime__date__lte=latest_download.date.replace(
@@ -155,7 +162,7 @@ def opendata(region=None):
                 {"type": "Feature",
                  "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
                  "properties": item
-                 } for item in data
+                 } for item in tqdm(data)
             ]}
 
             path = 'media/opendata/' + region.slug + '.geojson'
@@ -168,7 +175,7 @@ def opendata(region=None):
             latest_opendata.date = latest_download.date
             latest_opendata.file_size = os.stat(path).st_size
             latest_opendata.save()
-    """
+
 
 
 def generate_datasets_geojson():

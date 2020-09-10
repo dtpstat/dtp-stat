@@ -7,7 +7,7 @@
     {% if message %}
         <div class="container text-center" style="min-height: 50vh">
             <h2 class="mt-5 mb-3">{{ message }}</h2>
-            <a href="{% url 'dtp' dtp.slug %}">Перейти на страницу ДТП</a>
+            <a href="{% url 'dtp' dtp.gibdd_slug %}">Перейти на страницу ДТП</a>
             {% if is_moderator %}
                 <a href="{% url 'tickets_list' %}">Вернуться к списку тикетов</a>
             {% endif %}
@@ -17,7 +17,7 @@
         <div class="text-center">
             <h2 class="mt-5 mb-1">Корректировка координат ДТП</h2>
             <div class="m-auto" style="border: 1px solid #EBEDF0;box-sizing: border-box;border-radius: 20px;max-width: 600px;margin-top: 30px!important;padding:10px">
-            <h3><a href="{% url 'dtp' dtp.slug %}">{{ dtp.category.name }} {{ dtp.datetime }}</a></h3>
+            <h3><a href="{% url 'dtp' dtp.gibdd_slug %}">{{ dtp.category.name }} {{ dtp.datetime }}</a></h3>
             <br>
             <h5>Адрес</h5>
             <p>{{ dtp.full_address }}</p>

@@ -24,9 +24,10 @@ class DTPStatFilterSet(django_filters.FilterSet):
     severity = django_filters.BaseInFilter(field_name='severity__level', lookup_expr='in')
     participant_categories = django_filters.BaseInFilter(field_name='participant_categories__slug', lookup_expr='in')
     geo_frame = django_filters.CharFilter(method=geo_filter)
+    category = django_filters.BaseInFilter(field_name='category__id', lookup_expr='in')
 
     """
-    category = django_filters.BaseInFilter(field_name='category__name', lookup_expr='in')
+    
     tags = django_filters.BaseInFilter(field_name='tags__name', lookup_expr='in')
     light = django_filters.BaseInFilter(field_name='light__name', lookup_expr='in')
     weather = django_filters.BaseInFilter(field_name='weather__name', lookup_expr='in')

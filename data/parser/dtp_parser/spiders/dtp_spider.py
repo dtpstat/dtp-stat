@@ -12,8 +12,7 @@ from scrapy.spidermiddlewares.httperror import HttpError
 
 from data import models, utils
 
-log = logging.getLogger(__name__)
-
+logging.disable(10)
 
 class DtpSpider(scrapy.Spider):
     name = "dtp"
@@ -39,7 +38,7 @@ class DtpSpider(scrapy.Spider):
             for date in self.dates.split(","):
                 for tag_code in [x.code for x in tags]:
                     payload = dict()
-                    payload_data = '{"date": ["MONTHS:%s"], "ParReg": %s, "order": { "type":"1", "fieldName":"dat" }, "reg": %s, "ind": %s, "st": 1, "en": "10000",}' % (date, self.region_code, area_code, tag_code)
+                    payload_data = '{"date":["MONTHS:' + date + '"],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
                     payload["data"] = payload_data
                     yield Request(
                         'http://stat.gibdd.ru/map/getDTPCardData',
@@ -56,7 +55,7 @@ class DtpSpider(scrapy.Spider):
                         errback=self.handle_error
                     )
 
-    @statsd.timed('dtpstat.spider.parse_area')
+    #@statsd.timed('dtpstat.spider.parse_area')
     def parse_area(self, response):
         export = json.loads(response.body_as_unicode())
         if export['data']:

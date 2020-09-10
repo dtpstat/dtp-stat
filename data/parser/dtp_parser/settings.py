@@ -29,7 +29,7 @@ BOT_NAME = 'dtp_parser'
 SPIDER_MODULES = ['dtp_parser.spiders']
 NEWSPIDER_MODULE = 'dtp_parser.spiders'
 
-LOG_LEVEL='DEBUG'
+LOG_LEVEL='INFO'
 FEED_EXPORT_ENCODING = 'utf-8'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -38,7 +38,7 @@ FEED_EXPORT_ENCODING = 'utf-8'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
-ROTATING_PROXY_LIST = env('PROXY_LIST')
+#ROTATING_PROXY_LIST = env('PROXY_LIST')
 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -74,9 +74,9 @@ ROTATING_PROXY_LIST = env('PROXY_LIST')
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 
 DOWNLOADER_MIDDLEWARES = {
-    #'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
-    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
-    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+    'dtp_parser.middlewares.DtpParserDownloaderMiddleware': 543,
+    #'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    #'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
 }
 
 # Enable or disable extensions

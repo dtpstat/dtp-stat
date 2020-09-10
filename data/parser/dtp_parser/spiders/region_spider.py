@@ -1,13 +1,12 @@
 import scrapy
 from scrapy.http.request import Request
-from scrapy import signals
-from scrapy.exceptions import CloseSpider
-from scrapy.spidermiddlewares.httperror import HttpError
 
 import json
 from ast import literal_eval
 import re
 
+import logging
+logging.disable(10)
 
 class RegionSpider(scrapy.Spider):
     name = "regions"

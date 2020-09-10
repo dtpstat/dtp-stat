@@ -8,3 +8,4 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         utils.extra_filters_data()
         utils.crawl('regions')
+        #utils.get_region_ya_names()

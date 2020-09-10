@@ -71,7 +71,7 @@ def donate(request):
 
 
 def dtp(request, slug):
-    dtp_item = get_object_or_404(data_models.DTP, slug=slug)
+    dtp_item = get_object_or_404(data_models.DTP, gibdd_slug=slug)
     participants = dtp_item.participant_set.order_by('violations')
     vehicles = data_models.Vehicle.objects.filter(participant__dtp=dtp_item).distinct()
     injured = dtp_item.participant_set.filter(severity__level__in=[1,2,3]).count()
@@ -87,7 +87,7 @@ def dtp(request, slug):
 
 
 def dtp_fix_point(request, slug):
-    dtp = get_object_or_404(data_models.DTP, slug=slug)
+    dtp = get_object_or_404(data_models.DTP, gibdd_slug=slug)
     error = ""
 
     is_moderator = utils.is_moderator(request.user)
@@ -110,12 +110,15 @@ def dtp_fix_point(request, slug):
             ticket_item.data={"lat": form.cleaned_data.get('lat'), "long": form.cleaned_data.get('long')}
             ticket_item.category = 'fix_point'
             if is_moderator:
+
                 if form.cleaned_data.get('lat') and form.cleaned_data.get('long'):
                     ticket_item.status = "done"
                     dtp.point = Point(form.cleaned_data.get('long'), form.cleaned_data.get('lat'))
                     dtp.save()
                 else:
                     ticket_item.status = "no"
+
+                ticket_item.moderated_by = request.user
 
             ticket_item.save()
 
@@ -173,7 +176,7 @@ def ticket(request, ticket_id):
     if not ticket_item in ticket_qs:
         return redirect("tickets_list")
     elif ticket_item.category == "fix_point" and ticket_item.status == "new":
-        return redirect("dtp_fix_point", ticket_item.dtp.slug)
+        return redirect("dtp_fix_point", ticket_item.dtp.gibdd_slug)
     else:
         return render(request, "board/ticket.html", context={
             "ticket_item": ticket_item

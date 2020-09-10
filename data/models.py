@@ -117,7 +117,7 @@ class ParticipantCategory(models.Model):
 
 
 class DTP(models.Model):
-    slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
+    gibdd_slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
     status = models.BooleanField(help_text="show or hide dtp", default=True)
     only_manual_edit = models.BooleanField(help_text="only manul adit and update", default=False)
 
@@ -125,6 +125,7 @@ class DTP(models.Model):
                                on_delete=models.SET_NULL, db_index=True)
     address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
     street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None, db_index=True)
+    street_category = models.CharField(max_length=1000, help_text="street category", null=True, blank=True, default=None, db_index=True)
     point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
     point_is_verified = models.BooleanField(help_text="point is valid and verified", default=False)
 
@@ -153,13 +154,16 @@ class DTP(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.category.name + " " + str(self.datetime) + " " + self.region.parent_region.name
+        name = self.category.name + " " + str(self.datetime)
+        if self.region:
+            name += " " + self.region.parent_region.name
+        return name
 
     def full_address(self):
         return ", ".join([x for x in [self.region.parent_region.name, self.region.name, self.address] if x])
 
     def get_absolute_url(self):
-        return '/dtp/' + self.slug + '/'
+        return '/dtp/' + self.gibdd_slug + '/'
 
     def as_dict(self):
         return {
