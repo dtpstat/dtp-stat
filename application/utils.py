@@ -110,8 +110,7 @@ def opendata(region=None, force=False):
 
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
-
-    latest_download = data_models.Download.objects.all().latest('date').date
+    latest_download = data_models.Download.objects.all().latest('date')
     if data_models.Download.objects.filter(date=latest_download.date).count() == data_models.Region.objects.filter(level=1, is_active=True):
         latest_opendata, created = models.OpenData.objects.get_or_create(
             region=None
