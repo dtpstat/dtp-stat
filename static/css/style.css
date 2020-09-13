@@ -47,7 +47,7 @@ p {
 	font-weight: 500;
 }
 
-ymaps [class*="ground-pane"] {
+ymaps [class*="ground-pane"] ymaps:first-child {
 	filter: grayscale(0.8);
 	-webkit-filter: grayscale(0.8);
 	-moz-filter: grayscale(0.8);

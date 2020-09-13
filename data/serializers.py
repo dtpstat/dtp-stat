@@ -12,12 +12,15 @@ class TagSerializer(serializers.ModelSerializer):
 class DTPSerializer(serializers.Serializer):
     id = serializers.CharField(source='gibdd_slug')
     datetime = serializers.DateTimeField()
-    severity = serializers.PrimaryKeyRelatedField(read_only=True)
+    severity = serializers.IntegerField(source='severity.level')
     participants = serializers.IntegerField()
     injured = serializers.IntegerField()
     dead = serializers.IntegerField()
     point = PointField()
     region_slug = serializers.CharField(source='region.slug')
+    category = serializers.IntegerField(source='category.id')
+    address = serializers.CharField()
+    category_name = serializers.CharField(source='category.name')
     #tags = TagSerializer(many=True)
 
 

@@ -7,20 +7,28 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 from tqdm import tqdm
+import json
+
 
 class Command(BaseCommand):
     help = 'fix'
 
     def handle(self, *args, **kwargs):
-
+        """
+        data = []
         for dtp in tqdm(models.DTP.objects.all()):
-            if dtp.dead:
-                dtp.severity = get_object_or_404(models.Severity, level=4)
-            else:
-                severity_levels = [x.severity.level for x in dtp.participant_set.all() if
-                                   x.severity and x.severity.level]
-                if severity_levels:
-                    dtp.severity = get_object_or_404(models.Severity, level=max(severity_levels))
-                else:
-                    dtp.severity = get_object_or_404(models.Severity, level=1)
-            dtp.save()
+            data.append(dtp.data['source'])
+
+        with open('test.json', 'w') as data_file:
+            json.dump(data, data_file, ensure_ascii=False)
+        """
+
+        for dtp in models.DTP.objects.all():
+            # if dtp.gibdd_latest_check <
+            pass
+
+        for dtp in models.DTP.objects.filter(status=False):
+            pass
+
+        #data_utils.update_export_meta_data()
+

@@ -152,6 +152,8 @@ class DTP(models.Model):
     data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    gibdd_latest_check = models.DateTimeField(help_text="gibdd_latest_check", null=True, blank=True, default=None)
+    gibdd_latest_change = models.DateTimeField(help_text="gibdd_latest_change", null=True, blank=True, default=None)
 
     def __str__(self):
         name = self.category.name + " " + str(self.datetime)
@@ -164,6 +166,14 @@ class DTP(models.Model):
 
     def get_absolute_url(self):
         return '/dtp/' + self.gibdd_slug + '/'
+
+    def save(self, *args, **kwargs):
+        # генерация нового export json
+        old_value = self.__class__._default_manager.filter(pk=self.pk).values('data').get()['data'].get('source')
+        if old_value != self.data.get('source') or not self.data.get('export'):
+            self.data['export'] = self.as_dict()
+
+        super(DTP, self).save(*args, **kwargs)
 
     def as_dict(self):
         return {
@@ -212,6 +222,7 @@ class DTP(models.Model):
 
 class Violation(models.Model):
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None, db_index=True)
+    gibdd_category = models.CharField(max_length=1000, help_text="category", null=True, blank=True, default=None, db_index=True)
 
     def __str__(self):
         return self.name
@@ -224,22 +235,43 @@ class VehicleCategory(models.Model):
         return self.name
 
 
+class VehicleDamage(models.Model):
+    name = models.CharField(max_length=1000, help_text="damage name", null=True, blank=True, default=None, db_index=True)
+
+
+class VehicleMalfunction(models.Model):
+    name = models.CharField(max_length=1000, help_text="malfunction name", null=True, blank=True, default=None, db_index=True)
+
+
 class Vehicle(models.Model):
+    gibdd_slug = models.CharField(max_length=1000, help_text="vehicle gibdd id", null=True, blank=True, default=None)
+
     brand = models.CharField(max_length=1000, help_text="brand", null=True, blank=True, default=None, db_index=True)
     vehicle_model = models.CharField(max_length=1000, help_text="model", null=True, blank=True, default=None, db_index=True)
     color = models.CharField(max_length=1000, help_text="color", null=True, blank=True, default=None, db_index=True)
     year = models.IntegerField(help_text="year", null=True, blank=True, default=None, db_index=True)
     category = models.ForeignKey(VehicleCategory, help_text="category", null=True, blank=True, default=None, on_delete=models.CASCADE)
+    drive = models.CharField(max_length=1000, help_text="color", null=True, blank=True, default=None, db_index=True)
+    ownership = models.CharField(max_length=1000, help_text="ownership", null=True, blank=True, default=None, db_index=True)
+    ownership_category = models.CharField(max_length=1000, help_text="ownership_category", null=True, blank=True, default=None, db_index=True)
+    malfunctions = models.ManyToManyField(VehicleMalfunction, help_text="malfunctions")
+
+    absconded = models.CharField(max_length=1000, help_text="absconded", null=True, blank=True, default=None)
+    damages = models.ManyToManyField(VehicleDamage, help_text="damages")
 
     def __str__(self):
         return self.brand + " " + self.vehicle_model
 
 
 class Participant(models.Model):
+    gibdd_slug = models.CharField(max_length=1000, help_text="participant id", null=True, blank=True, default=None)
+
     role = models.CharField(max_length=1000, help_text="role", null=True, blank=True, default=None, db_index=True)
     driving_experience = models.IntegerField(help_text="Participant driving experience (years)", null=True, blank=True)
     health_status = models.CharField(max_length=1000, help_text="Participant status", null=True, blank=True, default=None)
     gender = models.CharField(max_length=1000, help_text="Participant gender", null=True, blank=True, default=None)
+    alco = models.IntegerField(help_text="Participant alco", null=True, blank=True, default=None)
+    absconded = models.CharField(max_length=1000, help_text="Participant absconded", null=True, blank=True, default=None)
 
     dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
     violations = models.ManyToManyField(Violation, help_text="violations", db_index=True)

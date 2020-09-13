@@ -18,6 +18,7 @@ from lxml import html
 from tqdm import tqdm
 
 from . import models
+from application import utils as app_utils
 
 env = environ.Env(
     PROXY_LIST=(list, [])
@@ -32,7 +33,6 @@ def open_json(path):
 
 
 def extra_filters_data():
-    print("filter")
     # severity
     severity_levels = {
         0: {'name': 'Без пострадавших (нет данных)', 'keywords': ['не пострадал']},
@@ -226,9 +226,7 @@ def get_region(region_code, region_name, parent_region_code, parent_region_name)
     region.save()
 
     if not region.ya_name or not parent_region.ya_name:
-        print(region.name ,region.parent_region.name)
         ya_data = geocoder_yandex(parent_region_name + ", " + region_name)
-        print(ya_data)
         if not parent_region.ya_name and ya_data.get('parent_region'):
             parent_region.ya_name = ya_data['parent_region']
 
@@ -249,6 +247,13 @@ def add_participant_record(participant, dtp, vehicle=None):
             participant_severity = severity
             break
 
+    try:
+        alco = int(participant['ALCO'])
+        if not alco:
+            alco = None
+    except:
+        alco = None
+
     participant_item = models.Participant(
         role=participant['K_UCH'] or None,
         driving_experience=participant['V_ST'] if participant['V_ST'] and int(participant['V_ST']) and int(participant['V_ST']) < 90 else None,
@@ -256,17 +261,32 @@ def add_participant_record(participant, dtp, vehicle=None):
         gender=participant['POL'] if participant['POL'] and participant['POL'] != "Не определен" else None,
         dtp=dtp,
         vehicle=vehicle,
-        severity=participant_severity
+        severity=participant_severity,
+        gibdd_slug=participant['N_UCH'],
+        alco=alco,
+        absconded=participant['S_SM']
     )
     participant_item.save()
 
-    for violation_item in (participant['NPDD'] + participant['SOP_NPDD']):
+    for violation_item in participant['NPDD']:
         if violation_item != "Нет нарушений":
             violation, created = models.Violation.objects.get_or_create(
                 name=violation_item
             )
+            if not violation.gibdd_category:
+                violation.gibdd_category = 'Основные нарушения'
+                violation.save()
             participant_item.violations.add(violation)
 
+    for violation_item in participant['SOP_NPDD']:
+        if violation_item != "Нет нарушений":
+            violation, created = models.Violation.objects.get_or_create(
+                name=violation_item
+            )
+            if not violation.gibdd_category:
+                violation.gibdd_category = 'Сопутствующие нарушения'
+                violation.save()
+            participant_item.violations.add(violation)
 
 #@statsd.timed('dtpstat.add_participants_records')
 def add_participants_records(item, dtp):
@@ -280,13 +300,32 @@ def add_participants_records(item, dtp):
             )
 
             vehicle = models.Vehicle(
+                gibdd_slug=vehicle_item['n_ts'],
                 year=vehicle_item['g_v'] or None,
                 brand=vehicle_item['marka_ts'] or None,
                 vehicle_model=vehicle_item['m_ts'] or None,
                 color=vehicle_item['color'] or None,
-                category=category
+                category=category,
+                drive=vehicle_item['r_rul'] or None,
+                absconded=vehicle_item['ts_s'] or None,
+                ownership_category=vehicle_item['f_sob'] or None,
+                ownership=vehicle_item['o_pf'] or None,
             )
             vehicle.save()
+
+            for damage in vehicle_item['m_pov'].split("|"):
+                if damage:
+                    damage_item, created = models.VehicleDamage.objects.get_or_create(
+                        name=damage.strip()
+                    )
+                    vehicle.damages.add(damage_item)
+
+            for malfunction in vehicle_item['t_n'].split("|"):
+                if malfunction and malfunction != "Технические неисправности отсутствуют":
+                    damage_item, created = models.VehicleMalfunction.objects.get_or_create(
+                        name=malfunction.strip()
+                    )
+                    vehicle.malfunctions.add(damage_item)
 
             for participant in vehicle_item['ts_uch']:
                 add_participant_record(participant, dtp, vehicle=vehicle)
@@ -378,31 +417,12 @@ def add_extra_filters(item, dtp):
         dtp.participant_categories.add(participant_categories.get("public_transport"))
 
 
-#@statsd.timed('dtpstat.add_dtp_record')
-def add_dtp_record(item):
+def update_dtp_data(dtp):
+    item = dtp.data['source']
     area_code = item.get("area_code")
     parent_code = item.get("parent_code")
-    tag_code = item.get("tag_code")
-    item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
-
-    dtp_datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
-
-    dtp, created = models.DTP.objects.filter(
-        datetime__year=dtp_datetime.year,
-        datetime__month=dtp_datetime.month
-    ).get_or_create(
-        gibdd_slug=item['KartId'],
-    )
-
-    tag = get_object_or_404(models.Tag, code=tag_code)
-    dtp.tags.add(tag)
-
-    if dtp.only_manual_edit or (dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item):
-        #statsd.increment('dtpstat.add_dtp_record.update_not_needed')
-        return
-    #statsd.increment('dtpstat.add_dtp_record.update_started')
-
-    # start update
+    dtp_datetime = pytz.timezone('UTC').localize(
+        datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
 
     if area_code and parent_code:
         if area_code == "63401" and parent_code == "63":
@@ -427,8 +447,44 @@ def add_dtp_record(item):
     add_related_data(item, dtp)
     add_extra_filters(item, dtp)
 
-    dtp.data['source'] = item
     dtp.save()
+
+
+#@statsd.timed('dtpstat.add_dtp_record')
+def add_dtp_record(item):
+    tag_code = item.get("tag_code")
+    item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
+
+    dtp_datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
+
+    dtp, created = models.DTP.objects.filter(
+        datetime__year=dtp_datetime.year,
+        datetime__month=dtp_datetime.month
+    ).get_or_create(
+        gibdd_slug=item['KartId'],
+    )
+
+    dtp.gibdd_latest_check = timezone.now()
+
+    tag = get_object_or_404(models.Tag, code=tag_code)
+    dtp.tags.add(tag)
+
+    dtp.save()
+
+    if dtp.only_manual_edit or (dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item):
+        #statsd.increment('dtpstat.add_dtp_record.update_not_needed')
+        return
+    else:
+        # statsd.increment('dtpstat.add_dtp_record.update_started')
+        dtp.gibdd_latest_change = timezone.now()
+        dtp.data['source'] = item
+        dtp.save()
+
+        update_dtp_data(dtp)
+
+
+
+
 
 
 #@statsd.timed('dtpstat.check_dates_from_gibdd')
@@ -557,9 +613,15 @@ def regions_crawl(downloads, tags=False):
                     "dates": ",".join([date]),
                     "region_code": str(region.gibdd_code),
                     "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                    #"area_codes": "45280567"
                 })
 
+
+def update_export_meta_data():
+    for dtp in tqdm(models.DTP.objects.all()):
+        dtp.data['export'] = dtp.as_dict()
+        dtp.save()
+
+    app_utils.opendata(force=True)
 
 #@statsd.timed('dtpstat.check_dtp')
 def check_dtp():
@@ -585,3 +647,6 @@ def check_dtp():
     elif downloads_no_tags.count() > 0:
         region_crawl(downloads_no_tags, tags=True)
     """
+
+    app_utils.opendata()
+

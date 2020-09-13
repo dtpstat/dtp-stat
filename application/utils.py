@@ -85,96 +85,69 @@ def get_region_by_center_point(center_point):
     return region
 
 
-def opendata(region=None):
-    """
+def opendata(region=None, force=False):
     if region:
-        downloads = region.download_set.filter(last_update__isnull=False)
-
-        if downloads:
-            latest_update_date=downloads.latest('date').date
-
-
-        else:
-            return
-
-
-    # get russia dataset
-    latest_download = data_models.Download.objects.filter(last_update__isnull=False).latest('date')
-    latest_opendata = models.OpenData.objects.filter(region=None).last()
-
-    if latest_opendata and latest_opendata.date == latest_download.date:
-        pass
+        active_region_ids = [region.id]
     else:
-        data = []
-        for obj in tqdm(data_models.DTP.objects.select_related(
-                'region', 'category', 'light', 'severity'
-        ).prefetch_related(
-            'nearby', 'weather', 'tags', 'participant_categories', 'road_conditions'
-        ).filter(
-            datetime__date__lte=latest_download.date.replace(day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1])
-        ).iterator()):
-            data.append(obj.as_dict())
+        active_region_ids = data_models.Download.objects.filter(last_update__isnull=False).values('region').distinct()
 
-        geo_data = {"type": "FeatureCollection", "features": [
-            {"type": "Feature",
-             "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
-             "properties": item
-             } for item in data
-        ]}
-
-        file_name = 'russia.geojson'
-        path = 'media/opendata/'
-        with open(path + file_name, 'w') as data_file:
-            json.dump(geo_data, data_file, ensure_ascii=False)
-
-        shutil.make_archive(path + file_name, 'zip', path, file_name)
-
-        latest_opendata, created = models.OpenData.objects.get_or_create(
-            region=None
-        )
-        latest_opendata.date = latest_download.date
-        latest_opendata.file_size = os.stat(path + file_name + ".zip").st_size
-        latest_opendata.save()
-    """
-
-    active_region_ids = data_models.Download.objects.filter(last_update__isnull=False).values('region').distinct()
     for region_id in tqdm(active_region_ids):
         region = get_object_or_404(data_models.Region, id=region_id['region'])
         latest_download = region.download_set.filter(last_update__isnull=False).latest('date')
+        latest_opendata, created = models.OpenData.objects.get_or_create(
+            region=region
+        )
 
-        opendata = region.opendata_set.all()
-        if opendata:
-            latest_opendata = opendata.latest('date')
-        else:
-            latest_opendata = None
-
-        if latest_opendata and latest_opendata.date == latest_download.date:
+        if latest_opendata.date == latest_download.date and not force:
             continue
+
+        data = [obj.data['export'] for obj in data_models.DTP.objects.filter(
+            region__in=region.region_set.all(),
+            datetime__date__lte=latest_download.date.replace(
+                            day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
+                        )
+        )]
+
+        export_opendata(data, region.slug, latest_download, latest_opendata)
+
+
+    latest_download = data_models.Download.objects.all().latest('date').date
+    if data_models.Download.objects.filter(date=latest_download.date).count() == data_models.Region.objects.filter(level=1, is_active=True):
+        latest_opendata, created = models.OpenData.objects.get_or_create(
+            region=None
+        )
+
+        if latest_opendata.date == latest_download.date and not force:
+            return
         else:
-            data = [obj.as_dict() for obj in data_models.DTP.objects.filter(
+            data = [obj.data['export'] for obj in data_models.DTP.objects.filter(
                 region__in=region.region_set.all(),
                 datetime__date__lte=latest_download.date.replace(
-                                day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
-                            )
+                    day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
+                )
             )]
 
-            geo_data = {"type": "FeatureCollection", "features": [
-                {"type": "Feature",
-                 "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
-                 "properties": item
-                 } for item in tqdm(data)
-            ]}
+            export_opendata(data, "russia", latest_download, latest_opendata)
 
-            path = 'media/opendata/' + region.slug + '.geojson'
-            with open(path, 'w') as data_file:
-                json.dump(geo_data, data_file, ensure_ascii=False)
 
-            latest_opendata, created = models.OpenData.objects.get_or_create(
-                region=region
-            )
-            latest_opendata.date = latest_download.date
-            latest_opendata.file_size = os.stat(path).st_size
-            latest_opendata.save()
+def export_opendata(data, region_slug, latest_download, latest_opendata):
+
+    geo_data = {"type": "FeatureCollection", "features": [
+        {"type": "Feature",
+         "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
+         "properties": item
+         } for item in tqdm(data)
+    ]}
+
+    path = 'media/opendata/' + region_slug + '.geojson'
+    with open(path, 'w') as data_file:
+        json.dump(geo_data, data_file, ensure_ascii=False)
+
+    shutil.make_archive(region_slug + '.geojson.zip', 'zip', 'media/opendata/')
+
+    latest_opendata.date = latest_download.date
+    latest_opendata.file_size = os.stat(path).st_size
+    latest_opendata.save()
 
 
 
