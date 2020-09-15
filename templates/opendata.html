@@ -2,21 +2,82 @@
 
 {% load static %}
 
+{% block meta-tags %}
+    <meta property="og:title" content="Скачать данные – Карта ДТП">
+    <meta property="og:description" content="Скачать данные ДТП по всем регионам">
+    <meta name="description" content="Скачать данные ДТП по всем регионам">
+    <meta name="keywords" content="Карта, ДТП, данные">
+    <title>Скачать данные – Карта ДТП</title>
+{% endblock %}
+
 {% block content %}
     <div class="container mt-5 mb-5">
         <h2 class="text-center mb-4">Скачать данные</h2>
+        <div class="post mt-5 mb-5 ml-auto mr-auto">
+            {{ text | safe }}
+            <br>
+            <p>
+                <a data-toggle="collapse" href="#collapseExample" role="button"
+                   aria-expanded="false" aria-controls="collapseExample">
+                    Структура данных
+                </a>
+            </p>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    <pre><code><samp>{
+    "id": 384094, # идентификатор
+    "tags": ["Дорожно-транспортные происшествия"], # показатели с официального сайта ГИБДД
+    "light": "Светлое время суток", # время суток
+    "point": {"lat": 50.6039, "long": 36.5578}, # координаты
+    "nearby": [ "Нерегулируемый перекрёсток неравнозначных улиц (дорог)", "Жилые дома индивидуальной застройки"], # координаты
+    "region": "Белгород", # город/район
+    "address": "г Белгород, ул Сумская, 30", # адрес
+    "weather": ["Ясно"], # погода
+    "category": "Столкновение", # тип ДТП
+    "datetime": "2017-08-05 13:06:00", # дата и время
+    "severity": "Легкий", # тяжесть ДТП/вред здоровью
+    "vehicles": [ # участники – транспортные средства
+      {
+        "year": 2010, # год производства транспортного средства
+        "brand": "ВАЗ", # марка транспортного средства
+        "color": "Иные цвета", # цвет транспортного средства
+        "model": "Priora", # модель транспортного средства
+        "category": "С-класс (малый средний, компактный) до 4,3 м", # категория транспортного средства
+        "participants": [ # участники внутри транспортных средств
+          {
+            "role": "Водитель", # роль участника
+            "gender": "Женский", # пол участника
+            "violations": [], # нарушения правил участником
+            "health_status": "Раненый, находящийся...", # состояние здоровья участника
+            "years_of_driving_experience": 11 # стаж вождения участника (только у водителей)
+          }
+        ]
+      },
+    ],
+    "dead_count": 0, # кол-во погибших в ДТП
+    "participants": [], # участники без транспортных средств (описание, как и у участников врнутри транспортных сердств)
+    "injured_count": 2, # кол-во раненых в ДТП
+    "parent_region": "Белгородская область", # регион
+    "road_conditions": ["Сухое"], # состояние дорожного покрытия
+    "participants_count": 3, # кол-во участников ДТП
+    "participant_categories": ["Все участники", "Дети"] # категории участников
+  }</samp></code></pre>
+                </div>
+            </div>
+        </div>
 
 
         <table class="table">
             <tbody>
-                {% for opendata_item in opendata %}
-                    <tr>
-                        <td><b>{{ opendata_item.region.name|default:"Россия" }}</b></td>
-                        <td>{{ start_date|date:"F Y" }} - {{ opendata_item.date|date:"F Y" }}</td>
-                        <td>{{ opendata_item.mb_file_size|floatformat:"2" }} mb</td>
-                        <td class="text-center"><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson" class="button">Скачать .geojson</a> </td>
-                    </tr>
-                {% endfor %}
+            {% for opendata_item in opendata %}
+                <tr>
+                    <td><b>{{ opendata_item.region.name|default:"Россия" }}</b></td>
+                    <td class="small">{{ start_date|date:"F Y"|lower }} - {{ opendata_item.date|date:"F Y"|lower }}</td>
+                    <td class="small">{{ opendata_item.mb_file_size|floatformat:"2" }} mb</td>
+                    <td class="text-center"><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson"
+                                               class="button">Скачать&nbsp;.geojson</a></td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>

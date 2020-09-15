@@ -9,12 +9,14 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     {% if request.resolver_match.url_name == 'home' %}
-    <form class="form-inline mr-auto mt-2 mt-lg-0 d-none d-lg-block" role="form">
+        <!--
+    <form class="form-inline mr-auto mt-2 mt-lg-0 d-lg-block" role="form">
         <div class="form-group">
             <input class="form-control" type="text" />
             <i class="fas fa-search"></i>
         </div>
     </form>
+    -->
     {% endif %}
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -28,7 +30,7 @@
             <li class="nav-item {% if 'data' in request.resolver_match.url_name %}active{% endif %}">
                 <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
             </li>
-            <li class="nav-item {% if 'about' in request.resolver_match.url_name %}active{% endif %}">
+            <li class="nav-item {% if 'about' in request.path and 'pages' in request.path %}active{% endif %}">
                 <a class="nav-link" href="/pages/about/">О проекте</a>
             </li>
             <li class="nav-item support">

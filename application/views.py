@@ -53,9 +53,16 @@ def page(request, slug):
 def opendata(request):
     opendata = models.OpenData.objects.all().order_by("region__name")
     start_date = datetime.datetime(2015, 1, 1)
+
+    try:
+        text = get_object_or_404(models.Page, slug="opendata").text
+    except:
+        text = None
+
     return render(request, "opendata.html", context={
         'opendata': opendata,
-        'start_date': start_date
+        'start_date': start_date,
+        'text': text
     })
 
 
@@ -64,6 +71,7 @@ def donate(request):
         text = get_object_or_404(models.Page, slug="donate").text
     except:
         text = None
+
 
     return render(request, "donate.html", context={
         "text": text

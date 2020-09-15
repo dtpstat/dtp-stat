@@ -5,13 +5,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{% static 'media/logo.ico' %}" type="image/x-icon">
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+       m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+       ym(49130284, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+       });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/49130284" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <meta property="og:image" content="http://{{ request.get_host }}{% static "media/og.png" %}"/>
 
     {% block meta-tags %}
         <meta property="og:title" content="Карта ДТП">
         <meta property="og:description" content="Карта ДТП">
         <meta name="description" content="Карта ДТП">
         <meta name="keywords" content="Карта ДТП">
-        <meta property="og:image" content=""/>
         <title>Карта ДТП</title>
     {% endblock %}
 
@@ -63,23 +81,27 @@
 
 <script>
     $(document).on('click', 'a[href^="#"]', function (e) {
-        // target element id
-        var id = $(this).attr('href');
+        if ($(this).attr('data-toggle') !== "collapse") {
+            // target element id
+            var id = $(this).attr('href');
 
-        // target element
-        var $id = $(id);
-        if ($id.length === 0) {
-            return;
+            // target element
+            var $id = $(id);
+            if ($id.length === 0) {
+                return;
+            }
+
+            // prevent standard hash navigation (avoid blinking in IE)
+            e.preventDefault();
+
+            // top position relative to the document
+            var pos = $(id).offset().top;
+
+            // animated top scrolling
+            $('body, html').animate({scrollTop: pos}, 500);
         }
 
-        // prevent standard hash navigation (avoid blinking in IE)
-        e.preventDefault();
 
-        // top position relative to the document
-        var pos = $(id).offset().top;
-
-        // animated top scrolling
-        $('body, html').animate({scrollTop: pos}, 500);
     });
 
 </script>

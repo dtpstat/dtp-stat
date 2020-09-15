@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api
+Disallow: /ckeditor
+Disallow: /board
+Disallow: /accounts

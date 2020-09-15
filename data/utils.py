@@ -96,8 +96,8 @@ def get_geo_data(item, dtp):
         item['infoDtp']['n_p'],
         item['infoDtp']['dor']
     ]
-
-    dtp.street_category = item['infoDtp']['dor_z']
+    if item['infoDtp']['km']:
+        road_components.append(item['infoDtp']['km'] + " " + "км")
 
     if address_components[1]:
         street = address_components[1]
@@ -114,6 +114,12 @@ def get_geo_data(item, dtp):
 
     if street:
         dtp.street = street
+
+    if item['infoDtp']['k_ul']:
+        dtp.street_category = item['infoDtp']['k_ul']
+
+    if item['infoDtp']['dor_z'] and item['infoDtp']['dor_z']!= "Не указано":
+        dtp.road_category = item['infoDtp']['dor_z']
 
     if lat and long:
         if not dtp.point_is_verified:
@@ -419,16 +425,10 @@ def add_extra_filters(item, dtp):
 
 def update_dtp_data(dtp):
     item = dtp.data['source']
-    area_code = item.get("area_code")
-    parent_code = item.get("parent_code")
     dtp_datetime = pytz.timezone('UTC').localize(
         datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
 
-    if area_code and parent_code:
-        if area_code == "63401" and parent_code == "63":
-            dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
-        else:
-            dtp.region = get_object_or_404(models.Region, gibdd_code=area_code, parent_region__gibdd_code=parent_code)
+
 
     get_geo_data(item, dtp)
 
@@ -453,6 +453,8 @@ def update_dtp_data(dtp):
 #@statsd.timed('dtpstat.add_dtp_record')
 def add_dtp_record(item):
     tag_code = item.get("tag_code")
+    area_code = item.get("area_code")
+    parent_code = item.get("parent_code")
     item = {key: item[key] for key in item if key not in ['tag_code', 'area_code', 'parent_code']}
 
     dtp_datetime = pytz.timezone('UTC').localize(datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
@@ -463,6 +465,12 @@ def add_dtp_record(item):
     ).get_or_create(
         gibdd_slug=item['KartId'],
     )
+
+    if area_code and parent_code:
+        if area_code == "63401" and parent_code == "63":
+            dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
+        else:
+            dtp.region = get_object_or_404(models.Region, gibdd_code=area_code, parent_region__gibdd_code=parent_code)
 
     dtp.gibdd_latest_check = timezone.now()
 
@@ -600,7 +608,7 @@ def download_success(dates, region_code, tags=False):
 
 
 def regions_crawl(downloads, tags=False):
-    for region in tqdm(models.Region.objects.filter(level=1, slug__in=["belgorodskaia-oblast"])):
+    for region in tqdm(models.Region.objects.filter(level=1)):
         region_downloads = downloads.filter(region=region)
 
         if region_downloads:
@@ -614,6 +622,8 @@ def regions_crawl(downloads, tags=False):
                     "region_code": str(region.gibdd_code),
                     "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
                 })
+
+            app_utils.opendata()
 
 
 def update_export_meta_data():

@@ -1,10 +1,16 @@
-
-
 {% extends "base.html" %}
 
+{% block meta-tags %}
+    <meta property="og:title" content="{{ page.title }} – Карта ДТП">
+    <meta property="og:description" content="{{ page.title }}">
+    <meta name="description" content="{{ page.title }}">
+    <meta name="keywords" content="Карта, ДТП, {{ page.title }}">
+    <title>{{ page.title }} – Карта ДТП</title>
+{% endblock %}
+
 {% block content %}
-    <div class="m-auto text-center">
-        <h3 class="text-center">{{ page.title }}</h3>
-        {{ page.text | safe }}
+    <div class="container mt-5 mb-5">
+        <h2 class="text-center mb-4">{{ page.title }}</h2>
+        <div class="post m-auto">{{ page.text | safe }}</div>
     </div>
 {% endblock %}

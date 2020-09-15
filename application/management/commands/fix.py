@@ -8,12 +8,14 @@ from django.shortcuts import get_object_or_404
 
 from tqdm import tqdm
 import json
+import shutil
 
 
 class Command(BaseCommand):
     help = 'fix'
 
     def handle(self, *args, **kwargs):
+
         """
         data = []
         for dtp in tqdm(models.DTP.objects.all()):
@@ -23,9 +25,9 @@ class Command(BaseCommand):
             json.dump(data, data_file, ensure_ascii=False)
         """
 
-        for dtp in models.DTP.objects.all():
-            # if dtp.gibdd_latest_check <
-            pass
+        for dtp in tqdm(models.DTP.objects.filter(gibdd_slug="209684131")):
+            if dtp.gibdd_slug == "209684131":
+                data_utils.update_dtp_data(dtp)
 
         for dtp in models.DTP.objects.filter(status=False):
             pass

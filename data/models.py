@@ -126,6 +126,7 @@ class DTP(models.Model):
     address = models.CharField(max_length=1000, help_text="address", null=True, blank=True, default=None, db_index=True)
     street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None, db_index=True)
     street_category = models.CharField(max_length=1000, help_text="street category", null=True, blank=True, default=None, db_index=True)
+    road_category = models.CharField(max_length=1000, help_text="road category", null=True, blank=True, default=None, db_index=True)
     point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
     point_is_verified = models.BooleanField(help_text="point is valid and verified", default=False)
 
@@ -143,11 +144,11 @@ class DTP(models.Model):
     severity = models.ForeignKey(Severity, help_text="severity lvl", db_index=True, on_delete=models.SET_NULL,
                                  null=True, blank=True, default=None)
 
-    nearby = models.ManyToManyField(Nearby, help_text="nearby objects", db_index=True)
-    weather = models.ManyToManyField(Weather, help_text="weather", db_index=True)
-    road_conditions = models.ManyToManyField(RoadCondition, help_text="Road conditions", db_index=True)
-    tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True)
-    participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", db_index=True)
+    nearby = models.ManyToManyField(Nearby, help_text="nearby objects", db_index=True, blank=True)
+    weather = models.ManyToManyField(Weather, help_text="weather", db_index=True, blank=True)
+    road_conditions = models.ManyToManyField(RoadCondition, help_text="Road conditions", db_index=True, blank=True)
+    tags = models.ManyToManyField(Tag, help_text="Tags", db_index=True, blank=True)
+    participant_categories = models.ManyToManyField(ParticipantCategory, help_text="ParticipantCategory", db_index=True, blank=True)
 
     data = JSONField(help_text="extra data", null=True, blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -156,7 +157,9 @@ class DTP(models.Model):
     gibdd_latest_change = models.DateTimeField(help_text="gibdd_latest_change", null=True, blank=True, default=None)
 
     def __str__(self):
-        name = self.category.name + " " + str(self.datetime)
+        name = ""
+        if self.category and self.datetime:
+            name = self.category.name + " " + str(self.datetime)
         if self.region:
             name += " " + self.region.parent_region.name
         return name
@@ -169,9 +172,13 @@ class DTP(models.Model):
 
     def save(self, *args, **kwargs):
         # генерация нового export json
-        old_value = self.__class__._default_manager.filter(pk=self.pk).values('data').get()['data'].get('source')
-        if old_value != self.data.get('source') or not self.data.get('export'):
-            self.data['export'] = self.as_dict()
+
+        if self.severity and self.data:
+            old_source = self.__class__._default_manager.filter(pk=self.pk).values('data').get()['data'].get('source')
+            old_point = self.__class__._default_manager.filter(pk=self.pk).values('point')
+
+            if old_source != self.data.get('source') or not self.data.get('export') or old_point != self.point:
+                self.data['export'] = self.as_dict()
 
         super(DTP, self).save(*args, **kwargs)
 
@@ -254,10 +261,10 @@ class Vehicle(models.Model):
     drive = models.CharField(max_length=1000, help_text="color", null=True, blank=True, default=None, db_index=True)
     ownership = models.CharField(max_length=1000, help_text="ownership", null=True, blank=True, default=None, db_index=True)
     ownership_category = models.CharField(max_length=1000, help_text="ownership_category", null=True, blank=True, default=None, db_index=True)
-    malfunctions = models.ManyToManyField(VehicleMalfunction, help_text="malfunctions")
+    malfunctions = models.ManyToManyField(VehicleMalfunction, help_text="malfunctions", blank=True)
 
     absconded = models.CharField(max_length=1000, help_text="absconded", null=True, blank=True, default=None)
-    damages = models.ManyToManyField(VehicleDamage, help_text="damages")
+    damages = models.ManyToManyField(VehicleDamage, help_text="damages", blank=True)
 
     def __str__(self):
         return self.brand + " " + self.vehicle_model
@@ -274,7 +281,7 @@ class Participant(models.Model):
     absconded = models.CharField(max_length=1000, help_text="Participant absconded", null=True, blank=True, default=None)
 
     dtp = models.ForeignKey(DTP, help_text="DTP", null=True, blank=True, default=None, on_delete=models.CASCADE)
-    violations = models.ManyToManyField(Violation, help_text="violations", db_index=True)
+    violations = models.ManyToManyField(Violation, help_text="violations", db_index=True, blank=True)
     vehicle = models.ForeignKey(Vehicle, help_text="vehicle", null=True, blank=True, default=None, on_delete=models.CASCADE)
     severity = models.ForeignKey(Severity, help_text="severity lvl", db_index=True, null=True, blank=True, default=None, on_delete=models.SET_NULL)
 

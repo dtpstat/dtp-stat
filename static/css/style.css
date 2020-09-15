@@ -407,6 +407,12 @@ h3 {
 	text-align: justify;
 }
 
+.text a{
+	font-family: Merriweather!important;
+	font-size: 18px;
+	text-align: justify;
+}
+
 .post .ya-share2__title {
 	display: none;
 }
@@ -435,7 +441,9 @@ h3 {
 footer .soc_media a{
 	margin: 5px;
 	font-weight: normal;
+	line-height: 40px;
 }
+
 
 footer .license i, footer .license p {
 	color: rgba(24, 51, 74, 0.5);

@@ -101,12 +101,17 @@ def opendata(region=None, force=False):
         if latest_opendata.date == latest_download.date and not force:
             continue
 
-        data = [obj.data['export'] for obj in data_models.DTP.objects.filter(
-            region__in=region.region_set.all(),
-            datetime__date__lte=latest_download.date.replace(
-                            day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
-                        )
-        )]
+        data = []
+
+        for obj in data_models.DTP.objects.filter(
+                region__in=region.region_set.all(),
+                datetime__date__lte=latest_download.date.replace(
+                    day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
+                )
+        ):
+            if not obj.data.get('export'):
+                obj.data['export'] = obj.as_dict()
+            data.append(obj.data['export'])
 
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
@@ -142,7 +147,7 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     with open(path, 'w') as data_file:
         json.dump(geo_data, data_file, ensure_ascii=False)
 
-    shutil.make_archive(region_slug + '.geojson.zip', 'zip', 'media/opendata/')
+    #shutil.make_archive(region_slug + '.geojson', 'zip', '/media/opendata/')
 
     latest_opendata.date = latest_download.date
     latest_opendata.file_size = os.stat(path).st_size
