@@ -9,6 +9,14 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
+class ParticipantCategorySerializer(serializers.RelatedField):
+
+    def to_representation(self, value):
+        return value.id
+
+    class Meta:
+        model = models.ParticipantCategory
+
 class DTPSerializer(serializers.Serializer):
     id = serializers.CharField(source='gibdd_slug')
     datetime = serializers.DateTimeField()
@@ -21,7 +29,8 @@ class DTPSerializer(serializers.Serializer):
     category = serializers.IntegerField(source='category.id')
     address = serializers.CharField()
     category_name = serializers.CharField(source='category.name')
-    #tags = TagSerializer(many=True)
+    participant_categories = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    tags = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
 
 
 class RegionSerializer(serializers.Serializer):

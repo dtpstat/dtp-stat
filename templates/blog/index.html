@@ -31,9 +31,9 @@
                             {% endfor %}
                         </div>
                         <a href="{% url 'blog_post' post.slug %}">
-                            <div class="text">
-                                <h3>{{ post.title }}</h3>
-                                <p>{{ post.abstract }}</p>
+                            <div>
+                                <h3 style="font-weight: 700">{{ post.title }}</h3>
+                                <p style="font-family: Roboto;font-size: 14px">{{ post.abstract }}</p>
                             </div>
                         </a>
 

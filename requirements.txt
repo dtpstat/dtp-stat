@@ -31,3 +31,6 @@ django-cors-headers==3.4.0
 scrapy-rotating-proxies==0.6.2
 Pillow==7.2.0
 pymorphy2==0.8
+beautifulsoup4==4.9.3
+tweepy==3.9.0
+python-telegram-bot==13.0

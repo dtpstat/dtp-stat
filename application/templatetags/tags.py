@@ -35,6 +35,9 @@ def date_standart(value, source_format="%Y-%m-%d", export_format="j E Y года
 
 @register.simple_tag
 def get_word_after_num(word, num):
-    word = morph.parse(word)[0]
-    new_word = word.make_agree_with_number(int(num)).word
-    return str(num) + " " + new_word
+    if num:
+        word = morph.parse(word)[0]
+        new_word = word.make_agree_with_number(int(num)).word
+        return str(num) + " " + new_word
+    else:
+        return word

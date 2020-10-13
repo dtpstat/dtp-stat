@@ -623,7 +623,10 @@ def regions_crawl(downloads, tags=False):
                     "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
                 })
 
-            app_utils.opendata()
+        for dtp in tqdm(models.DTP.objects.filter(severity__isnull=True)):
+            update_dtp_data(dtp)
+
+        app_utils.opendata()
 
 
 def update_export_meta_data():

@@ -102,3 +102,10 @@ class Moderator(models.Model):
         return ", ".join([x.name for x in self.regions.all()])
 
 
+class BriefData(models.Model):
+    date = models.DateField()
+    dtp_count = models.PositiveIntegerField(null=True)
+    death_count = models.PositiveIntegerField(null=True)
+    injured_count = models.PositiveIntegerField(null=True)
+    child_death_count = models.PositiveIntegerField(null=True)
+    child_injured_count = models.PositiveIntegerField(null=True)

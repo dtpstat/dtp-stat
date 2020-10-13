@@ -10,9 +10,14 @@ def get_donate_data(request):
 
     try:
         donate_data = donate_data_r.json()
-        donate_data['progress'] = donate_data['paymentsInfo']['sum_total']*100/donate_data['paymentsInfo']['sum_goal']
-        donate_data['days_left'] = calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[1] + 1 - datetime.datetime.now().day
     except:
-        donate_data = None
+        donate_data = {}
+
+    if donate_data:
+        donate_data['progress'] = donate_data['paymentsInfo']['sum_total']*100/donate_data['paymentsInfo']['sum_goal']
+    else:
+        donate_data['progress'] = 50
+
+    donate_data['days_left'] = calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[1] + 1 - datetime.datetime.now().day
 
     return {'donate_data':donate_data}

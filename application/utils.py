@@ -18,6 +18,8 @@ from application import models
 from data import models as data_models
 from data import utils as data_utils
 
+from django.conf import settings
+
 log = logging.getLogger(__name__)
 
 
@@ -116,7 +118,9 @@ def opendata(region=None, force=False):
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
     latest_download = data_models.Download.objects.all().latest('date')
-    if data_models.Download.objects.filter(date=latest_download.date).count() == data_models.Region.objects.filter(level=1, is_active=True):
+    print('1')
+    if models.OpenData.objects.filter(date=latest_download.date, region__isnull=False).count() == data_models.Region.objects.filter(level=1, is_active=True).count():
+        print('2')
         latest_opendata, created = models.OpenData.objects.get_or_create(
             region=None
         )
@@ -125,7 +129,6 @@ def opendata(region=None, force=False):
             return
         else:
             data = [obj.data['export'] for obj in data_models.DTP.objects.filter(
-                region__in=region.region_set.all(),
                 datetime__date__lte=latest_download.date.replace(
                     day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
                 )
@@ -147,7 +150,9 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     with open(path, 'w') as data_file:
         json.dump(geo_data, data_file, ensure_ascii=False)
 
-    #shutil.make_archive(region_slug + '.geojson', 'zip', '/media/opendata/')
+    print(settings.BASE_DIR)
+    if region_slug == "russia":
+        shutil.make_archive(region_slug + '.geojson', 'zip', settings.BASE_DIR + '/media/opendata/')
 
     latest_opendata.date = latest_download.date
     latest_opendata.file_size = os.stat(path).st_size

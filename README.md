@@ -26,4 +26,5 @@ crontab -e
 ```
 0 1 * * * cd /var/www/dtp-stat/ && . .venv/bin/activate && .venv/bin/python manage.py dtp >> /tmp/cronlog-dtp.txt 2>&1
 0 5 * * * cd /var/www/dtp-stat/ && . .venv/bin/activate && .venv/bin/python manage.py opendata >> /tmp/cronlog-dtp.txt 2>&1
+0 12-20 * * * cd /var/www/dtp-stat/ && . .venv/bin/activate && .venv/bin/python manage.py bot >> /tmp/cronlog-dtp.txt 2>&1
 ```

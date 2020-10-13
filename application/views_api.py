@@ -26,7 +26,7 @@ import datetime
 
 # API ДТП на карте
 class DTPApiView(generics.ListAPIView):
-    queryset = data_models.DTP.objects.all()
+    queryset = data_models.DTP.objects.filter(region__is_active=True)
     serializer_class = data_serializers.DTPSerializer
     filterset_class = data_filters.DTPFilterSet
 
@@ -105,7 +105,7 @@ class FiltersApiView(APIView):
                     "values": [
                         {
                             "preview": x.name,
-                            "value": x.slug,
+                            "value": x.id,
                             "icon": static('media/' + x.slug + '.svg'),
                             "default": True if x.slug == 'all' else False
                         } for x in data_models.ParticipantCategory.objects.all()]
