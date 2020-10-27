@@ -77,76 +77,140 @@ class FiltersApiView(APIView):
         region_slug = request.query_params.get('region_slug')
         if region_slug:
             region = get_object_or_404(data_models.Region, slug=region_slug)
-            if region.parent_region:
-                region = region.parent_region
-            region_downloads = data_models.Download.objects.filter(region=region).order_by('date')
+            region = region.parent_region
+            downloads = data_models.Download.objects.filter(region=region).order_by('date')
+        else:
+            downloads = data_models.Download.objects.all().order_by('date')
 
-            if region_downloads:
 
-                # фильтр по дате
-                filters.append({
-                    "name": "date",
-                    "label": "Период данных",
-                    "values": [
-                        region_downloads.first().date,
-                        region_downloads.last().date.replace(day=calendar.monthrange(region_downloads.last().date.year, region_downloads.last().date.month)[1])
-                    ],
-                    "default_value": {
-                        "start_date": region_downloads.last().date,
-                        "end_date": region_downloads.last().date.replace(day=calendar.monthrange(region_downloads.last().date.year, region_downloads.last().date.month)[1])
-                    }
-                })
+        # фильтр по дате
+        filters.append({
+            "name": "date",
+            "label": "Период данных",
+            "values": [
+                downloads.first().date,
+                downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
+            ],
+            "default_value": {
+                "start_date": downloads.last().date,
+                "end_date": downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
+            }
+        })
 
-                # фильтр по участникам
-                filters.append({
-                    "name": "participant_categories",
-                    "label": "Участники ДТП",
-                    "multiple": False,
-                    "values": [
-                        {
-                            "preview": x.name,
-                            "value": x.id,
-                            "icon": static('media/' + x.slug + '.svg'),
-                            "default": True if x.slug == 'all' else False
-                        } for x in data_models.ParticipantCategory.objects.all()]
-                })
 
-                # фильтр по тяжести
-                severity_colors = {
-                    0: 'rgba(24, 51, 74, 0.5)',
-                    1: '#FFB81F',
-                    3: '#FF7F24',
-                    4: '#FF001A'
-                }
-                filters.append(
+
+        # фильтр по участникам
+        filters.append({
+            "name": "participant_categories",
+            "label": "Участники ДТП",
+            "multiple": False,
+            "values": [
+                {
+                    "preview": x.name,
+                    "value": x.id,
+                    "icon": static('media/' + x.slug + '.svg'),
+                    "default": True if x.slug == 'all' else False
+                } for x in data_models.ParticipantCategory.objects.all()]
+        })
+
+        # фильтр по тяжести
+        severity_colors = {
+            0: 'rgba(24, 51, 74, 0.5)',
+            1: '#FFB81F',
+            3: '#FF7F24',
+            4: '#FF001A'
+        }
+        filters.append(
+            {
+                "name": "severity",
+                "label": "Вред здоровью",
+                "multiple": True,
+                "values": [
                     {
-                        "name": "severity",
-                        "label": "Вред здоровью",
-                        "multiple": True,
-                        "values": [
-                            {
-                                'preview': x.name,
-                                'value': x.level,
-                                'color': severity_colors.get(x.level),
-                                'disabled': True if x.level == 0 else False,
-                                "default": True if x.level in [1,2,3,4] else False
-                            } for x in data_models.Severity.objects.all().order_by("level")
-                        ]
-                    },
-                )
+                        'preview': x.name,
+                        'value': x.level,
+                        'color': severity_colors.get(x.level),
+                        'disabled': True if x.level == 0 else False,
+                        "default": True if x.level in [1,2,3,4] else False
+                    } for x in data_models.Severity.objects.all().order_by("level")
+                ]
+            },
+        )
 
-                filters.append(
+        filters.append(
+            {
+                "name": "category",
+                "key": "category",
+                "label": "Типы ДТП",
+                "values": [
                     {
-                        "name": "category",
-                        "label": "Типы ДТП",
-                        "multiple": True,
-                        "values": [
-                            {
-                            "preview": x.name,
-                            "value": x.id
-                            } for x in data_models.Category.objects.all().order_by("name")],
-                    }
-                )
+                    "preview": x.name,
+                    "value": x.id
+                    } for x in data_models.Category.objects.all().order_by("name")],
+            }
+        )
+
+        filters.append(
+            {
+                "name": "category",
+                "key": "violations",
+                "label": "Нарушения ПДД",
+                "values": [
+                    {
+                        "preview": x.name,
+                        "value": x.id
+                    } for x in data_models.Violation.objects.all().order_by("name")],
+            }
+        )
+
+        filters.append(
+            {
+                "name": "category",
+                "key": "nearby",
+                "label": "Объекты поблизости",
+                "values": [
+                    {
+                        "preview": x.name,
+                        "value": x.id
+                    } for x in data_models.Nearby.objects.all().order_by("name")],
+            }
+        )
+
+        filters.append(
+            {
+                "name": "category",
+                "key": "conditions",
+                "label": "Дорожные условия",
+                "values": [
+                    {
+                        "preview": x.name,
+                        "value": x.id
+                    } for x in data_models.RoadCondition.objects.all().order_by("name")],
+            }
+        )
+
+        filters.append(
+            {
+                "name": "category",
+                "key": "street",
+                "label": "Улицы",
+                "values": [],
+            }
+        )
+
+        filters.append(
+            {
+                "name": "category",
+                "key": "weather",
+                "label": "Погода",
+                "values": [
+                    {
+                        "preview": x.name,
+                        "value": x.id
+                    } for x in data_models.Weather.objects.all().order_by("name")
+                ],
+            }
+        )
 
         return Response(filters)
 

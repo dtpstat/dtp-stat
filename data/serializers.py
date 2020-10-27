@@ -10,12 +10,28 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ParticipantCategorySerializer(serializers.RelatedField):
-
     def to_representation(self, value):
         return value.id
 
     class Meta:
         model = models.ParticipantCategory
+
+
+class ViolationSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.id
+
+    class Meta:
+        model = models.Violation
+
+
+class TestSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.violations.id
+
+    class Meta:
+        model = models.Participant
+
 
 class DTPSerializer(serializers.Serializer):
     id = serializers.CharField(source='gibdd_slug')
@@ -29,8 +45,17 @@ class DTPSerializer(serializers.Serializer):
     category = serializers.IntegerField(source='category.id')
     address = serializers.CharField()
     category_name = serializers.CharField(source='category.name')
+    weather = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    nearby = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    conditions = serializers.PrimaryKeyRelatedField(source='road_conditions',read_only=True, many=True)
     participant_categories = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     tags = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    violations = serializers.SerializerMethodField('get_violations')
+
+    @staticmethod
+    def get_violations(self):
+        participants = models.Participant.objects.filter(dtp=self)
+        return [x for x in participants.values_list('violations', flat=True) if x]
 
 
 class RegionSerializer(serializers.Serializer):

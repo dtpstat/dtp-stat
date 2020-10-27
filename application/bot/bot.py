@@ -48,7 +48,7 @@ def get_today_data():
     source_date = block_count.find("th").text.strip().split(" ")[-1]
     date = datetime.datetime.strptime(source_date, '%d.%m.%Y').date()
     string_date = date.strftime("%-d %B")
-    weekday = date.strftime("%A")
+    weekday = date.strftime("%A").lower()
 
     data_blocks = block_count.findAll("tr")
     crashes_num = str(data_blocks[1].findChildren()[1].text)
@@ -165,14 +165,14 @@ def send_tweet(text):
 
 def send_telegram_post(text):
     bot = telegram.Bot(token=env('TELEGRAM_TOKEN'))
-    bot.sendPhoto("@dtp_stat", open("img.png", 'rb'), caption=text)
+    bot.sendPhoto("@dtp_stat", open(os.path.dirname(os.path.abspath(__file__)) + "/img.png", 'rb'), caption=text)
 
 
 def main(message="today"):
     if message == "today":
         data = get_today_data()
         if data:
-            text = generate_text(data, "week_post")
+            text = generate_text(data, "today_post")
             make_img(data)
             send_tweet(text)
             send_telegram_post(text)

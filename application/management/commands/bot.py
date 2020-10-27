@@ -14,7 +14,7 @@ import shutil
 
 
 class Command(BaseCommand):
-    help = 'fix'
+    help = 'bot'
 
     def handle(self, *args, **kwargs):
         bot.main()

@@ -117,10 +117,10 @@ def opendata(region=None, force=False):
 
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
+    """
     latest_download = data_models.Download.objects.all().latest('date')
-    print('1')
+   
     if models.OpenData.objects.filter(date=latest_download.date, region__isnull=False).count() == data_models.Region.objects.filter(level=1, is_active=True).count():
-        print('2')
         latest_opendata, created = models.OpenData.objects.get_or_create(
             region=None
         )
@@ -135,7 +135,7 @@ def opendata(region=None, force=False):
             )]
 
             export_opendata(data, "russia", latest_download, latest_opendata)
-
+    """
 
 def export_opendata(data, region_slug, latest_download, latest_opendata):
 

@@ -26,13 +26,13 @@ class DTPStatFilterSet(django_filters.FilterSet):
     geo_frame = django_filters.CharFilter(method=geo_filter)
     category = django_filters.BaseInFilter(field_name='category__id', lookup_expr='in')
     tags = django_filters.BaseInFilter(field_name='tags__id', lookup_expr='in')
+    violations = django_filters.BaseInFilter(field_name='participant__violations__name', lookup_expr='in')
+    nearby = django_filters.BaseInFilter(field_name='nearby__name', lookup_expr='in')
+    conditions = django_filters.BaseInFilter(field_name='road_conditions__name', lookup_expr='in')
+    street = django_filters.BaseInFilter(field_name='street', lookup_expr='in')
+    weather = django_filters.BaseInFilter(field_name='weather__name', lookup_expr='in')
 
     """
     light = django_filters.BaseInFilter(field_name='light__name', lookup_expr='in')
-    weather = django_filters.BaseInFilter(field_name='weather__name', lookup_expr='in')
-    nearby = django_filters.BaseInFilter(field_name='nearby__name', lookup_expr='in')
-    conditions = django_filters.BaseInFilter(field_name='road_conditions__name', lookup_expr='in')
-    violations = django_filters.BaseInFilter(field_name='participant__violations__name', lookup_expr='in')
     id = django_filters.CharFilter(field_name='slug', lookup_expr="exact")
-    street = django_filters.BaseInFilter(field_name='street', lookup_expr='in')
     """

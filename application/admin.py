@@ -37,3 +37,8 @@ class ModeratorAdmin(admin.ModelAdmin):
 @admin.register(models.OpenData)
 class OpenDataAdmin(admin.ModelAdmin):
     list_display = ('region', 'date')
+
+
+@admin.register(models.BriefData)
+class BriefDataAdmin(admin.ModelAdmin):
+    list_display = ('date', 'death_count')
