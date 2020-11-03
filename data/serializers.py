@@ -44,6 +44,7 @@ class DTPSerializer(serializers.Serializer):
     region_slug = serializers.CharField(source='region.slug')
     category = serializers.IntegerField(source='category.id')
     address = serializers.CharField()
+    street = serializers.CharField()
     category_name = serializers.CharField(source='category.name')
     weather = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     nearby = serializers.PrimaryKeyRelatedField(read_only=True, many=True)

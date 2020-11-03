@@ -467,10 +467,7 @@ def add_dtp_record(item):
     )
 
     if area_code and parent_code:
-        if area_code == "63401" and parent_code == "63":
-            dtp.region = get_object_or_404(models.Region, gibdd_code="63575", parent_region__gibdd_code="63")
-        else:
-            dtp.region = get_object_or_404(models.Region, gibdd_code=area_code, parent_region__gibdd_code=parent_code)
+        dtp.region = get_object_or_404(models.Region, gibdd_code=area_code, parent_region__gibdd_code=parent_code)
 
     dtp.gibdd_latest_check = timezone.now()
 
