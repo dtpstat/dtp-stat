@@ -128,13 +128,16 @@ def make_img(source):
 
     # text second line
     text = "на дорогах России "
+    w_text, h_text = draw.textsize(text, font=text_font)
     w, h = draw.textsize(text + source['string_date'], font=text_font)
-    draw.text((crashes_deaths_ratio - w / 2, 0.65 * H), text, (255, 255, 255), font=text_font)
+    w_coord = crashes_deaths_ratio - w / 2
+    h_coord = 0.65 * H
+    draw.text((w_coord, h_coord), text, (255, 255, 255), font=text_font)
 
     text = " " + source['string_date'] + " "
-    w, h = draw.textsize(text, font=text_font)
-    draw.rectangle(((W*0.58, 0.65 * H),(W*0.58+w, 0.65 * H+h)), fill="white")
-    draw.text((W*0.58, 0.65 * H), text, (0, 0, 0), font=text_font)
+    w_string, h_string = draw.textsize(text, font=text_font)
+    draw.rectangle(((w_coord + w_text, h_coord*1.01),(w_coord + w_text + w_string, (h_coord + h)*1.01)), fill="white")
+    draw.text((w_coord + w_text, 0.65 * H), text, (0, 0, 0), font=text_font)
 
     # low line
     low_line = int(0.85 * H)
