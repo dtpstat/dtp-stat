@@ -20,12 +20,13 @@ services:
       SECRET_KEY: secret
       DATABASE_URL: 'postgis://docker:docker@db:5432/gis'
       STATIC_ROOT: '/static'
-      STATICFILES_DIRS: '/staticfiles'
+      STATICFILES_DIRS: '/code/static'
       RECAPTCHA_PUBLIC_KEY: test
       RECAPTCHA_PRIVATE_KEY: test
       DEBUG: 1
       PROJECT_PATH: /code
       STATSD_HOST: dd-agent
+      ALLOWED_HOSTS: localhost
 
 networks:
   backend:

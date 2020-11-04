@@ -1,17 +1,22 @@
-from django.db.models import Sum, Q
-from django.shortcuts import get_object_or_404, render, redirect
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.contrib.gis.geos import Point
-
-from data import models as data_models
-from data import utils as data_utils
-from application import models
-from application import forms
-from application import utils
+import datetime
 
 import requests
-import datetime
+from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import Point
+from django.db.models import Q, Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaulttags import register
+from django.utils import timezone
+
+from application import forms, models, utils
+from data import models as data_models
+from data import utils as data_utils
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
 
 
 def home(request):
@@ -80,17 +85,32 @@ def donate(request):
 
 def dtp(request, slug):
     dtp_item = get_object_or_404(data_models.DTP, gibdd_slug=slug)
-    participants = dtp_item.participant_set.order_by('violations')
+    participants = dtp_item.participant_set.order_by('violations').filter(vehicle__isnull=True)
     vehicles = data_models.Vehicle.objects.filter(participant__dtp=dtp_item).distinct()
     injured = dtp_item.participant_set.filter(severity__level__in=[1,2,3]).count()
     dead = dtp_item.participant_set.filter(severity__level__in=[4]).count()
+    tags = dtp_item.tags.all()
+    participant_role_map = {
+        'Пешеход': 'pedestrian',
+        'Велосипедист': 'cyclist',
+        'Водитель': 'wheel',
+    }
+    participant_severity_map = {
+        4: 'dead',
+        3: 'injured',
+    }
+    posts = models.BlogPost.objects.order_by("?")[:3]
 
     return render(request, "dtp/dtp.html", context={
         'dtp': dtp_item,
         'participants': participants,
         'vehicles': vehicles,
         'injured': injured,
-        'dead': dead
+        'dead': dead,
+        'participant_role_map': participant_role_map,
+        'participant_severity_map': participant_severity_map,
+        'tags': tags,
+        'posts': posts,
     })
 
 
@@ -189,5 +209,4 @@ def ticket(request, ticket_id):
         return render(request, "board/ticket.html", context={
             "ticket_item": ticket_item
         })
-
 
