@@ -18,6 +18,7 @@ from django.urls import path, include
 from data import views as data_views
 from application import views as app_views
 from application import views_api as api_views
+from django.views.decorators.cache import cache_page
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -45,8 +46,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/dtp/', api_views.DTPApiView.as_view()),
+    path('api/dtp_load/', cache_page(24 * 60 * 60)(api_views.DTPApiViewLoad.as_view())),
     path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
-    path('api/filters/', api_views.FiltersApiView.as_view()),
+    path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
+    path('api/test/', api_views.mvcs),
 ]
 
 if settings.DEBUG:

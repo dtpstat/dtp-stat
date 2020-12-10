@@ -34,3 +34,5 @@ pymorphy2==0.8
 beautifulsoup4==4.9.3
 tweepy==3.9.0
 python-telegram-bot==13.0
+drf-serializer-cache==0.3.4
+python-memcached==1.59

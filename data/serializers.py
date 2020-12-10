@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from drf_extra_fields.geo_fields import PointField
 from data import models
+from drf_serializer_cache import SerializerCacheMixin
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -33,18 +34,18 @@ class TestSerializer(serializers.RelatedField):
         model = models.Participant
 
 
-class DTPSerializer(serializers.Serializer):
+class DTPSerializer(SerializerCacheMixin, serializers.Serializer):
     id = serializers.CharField(source='gibdd_slug')
     datetime = serializers.DateTimeField()
-    severity = serializers.IntegerField(source='severity.level')
     participants = serializers.IntegerField()
     injured = serializers.IntegerField()
     dead = serializers.IntegerField()
     point = PointField()
-    region_slug = serializers.CharField(source='region.slug')
-    category = serializers.IntegerField(source='category.id')
     address = serializers.CharField()
     street = serializers.CharField()
+    severity = serializers.IntegerField(source='severity.level')
+    region_slug = serializers.CharField(source='region.slug')
+    category = serializers.IntegerField(source='category.id')
     category_name = serializers.CharField(source='category.name')
     weather = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
     nearby = serializers.PrimaryKeyRelatedField(read_only=True, many=True)

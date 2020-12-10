@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 from . import models
 from application import utils as app_utils
+from django.core.cache import cache
 
 env = environ.Env(
     PROXY_LIST=(list, [])
@@ -428,8 +429,6 @@ def update_dtp_data(dtp):
     dtp_datetime = pytz.timezone('UTC').localize(
         datetime.datetime.strptime(item['date'] + " " + item['Time'], '%d.%m.%Y %H:%M'))
 
-
-
     get_geo_data(item, dtp)
 
     dtp.datetime = dtp_datetime
@@ -645,6 +644,7 @@ def check_dtp():
     # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
     if downloads_no_update.count() > 0:
         regions_crawl(downloads_no_update, tags=False)
+        cache.clear()
 
     """
     # потом смотрим на архивные данные

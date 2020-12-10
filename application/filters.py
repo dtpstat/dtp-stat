@@ -18,6 +18,11 @@ class DTPFilterSet(django_filters.FilterSet):
     geo_frame = django_filters.CharFilter(method=geo_filter, required=True)
 
 
+class DTPLoadFilterSet(django_filters.FilterSet):
+    year = django_filters.NumberFilter(field_name='datetime', lookup_expr='year', required=True)
+    region_slug = django_filters.CharFilter(field_name='region__parent_region__slug', required=True)
+
+
 class DTPStatFilterSet(django_filters.FilterSet):
     start_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='gte')
     end_date = django_filters.DateFilter(field_name='datetime__date', lookup_expr='lte')

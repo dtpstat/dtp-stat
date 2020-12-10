@@ -460,3 +460,21 @@ footer a {
 	margin-top: 30px!important;
 	margin-bottom: 30px!important;
 }
+
+.ui-menu {
+	z-index: 100;
+	padding: 0;
+}
+
+.ui-helper-hidden-accessible {
+	display: none;
+}
+
+.ui-menu .ui-menu-item {
+    color: #96f226;
+    border-radius: 0px;
+	list-style: none;
+	padding: 10px;
+	cursor: pointer;
+	background: white;
+}

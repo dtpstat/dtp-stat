@@ -13,6 +13,9 @@ from application import forms, models, utils
 from data import models as data_models
 from data import utils as data_utils
 
+import environ
+env = environ.Env()
+environ.Env.read_env()
 
 @register.filter
 def get_item(dictionary, key):
@@ -23,7 +26,8 @@ def home(request):
     dtps = data_models.DTP.objects.all()
 
     return render(request, "index.html", context={
-        "dtps": dtps
+        "dtps": dtps,
+        'here_token': env('HERE_TOKEN')
     })
 
 

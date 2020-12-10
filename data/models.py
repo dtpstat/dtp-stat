@@ -127,7 +127,7 @@ class DTP(models.Model):
     street = models.CharField(max_length=1000, help_text="street", null=True, blank=True, default=None, db_index=True)
     street_category = models.CharField(max_length=1000, help_text="street category", null=True, blank=True, default=None, db_index=True)
     road_category = models.CharField(max_length=1000, help_text="road category", null=True, blank=True, default=None, db_index=True)
-    point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326)
+    point = models.PointField(help_text="coordinates", null=True, default=None, srid=4326, spatial_index=True)
     point_is_verified = models.BooleanField(help_text="point is valid and verified", default=False)
 
     datetime = models.DateTimeField(help_text="datetime", null=True, blank=True, default=None, db_index=True)

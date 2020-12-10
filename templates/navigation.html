@@ -9,14 +9,14 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     {% if request.resolver_match.url_name == 'home' %}
-        <!--
+
     <form class="form-inline mr-auto mt-2 mt-lg-0 d-lg-block" role="form">
         <div class="form-group">
-            <input class="form-control" type="text" />
+            <input class="form-control" type="text" id="regionSearch">
             <i class="fas fa-search"></i>
         </div>
     </form>
-    -->
+
     {% endif %}
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -39,3 +39,64 @@
         </ul>
     </div>
 </nav>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<script>
+    (function () {
+        function makeSearch(term, coords, callback) {
+            url = 'https://autosuggest.search.hereapi.com/v1/autosuggest?at=' + coords + '&lang=ru&apiKey={{ here_token }}&limit=10&q=' + term
+            $.get(url).done(function (data) {
+                options = data.items.map(function (item) {
+                    if ( item.address.label.includes('Россия')) {
+                        return {
+                            label: item.title,
+                            value: item.title,
+                            coords: item.position
+                        }
+                    }
+
+                })
+                console.log(options);
+                callback(options);
+            });
+        }
+
+        function replaceUrlParam(url, paramName, paramValue)
+        {
+            if (paramValue == null) {
+                paramValue = '';
+            }
+            var pattern = new RegExp('\\b('+paramName+'=).*?(&|#|$)');
+            if (url.search(pattern)>=0) {
+                return url.replace(pattern,'$1' + paramValue + '$2');
+            }
+            url = url.replace(/[?#]$/,'');
+            return url + (url.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue;
+        }
+
+        function goToRegionPage(coords) {
+            var old_url = window.location.href;
+            var new_url = replaceUrlParam(old_url, 'center', coords.lat.toString() + "," + coords.lng.toString());
+            window.location.href = new_url;
+        }
+
+        $('#regionSearch').autocomplete({
+            minLength: 3,
+            source: function (request, response) {
+                var url = new URL(window.location.href);
+                var coords = url.searchParams.get("c");
+                if (coords == null){
+                    coords = '55.7498,37.6179'
+                } else {
+                    coords = coords.replace('_',',')
+                }
+                makeSearch(request.term, coords, response);
+            },
+            select: function (event, ui) {
+                console.log(ui.item.coords);
+                goToRegionPage(ui.item.coords);
+            }
+        });
+    })();
+</script>

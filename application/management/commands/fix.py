@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from application import utils
 from data import models
+from data import serializers
 from data import utils as data_utils
 import pandas as pd
 from django.db.models import Count, Q
@@ -12,14 +13,11 @@ import glob
 import shutil
 
 
-
 class Command(BaseCommand):
     help = 'fix'
 
     def handle(self, *args, **kwargs):
-        import telegram
-        import environ
-        env = environ.Env()
-
-        bot = telegram.Bot(token=env('TELEGRAM_TOKEN'))
-        bot.send_message(48994754, text='test')
+        data = models.DTP.objects.filter(region__parent_region__slug='moskva')
+        serializer = serializers.DTPSerializer(data, many=True)
+        with open('test.json', 'w') as data_file:
+            json.dump(serializer.data, data_file, ensure_ascii=False)
