@@ -7,7 +7,7 @@ import django_filters.rest_framework
 from rest_framework.decorators import action, api_view
 
 from django.db.models import Sum, Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect, reverse, HttpResponseRedirect
 
 from data import models as data_models
 from data import serializers as data_serializers
@@ -16,12 +16,16 @@ from application import utils, filters as data_filters
 from application import models
 from django.utils import timezone
 from django.templatetags.static import static
+from django.conf import settings
 
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 import calendar
 import datetime
+import os
+import json
 
 
 class CacheMixin(object):
@@ -65,6 +69,21 @@ class DTPApiViewLoad(generics.ListAPIView):
     )
     serializer_class = data_serializers.DTPSerializer
     filterset_class = data_filters.DTPLoadFilterSet
+
+
+def mapdata(request):
+    if request.GET.get('year') and request.GET.get('region_slug'):
+        # files = os.listdir(settings.STATIC_ROOT)
+        files = os.listdir('static/data')
+        for file in files:
+            if request.GET.get('year') in file and request.GET.get('region_slug') in file:
+                with open('static/data/' + file) as data_file:
+                    data = json.load(data_file)
+
+                return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
+
+        utils.mapdata(request.GET.get('region_slug'), request.GET.get('year'))
+        return HttpResponseRedirect('?year=' + request.GET.get('year') + '&region_slug=' + request.GET.get('region_slug').format(reverse('mapdata')))
 
 
 #@cache_page(24 * 60 * 60)

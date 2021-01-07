@@ -17,6 +17,7 @@ from tqdm import tqdm
 from application import models
 from data import models as data_models
 from data import utils as data_utils
+from data import serializers as data_serializers
 
 from django.conf import settings
 
@@ -150,7 +151,6 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     with open(path, 'w') as data_file:
         json.dump(geo_data, data_file, ensure_ascii=False)
 
-    print(settings.BASE_DIR)
     if region_slug == "russia":
         shutil.make_archive(region_slug + '.geojson', 'zip', settings.BASE_DIR + '/media/opendata/')
 
@@ -203,5 +203,23 @@ def is_moderator(user):
 
     return False
 
+
+def mapdata(region_slug=None, year=None):
+    if region_slug:
+        regions = data_models.Region.objects.filter(slug=region_slug)
+    else:
+        regions = data_models.Region.objects.filter(parent_region=None)
+
+    if year:
+        years = [year]
+    else:
+        years = [x for x in range(2015, datetime.datetime.now().year + 1)]
+
+    for region_value in regions:
+        for year_value in years:
+            data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value)
+            data = data_serializers.DTPSerializer(data, many=True).data
+            with open('static/data/' + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
+                json.dump(data, data_file, ensure_ascii=False)
 
 
