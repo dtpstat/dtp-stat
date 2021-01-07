@@ -3,175 +3,158 @@
 {% load static %}
 
 {% block extra-head %}
-	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec"
+            type="text/javascript"></script>
     <script src="{% static 'js/buttonstrip.min.js' %}"></script>
     <script src="{% static 'js/vendor/jquery-3.5.1.min.js' %}"></script>
     <script src="{% static 'js/dtp-card.js' %}"></script>
 
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
-	<link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-	      rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/style-dtp-card.css' %}">
 
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 {% endblock %}
 
 {% block content %}
-<div class="dtp">
-	<div id="toggle">
-		<div id="map"></div>
-		<div id="panorama" class="d-none"></div>
-	</div>
-	<div class="container">
-		<div class="row">
+    <div class="dtp">
+        <div id="toggle">
+            <div id="map"></div>
+            <div id="panorama" class="d-none"></div>
+        </div>
+        <div class="container">
+            <div class="row">
 
-			<div class="col-12 col-md-auto justify-content-center d-md-block d-none">
-				<div class="scheme-wrap d-flex flex-wrap align-items-center">
-					<img src="{% static 'scheme' %}/{{ dtp.scheme }}.png" class="scheme">
-					<!-- <div class="scheme-label"><span>6</span> фото</div> -->
-				</div>
-			</div>
+                <div class="col-12 col-md-auto justify-content-center d-md-block d-none">
+                    <div class="scheme-wrap d-flex flex-wrap align-items-center">
+                        <img src="{% static 'scheme' %}/{{ dtp.scheme }}.png" class="scheme">
+                        <!-- <div class="scheme-label"><span>6</span> фото</div> -->
+                    </div>
+                </div>
 
-			<div class="col-md col-12 pt-3">
-				<div class="map-buttons row justify-content-between">
-					<div class="col-auto">
-						<a href="/" class="button" target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
-					</div>
-					<div class="col-auto toggle-map d-none" id='toggle-check'>
-						<a class="button toggle active" id="toggle-map" data-to="map"><i class="fas fa-map-marker-alt"></i>
-							Карта</a>
-						<a class="button toggle" id="toggle-panorama" data-to="panorama"><i class="fas fa-video"></i> Панорама</a>
-					</div>
+                <div class="col-md col-12 pt-3">
+                    <div class="map-buttons row justify-content-between">
+                        <div class="col-auto">
+                            <a href="{% url "home" %}?center={{ dtp.point.0 }}:{{ dtp.point.1 }}" class="button"
+                               target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
+                        </div>
+                        <div class="col-auto toggle-map d-none" id='toggle-check'>
+                            <a class="button toggle active" id="toggle-map" data-to="map"><i
+                                    class="fas fa-map-marker-alt"></i>
+                                Карта</a>
+                            <a class="button toggle" id="toggle-panorama" data-to="panorama"><i
+                                    class="fas fa-video"></i> Панорама</a>
+                        </div>
 
-				</div>
+                    </div>
 
-				<p>{{ dtp.datetime|date:'l' }}, {{ dtp.datetime|date:'d.m.Y' }} в  {{ dtp.datetime|date:'H:i' }}
+                    <p>{{ dtp.datetime|date:'l' }}, {{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }}
 
-					<span style="color:#ddd; margin: 0 5px;">|</span>
-                    {{ dtp.address| default_if_none:"<span style='color:#ddd'>Адрес неизвестен</span>" }}</p>
-                <h1>{{ dtp.category.name }}</h1>
-				<div class="row">
-					<div class="col-auto indicator indicator_transport">
-						<div class="row">
-							<div class="col-auto pr-0">
-                                <img src="{% static 'media/all.svg' %}" class="dtp-icon">
-							</div>
-							<div class="col">
-								<p class="name">Транспорт</p>
-								<p class="value">{{ vehicles.count }}</p>
-							</div>
-						</div>
-					</div>
-					<div class="col-auto indicator indicator_participants">
-						<div class="row">
-							<div class="col-auto pr-0">
-                                <img src="{% static 'media/participants.svg' %}" class="dtp-icon">
-							</div>
-							<div class="col">
-								<p class="name">Участники</p>
-								<p class="value">{{ dtp.participant_set.count }}</p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-auto indicator indicator_injured">
-						<div class="row">
-							<div class="col-auto pr-0">
-                                <img src="{% static 'media/injured.svg' %}" class="dtp-icon">
-							</div>
-							<div class="col">
-								<p class="name">Пострадали</p>
-								<p class="value">{{ injured }}</p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-auto indicator indicator_dead">
-						<div class="row">
-							<div class="col-auto pr-0">
-                                <img src="{% static 'media/dead.svg' %}" class="dtp-icon">
-							</div>
-							<div class="col">
-								<p class="name">Погибли</p>
-								<p class="value">{{ dead }}</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<section class="tags">
-		<div class="container">
-            <p>
-                {% for tag in tags %}
-                    <a href="" class="tag-btn">{{ tag }}</a>
-                {% endfor %}
-                <button class="more-tags" type="button">Ещё 5 тегов...</button>
-            </p>
-
-		</div>
-	</section>
-	<section class="participants">
-		<div class="container">
-			<h2>Участники ДТП</h2>
-		</div>
-		<div class="participants__inner horizontal-scroll">
-			<div class="row">
-
-                {% for participant in participants %}
-                    <div class="col-12 col-sm-6 col-md-auto">
-                        <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level}}">
-                            <div class="participant-card__header">
-                                <span class="participant-card__icon">
-                                    <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg" width="24" height="24" alt="">
-                                </span>
-                                <div class="participant-card__info">
-                                    <p><b>{{ participant.role }}</b></p>
-                                    <p>{{ participant.gender }}</p>
+                        <span style="color:#ddd; margin: 0 5px;">|</span>
+                        {{ dtp.address| default_if_none:"<span style='color:#ddd'>Адрес неизвестен</span>" }}</p>
+                    <h1>{{ dtp.category.name }}</h1>
+                    <div class="row">
+                        <div class="col-auto indicator indicator_transport">
+                            <div class="row">
+                                <div class="col-auto pr-0">
+                                    <img src="{% static 'media/all.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col">
+                                    <p class="name">Транспорт</p>
+                                    <p class="value">{{ vehicles.count }}</p>
                                 </div>
                             </div>
-                            <div class="participant-card__content">
-                                <p>{{ participant.health_status }}</p>
-                            </div>
-                            {% if participant.violations.count %}
-                                <div class="participant-card__footer">
-                                    {% for violation in participant.violations.all %}
-                                        <p>{{ violation.name }}</p>
-                                    {% endfor %}
+                        </div>
+                        <div class="col-auto indicator indicator_participants">
+                            <div class="row">
+                                <div class="col-auto pr-0">
+                                    <img src="{% static 'media/participants.svg' %}" class="dtp-icon">
                                 </div>
-                            {% endif %}
+                                <div class="col">
+                                    <p class="name">Участники</p>
+                                    <p class="value">{{ dtp.participant_set.count }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto indicator indicator_injured">
+                            <div class="row">
+                                <div class="col-auto pr-0">
+                                    <img src="{% static 'media/injured.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col">
+                                    <p class="name">Пострадали</p>
+                                    <p class="value">{{ injured }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto indicator indicator_dead">
+                            <div class="row">
+                                <div class="col-auto pr-0">
+                                    <img src="{% static 'media/dead.svg' %}" class="dtp-icon">
+                                </div>
+                                <div class="col">
+                                    <p class="name">Погибли</p>
+                                    <p class="value">{{ dead }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+        </div>
 
-			</div>
+        <section class="tags">
+            <div class="container">
+                <p>
+                    {% for item in dtp.road_conditions.all %}
+                        <a class="tag-btn">{{ item }}</a>
+                    {% endfor %}
+                    {% for item in dtp.weather.all %}
+                        <a class="tag-btn">{{ item }}</a>
+                    {% endfor %}
+                    <a class="tag-btn">{{ dtp.light }}</a>
 
-            {% for vehicle in vehicles %}
-                <h3>{{ vehicle.brand }}, {{ vehicle.year }}</h3>
+                    <!-- <button class="more-tags" type="button">Ещё 5 тегов...</button> -->
+                </p>
+                <p>
+                    {% for item in dtp.nearby.all %}
+                        <a class="tag-btn">{{ item }}</a>
+                    {% endfor %}
+                </p>
+                <p>
+                    {% for tag in dtp.tags.all %}
+                        <a class="tag-btn">{{ tag }}</a>
+                    {% endfor %}
+                    <!-- <button class="more-tags" type="button">Ещё 5 тегов...</button> -->
+                </p>
+
+            </div>
+        </section>
+
+        <section class="participants">
+            <div class="container">
+                <h2>Участники ДТП</h2>
+                <div class="participants__inner horizontal-scroll">
                 <div class="row">
-
-                    {% for participant in vehicle.participant_set.all %}
+                    {% for participant in participants %}
                         <div class="col-12 col-sm-6 col-md-auto">
-                            <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level}}">
+                            <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level }}">
                                 <div class="participant-card__header">
-                                    <span class="participant-card__icon">
-                                        <img src="{% static 'media/wheel.svg' %}" width="24" height="24" alt="">
-                                    </span>
+                                <span class="participant-card__icon">
+                                    <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
+                                         width="24" height="24" alt="">
+                                </span>
                                     <div class="participant-card__info">
                                         <p><b>{{ participant.role }}</b></p>
-                                        <p>
-                                            {% if participant.driving_experience %}
-                                                {{ participant.gender }}, стаж — {{ participant.driving_experience }} года
-                                            {% else %}
-                                                {{ participant.gender }} 
-                                            {% endif %}
-                                        </p>
+                                        <p>{{ participant.gender }}</p>
                                     </div>
                                 </div>
                                 <div class="participant-card__content">
@@ -187,260 +170,233 @@
                             </div>
                         </div>
                     {% endfor %}
+
                 </div>
-            {% endfor %}
-		</div>
 
-	</section>
+                {% for vehicle in vehicles %}
+                    <h3>{{ vehicle.brand }}, {{ vehicle.year }}{% if vehicle.color %}, {{ vehicle.color|lower }}{% endif %}</h3>
+                    <div class="row">
 
-	<div class="row justify-content-center">
-		<div class="col-auto">
-			<a href="" class="error-report">
-			<span class="error-report__label">
-                <img src="{% static 'media/gibdd.svg' %}" width="36" height="32" alt="">
-				Официальные данные ГИБДД
-			</span>
-				<span class="error-report__button">Нашли ошибку?</span>
-			</a>
-		</div>
-	</div>
-
-	<section class="comments-section">
-		<div class="container">
-			<h2>Комментарии &mdash; <span>2</span></h2>
-			<div class="comments-section__list">
-				<ul class="comments-list">
-					<li class="comments-list__item">
-						<div class="comment-item">
-							<div class="comment-item__header">
-								<div class="comment-item__avatar avatar">
-                                    <img src="{% static 'media/person01.jpg' %}" srcset="{% static 'media/person01@2x.jpg 2x' %}" width="28" height="28" alt="">
-								</div>
-								<p class="comment-item__name">Павел Кучерягин</p>
-								<p class="comment-item__date">23 апреля 2020</p>
-							</div>
-							<div class="comment-item__content">
-								<p>информация о верификации данных, если координаты изменены при обработке (координаты отличаются от заявленных ГИБДД, но прошли подтверждение модератором).</p>
-							</div>
-						</div>
-					</li>
-					<li class="comments-list__item">
-						<div class="comment-item">
-							<div class="comment-item__header">
-								<div class="comment-item__avatar avatar">
-                                    <img src="{% static 'media/person02.jpg' %}" srcset="{% static 'media/person02@2x.jpg 2x' %}" width="28" height="28" alt="">
-								</div>
-								<p class="comment-item__name">Anna Kravtz</p>
-								<p class="comment-item__date">12 декабря 2019</p>
-							</div>
-							<div class="comment-item__content">
-								<p>Оставленная пользователями дополнительная/уточняющая информация</p>
-							</div>
-						</div>
-					</li>
-				</ul>
-			</div>
-			<div class="comments-section__form">
-				<form action="#" method="post" class="comment-form">
-					<div class="comment-form__field-wrapper">
-						<label class="visually-hidden" for="comment-field">Поле добавления комментария</label>
-						<textarea id="comment-field" placeholder="Добавить комментарий..."></textarea>
-						<div class="comment-form__avatar avatar"></div>
-						<button class="comment-form__submit btn" type="submit">Отправить</button>
-					</div>
-				</form>
-			</div>
-
-		</div>
-	</section>
-
-	<section class="news-section">
-		<div class="container">
-			<h2>Новости по теме</h2>
-			<div class="row">
-                {% for post in posts %}
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <a href="" class="news-card">
-                            <div class="news-card__image">
-                                <img src="{{ post.cover.url }}" width="300"
-                                     height="200" alt="">
+                        {% for participant in vehicle.participant_set.all|dictsort:"role" %}
+                            <div class="col-12 col-sm-6 col-md-auto">
+                                <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level }}">
+                                    <div class="participant-card__header">
+                                    <span class="participant-card__icon">
+                                        <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
+                                             width="24" height="24" alt="">
+                                    </span>
+                                        <div class="participant-card__info">
+                                            <p><b>{{ participant.role }}</b></p>
+                                            <p>
+                                                {% if participant.driving_experience %}
+                                                    {{ participant.gender }}, стаж (лет) —
+                                                    {{ participant.driving_experience }}
+                                                {% else %}
+                                                    {{ participant.gender }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="participant-card__content">
+                                        <p>{{ participant.health_status }}</p>
+                                    </div>
+                                    {% if participant.violations.count %}
+                                        <div class="participant-card__footer">
+                                            {% for violation in participant.violations.all %}
+                                                <p>{{ violation.name }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <h3>post.title</h3>
-                        </a>
+                        {% endfor %}
                     </div>
                 {% endfor %}
-			</div>
-		</div>
-	</section>
-</div>
+            </div>
+            </div>
+
+
+        </section>
+
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <a class="error-report">
+                    <span class="error-report__label">
+                        <img src="{% static 'media/gibdd.svg' %}" width="36" height="32" alt="">
+                        Официальные данные ГИБДД
+                    </span>
+                   <!-- <span class="error-report__button">Нашли ошибку?</span> -->
+                </a>
+            </div>
+        </div>
+
+        <hr>
+
+        <!--
+        <section class="comments-section">
+            <div class="container">
+                <h2>Комментарии &mdash; <span>2</span></h2>
+                <div class="comments-section__list">
+                    <ul class="comments-list">
+                        <li class="comments-list__item">
+                            <div class="comment-item">
+                                <div class="comment-item__header">
+                                    <div class="comment-item__avatar avatar">
+                                        <img src="{% static 'media/person01.jpg' %}"
+                                             srcset="{% static 'media/person01@2x.jpg 2x' %}" width="28" height="28"
+                                             alt="">
+                                    </div>
+                                    <p class="comment-item__name">Павел Кучерягин</p>
+                                    <p class="comment-item__date">23 апреля 2020</p>
+                                </div>
+                                <div class="comment-item__content">
+                                    <p>информация о верификации данных, если координаты изменены при обработке
+                                        (координаты отличаются от заявленных ГИБДД, но прошли подтверждение
+                                        модератором).</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="comments-list__item">
+                            <div class="comment-item">
+                                <div class="comment-item__header">
+                                    <div class="comment-item__avatar avatar">
+                                        <img src="{% static 'media/person02.jpg' %}"
+                                             srcset="{% static 'media/person02@2x.jpg 2x' %}" width="28" height="28"
+                                             alt="">
+                                    </div>
+                                    <p class="comment-item__name">Anna Kravtz</p>
+                                    <p class="comment-item__date">12 декабря 2019</p>
+                                </div>
+                                <div class="comment-item__content">
+                                    <p>Оставленная пользователями дополнительная/уточняющая информация</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="comments-section__form">
+                    <form action="#" method="post" class="comment-form">
+                        <div class="comment-form__field-wrapper">
+                            <label class="visually-hidden" for="comment-field">Поле добавления комментария</label>
+                            <textarea id="comment-field" placeholder="Добавить комментарий..."></textarea>
+                            <div class="comment-form__avatar avatar"></div>
+                            <button class="comment-form__submit btn" type="submit">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+        -->
+
+        <section class="news-section">
+            <div class="container">
+                <h2>Новости по теме</h2>
+                <div class="row">
+                    {% for post in posts %}
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <a href="" class="news-card">
+                                <div class="news-card__image">
+                                    <img src="{{ post.cover.url }}" width="300"
+                                         height="200" alt="">
+                                </div>
+                                <h3>{{ post.title }}</h3>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
 
 
 
-<footer>
-	<div class="container pt-4">
-		<div class="row">
-			<div class="col-12 col-lg-6 mb-4">
-                <img src="{% static 'media/logo.png' %}" class="logo">
-				<div class="description">
-					Проект посвящен проблеме дорожно-транспортных происшествий в России. Цель проекта — повышение безопасности
-					дорожного движения и снижение смертности в ДТП.
-				</div>
-			</div>
-			<div class="donate-box col-12 col-lg-6 mb-4">
-				<h3>Сбор ежемесячных пожертвований на проект</h3>
-				<div class="progress">
-					<div class="progress-bar bg-info" role="progressbar" style="width: 35.88333%;"></div>
-				</div>
-				<div class="row justify-content-between ">
-					<div class="col small">Собрано: 35 883р. из 100 000р.</div>
-					<div class="col text-right donate-status-extra small">До конца сбора 16 дней</div>
-				</div>
-				<div class="text-right mt-4 mb-4">
-					<a class="button support" href="/donate/">Поддержать проект</a>
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-12 col-lg-6 mb-5">
-				<h3>Мы в социальных сетях</h3>
-				<div class="mt-4 soc_media">
-					<nobr><a href="https://twitter.com/dtp_stat" class="button"><i class="fab fa-twitter"></i> Карта ДТП в Twitter</a>
-					</nobr>
-					<nobr><a href="https://t.me/dtp_stat" class="button"><i class="fab fa-telegram-plane"></i>&nbsp;Карта&nbsp;ДТП&nbsp;в&nbsp;Telegram</a>
-					</nobr>
-				</div>
 
-			</div>
-			<div class="col-12 col-lg-6 mb-5">
-				<h3>Наши партнёры</h3>
-				<div class="partners">
-                    <a href="https://city4people.ru/" target="_blank"><img src="{% static 'media/gor.svg' %}" class="partner"></a>
-                    <a href="http://shtab.co/" target="_blank"><img src="{% static 'media/stab.svg' %}" class="partner"></a>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<hr style="margin: 0">
-
-	<div class="container footer">
-		<div class="row justify-content-center">
-			<div class="col-12 col-md-6 p-3 license">
-				<div class="row">
-					<div class="col-auto" style="font-size: 30px">
-						<i class="fab fa-creative-commons"></i>
-						<i class="fab fa-creative-commons-by"></i>
-					</div>
-					<div class="col">
-						<p>Использование материалов возможно с указанием активной ссылки на сайт</p>
-					</div>
-
-				</div>
-			</div>
-			<div class="col-12 col-md-6 p-3 justify-content-center">
-				<div class="row justify-content-center">
-					<div class="col-auto">
-						<a class="" href="/blog/">Что&nbsp;почитать</a>
-					</div>
-					<div class="col-auto">
-						<a class="" href="/opendata/">Скачать&nbsp;данные</a>
-					</div>
-					<div class="col-auto">
-						<a class="" href="/pages/about/">О&nbsp;проекте</a>
-					</div>
-				</div>
-
-			</div>
-		</div>
-	</div>
-</footer>
+    <script>
+        ymaps.ready(function () {
+            var myMap = new ymaps.Map('map', {
+                center: [{{ dtp.point.1 }} +0.0005, {{ dtp.point.0 }}], zoom: 16, controls: []
+            }, {
+                suppressMapOpenBlock: true
+            });
+            myMap.behaviors.disable(['scrollZoom', 'rightMouseButtonMagnifier']);
 
 
-<script>
-  ymaps.ready(function () {
-    var myMap = new ymaps.Map('map', {
-        center: [{{ dtp.point.1 }} + 0.0005, {{ dtp.point.0 }}], zoom: 16, controls: []
-    }, {
-      suppressMapOpenBlock: true
-    });
-    myMap.behaviors.disable(['scrollZoom', 'rightMouseButtonMagnifier']);
+            myPlacemark = new ymaps.Placemark([{{ dtp.point.1 }}, {{ dtp.point.0 }}], {
+                balloonContent: '{{ dtp.point.1 }}, {{ dtp.point.0 }}'
+            }, {
+                // Опции.
+                // Необходимо указать данный тип макета.
+                iconLayout: 'default#image', // Своё изображение иконки метки.
+                iconImageHref: '{% static "media/pin.svg" %}', // Размеры метки.
+                iconImageSize: [36, 50], // Смещение левого верхнего угла иконки относительно
+                // её "ножки" (точки привязки).
+                iconImageOffset: [-18, -50]
+            });
+
+            myMap.events.once('click', function () {
+                myMap.behaviors
+                    .enable('scrollZoom')
+                    .enable('multiTouch');
+            });
+
+            myMap.geoObjects.add(myPlacemark)
 
 
-    myPlacemark = new ymaps.Placemark([{{ dtp.point.1 }}, {{ dtp.point.0 }}], {
-      balloonContent: '{{ dtp.point.1 }}, {{ dtp.point.0 }}'
-    }, {
-      // Опции.
-      // Необходимо указать данный тип макета.
-      iconLayout: 'default#image', // Своё изображение иконки метки.
-      iconImageHref: '{% static "media/pin.svg" %}', // Размеры метки.
-      iconImageSize: [36, 50], // Смещение левого верхнего угла иконки относительно
-      // её "ножки" (точки привязки).
-      iconImageOffset: [-18, -50]
-    });
+            var createPlayer = ymaps.panorama.createPlayer('panorama', [{{ dtp.point.1 }}, {{ dtp.point.0 }}], {controls: []})
 
-    myMap.events.once('click', function () {
-      myMap.behaviors
-        .enable('scrollZoom')
-        .enable('multiTouch');
-    });
-
-    myMap.geoObjects.add(myPlacemark)
+            createPlayer.then(function (player) {
+                $('#toggle-check').removeClass('d-none')
+            }, function (reason) {
+            });
+        });
 
 
-    var createPlayer = ymaps.panorama.createPlayer('panorama', [{{ dtp.point.1 }}, {{ dtp.point.0 }}], {controls: []})
+    </script>
+    <script>
+        var active_toggle = 'toggle-map'
 
-    createPlayer.then(function (player) {
-      $('#toggle-check').removeClass('d-none')
-    }, function (reason) {
-    });
-  });
+        $('.toggle').click(function () {
+            if ($(this).attr('id') !== active_toggle) {
+                $('.toggle').removeClass('active');
+                $(this).addClass('active');
 
+                $('#toggle').children().addClass('d-none')
+                $('#' + $(this).attr("data-to")).removeClass('d-none')
 
-</script>
-<script>
-  var active_toggle = 'toggle-map'
-
-  $('.toggle').click(function () {
-    if ($(this).attr('id') !== active_toggle) {
-      $('.toggle').removeClass('active');
-      $(this).addClass('active');
-
-      $('#toggle').children().addClass('d-none')
-      $('#' + $(this).attr("data-to")).removeClass('d-none')
-
-      active_toggle = $(this).attr('id')
-    }
+                active_toggle = $(this).attr('id')
+            }
 
 
-  });
-</script>
+        });
+    </script>
 
 
-<script>
-  $(document).on('click', 'a[href^="#"]', function (e) {
-    if ($(this).attr('data-toggle') !== "collapse") {
-      // target element id
-      var id = $(this).attr('href');
+    <script>
+        $(document).on('click', 'a[href^="#"]', function (e) {
+            if ($(this).attr('data-toggle') !== "collapse") {
+                // target element id
+                var id = $(this).attr('href');
 
-      // target element
-      var $id = $(id);
-      if ($id.length === 0) {
-        return;
-      }
+                // target element
+                var $id = $(id);
+                if ($id.length === 0) {
+                    return;
+                }
 
-      // prevent standard hash navigation (avoid blinking in IE)
-      e.preventDefault();
+                // prevent standard hash navigation (avoid blinking in IE)
+                e.preventDefault();
 
-      // top position relative to the document
-      var pos = $(id).offset().top;
+                // top position relative to the document
+                var pos = $(id).offset().top;
 
-      // animated top scrolling
-      $('body, html').animate({scrollTop: pos}, 500);
-    }
+                // animated top scrolling
+                $('body, html').animate({scrollTop: pos}, 500);
+            }
 
 
-  });
+        });
 
-</script>
+    </script>
 
 {% endblock %}

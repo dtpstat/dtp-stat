@@ -98,10 +98,12 @@ def dtp(request, slug):
         'Пешеход': 'pedestrian',
         'Велосипедист': 'cyclist',
         'Водитель': 'wheel',
+        'Пассажир': 'passenger'
     }
     participant_severity_map = {
         4: 'dead',
         3: 'injured',
+        1: 'injured'
     }
     posts = models.BlogPost.objects.order_by("?")[:3]
 
