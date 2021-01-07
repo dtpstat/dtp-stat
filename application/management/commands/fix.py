@@ -17,7 +17,5 @@ class Command(BaseCommand):
     help = 'fix'
 
     def handle(self, *args, **kwargs):
-        data = models.DTP.objects.filter(region__parent_region__slug='moskva')
-        serializer = serializers.DTPSerializer(data, many=True)
-        with open('test.json', 'w') as data_file:
-            json.dump(serializer.data, data_file, ensure_ascii=False)
+        data = models.DTP.objects.all().values_list('scheme', flat=True).distinct()
+        print(list(data))

@@ -205,6 +205,9 @@ def is_moderator(user):
 
 
 def mapdata(region_slug=None, year=None):
+    if not os.path.exists(settings.MEDIA_ROOT + "/mapdata/"):
+        os.makedirs(settings.MEDIA_ROOT + "/mapdata/")
+
     if region_slug:
         regions = data_models.Region.objects.filter(slug=region_slug)
     else:
@@ -219,7 +222,7 @@ def mapdata(region_slug=None, year=None):
         for year_value in years:
             data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value)
             data = data_serializers.DTPSerializer(data, many=True).data
-            with open('static/data/' + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
+            with open(settings.MEDIA_ROOT + "/mapdata/" + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
                 json.dump(data, data_file, ensure_ascii=False)
 
 

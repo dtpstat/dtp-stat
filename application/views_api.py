@@ -72,12 +72,15 @@ class DTPApiViewLoad(generics.ListAPIView):
 
 
 def mapdata(request):
+    if not os.path.exists(settings.MEDIA_ROOT + "/mapdata/"):
+        os.makedirs(settings.MEDIA_ROOT + "/mapdata/")
+
     if request.GET.get('year') and request.GET.get('region_slug'):
         # files = os.listdir(settings.STATIC_ROOT)
-        files = os.listdir('static/data')
+        files = os.listdir(settings.MEDIA_ROOT + "/mapdata/")
         for file in files:
             if request.GET.get('year') in file and request.GET.get('region_slug') in file:
-                with open('static/data/' + file) as data_file:
+                with open(settings.MEDIA_ROOT + "/mapdata/" + file) as data_file:
                     data = json.load(data_file)
 
                 return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})

@@ -659,4 +659,5 @@ def check_dtp():
     """
 
     app_utils.opendata()
+    app_utils.mapdata()
 
