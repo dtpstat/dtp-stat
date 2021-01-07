@@ -216,3 +216,5 @@ def ticket(request, ticket_id):
             "ticket_item": ticket_item
         })
 
+def temp_map_icons(request, slug):
+    return redirect('/static/media/svg/' + slug)

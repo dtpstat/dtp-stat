@@ -462,8 +462,9 @@ footer a {
 }
 
 .ui-menu {
-	z-index: 100;
+	z-index: 10000;
 	padding: 0;
+	position: absolute;
 }
 
 .ui-helper-hidden-accessible {
@@ -477,4 +478,5 @@ footer a {
 	padding: 10px;
 	cursor: pointer;
 	background: white;
+
 }

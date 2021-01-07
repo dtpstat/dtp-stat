@@ -19,12 +19,14 @@ from data import views as data_views
 from application import views as app_views
 from application import views_api as api_views
 from django.views.decorators.cache import cache_page
+from django.views.generic.base import RedirectView
 
 from django.conf import settings
 from django.conf.urls.static import static
 
 
 urlpatterns = [
+    path('svg/<slug>', app_views.temp_map_icons, name='app.views'),
     path('', app_views.home, name='home'),
     path('accounts/', include('allauth.urls')),
     path('board/', app_views.board, name='board'),

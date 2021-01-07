@@ -77,7 +77,7 @@
 
         function goToRegionPage(coords) {
             var old_url = window.location.href;
-            var new_url = replaceUrlParam(old_url, 'center', coords.lat.toString() + "," + coords.lng.toString());
+            var new_url = replaceUrlParam(old_url, 'center', coords.lat.toString() + ":" + coords.lng.toString());
             window.location.href = new_url;
         }
 
@@ -94,7 +94,6 @@
                 makeSearch(request.term, coords, response);
             },
             select: function (event, ui) {
-                console.log(ui.item.coords);
                 goToRegionPage(ui.item.coords);
             }
         });

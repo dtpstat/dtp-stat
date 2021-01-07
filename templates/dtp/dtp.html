@@ -41,7 +41,7 @@
                 <div class="col-md col-12 pt-3">
                     <div class="map-buttons row justify-content-between">
                         <div class="col-auto">
-                            <a href="{% url "home" %}?center={{ dtp.point.0 }}:{{ dtp.point.1 }}" class="button"
+                            <a href="{% url "home" %}?center={{ dtp.point.1 }}:{{ dtp.point.0 }}&zoom=15" class="button"
                                target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
                         </div>
                         <div class="col-auto toggle-map d-none" id='toggle-check'>
