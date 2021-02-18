@@ -76,9 +76,10 @@
         }
 
         function goToRegionPage(coords) {
-            var old_url = window.location.href;
-            var new_url = replaceUrlParam(old_url, 'center', coords.lat.toString() + ":" + coords.lng.toString());
-            window.location.href = new_url;
+            var url = window.location.href;
+            var url = replaceUrlParam(url, 'center', coords.lat.toString() + ":" + coords.lng.toString());
+            var url = replaceUrlParam(url, 'zoom', '13');
+            window.location.href = url;
         }
 
         $('#regionSearch').autocomplete({

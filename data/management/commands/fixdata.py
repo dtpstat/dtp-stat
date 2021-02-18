@@ -1,3 +1,4 @@
+
 from django.core.management.base import BaseCommand
 from data import utils
 from data import models
@@ -9,6 +10,8 @@ class Command(BaseCommand):
     help = 'Fixes'
 
     def handle(self, *args, **kwargs):
-        for DTP in tqdm(models.DTP.objects.filter().iterator()):
-            if DTP.data['source']['infoDtp']['dor_k']:
-                print(DTP.data['source']['infoDtp']['dor_k'], DTP.region.name, DTP.region.parent_region.name, DTP.datetime)
+        import json
+        with open("media/mapdata/tomskaia-oblast_2020.json") as data_file:
+            data = json.load(data_file)
+
+        print(len([x for x in data if (x['region_slug'] == "tomsk" and x['datetime'].startswith("2020-12"))]))

@@ -79,7 +79,8 @@ def mapdata(request):
         # files = os.listdir(settings.STATIC_ROOT)
         files = os.listdir(settings.MEDIA_ROOT + "/mapdata/")
         for file in files:
-            if request.GET.get('year') in file and request.GET.get('region_slug') in file:
+            file_region_slug = file.split('_')[0]
+            if request.GET.get('year') in file and request.GET.get('region_slug') == file_region_slug:
                 with open(settings.MEDIA_ROOT + "/mapdata/" + file) as data_file:
                     data = json.load(data_file)
 
@@ -150,7 +151,7 @@ class FiltersApiView(APIView):
             region = region.parent_region
             downloads = data_models.Download.objects.filter(region=region).order_by('date')
         else:
-            downloads = data_models.Download.objects.all().order_by('date')
+            downloads = data_models.Download.objects.filter(last_update__isnull=False).order_by('date')
 
 
         # фильтр по дате

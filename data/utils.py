@@ -3,23 +3,25 @@ import json
 import logging
 import os
 import re
-
+from lxml import html
+from tqdm import tqdm
 import environ
 import herepy
 import pytz
 import requests
 from datadog import statsd
+
 from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from lxml import html
-from tqdm import tqdm
+from django.core.cache import cache
+from django.conf import settings
 
 from . import models
 from application import utils as app_utils
-from django.core.cache import cache
+
 
 env = environ.Env(
     PROXY_LIST=(list, [])
@@ -637,21 +639,21 @@ def check_dtp():
     # проверяем обновления на сайте ГИБДД
     check_dates_from_gibdd()
 
-    # сверяем с нашей базой и, если расходится, то загружаем данные
     downloads = models.Download.objects.all()
-    downloads_no_update = downloads.filter(last_update=None)
 
     # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
+    downloads_no_update = downloads.filter(last_update=None)
+    # downloads_no_update = downloads.filter(region_id=5017, date=datetime.date(2021, 1, 1))
     if downloads_no_update.count() > 0:
         regions_crawl(downloads_no_update, tags=False)
         cache.clear()
 
-    """
     # потом смотрим на архивные данные
     downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
     if downloads_old_update.count() > 0:
-        region_crawl(downloads_old_update, tags=False)
+        regions_crawl(downloads_old_update, tags=False)
 
+    """
     # потом смотрим на теги
     downloads_no_tags = downloads.filter(last_tags_update=None)
     elif downloads_no_tags.count() > 0:

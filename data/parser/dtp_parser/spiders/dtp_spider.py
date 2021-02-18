@@ -36,6 +36,7 @@ class DtpSpider(scrapy.Spider):
 
         for area_code in self.area_codes.split(','):
             for date in self.dates.split(","):
+                print("lol", date)
                 for tag_code in [x.code for x in tags]:
                     payload = dict()
                     payload_data = '{"date":["MONTHS:' + date + '"],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
@@ -60,9 +61,11 @@ class DtpSpider(scrapy.Spider):
         export = json.loads(response.body_as_unicode())
         if export['data']:
             export = literal_eval(export['data'])
+            print("!!!!", response.meta['date'], len(export['tab']))
 
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
+
 
                 if response.meta['date'] in export_dtp['date']:
                     export_dtp['area_code'] = response.meta['area_code']
@@ -79,7 +82,7 @@ class DtpSpider(scrapy.Spider):
 
     def handle_error(self, failure):
         if failure.check(HttpError):
-            if failure.value.response.status in [500, 200]:
+            if failure.value.response.status in [200]:
                 return
 
         raise CloseSpider("failed")
