@@ -15,14 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.cache import cache_page
+from django.shortcuts import redirect
+from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
+
 from data import views as data_views
 from application import views as app_views
 from application import views_api as api_views
-from django.views.decorators.cache import cache_page
-from django.views.generic.base import RedirectView
-
-from django.conf import settings
-from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -48,10 +49,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/dtp/', api_views.DTPApiView.as_view()),
-    path('api/dtp_load/', cache_page(24 * 60)(api_views.mapdata), name='mapdata'),
+    path('api/dtp_load/', cache_page(60 * 60)(api_views.mapdata), name='mapdata'),
     path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
     path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
     path('api/test/', api_views.mvcs),
+
+    path('<slug>/', app_views.old_redirect, name='old-redirect')
 ]
 
 if settings.DEBUG:

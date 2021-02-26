@@ -52,7 +52,7 @@ class DTPAdmin(admin.ModelAdmin):
     search_fields = ('region__name', 'region__parent_region__name', 'gibdd_slug')
     date_hierarchy = 'datetime'
     filter_horizontal = ('weather', 'nearby', 'road_conditions', 'tags', 'participant_categories')
-    list_filter = ('point_is_verified', 'status', 'gibdd_latest_check', 'gibdd_latest_change')
+    list_filter = ('point_is_verified', 'status', 'gibdd_latest_check', 'gibdd_latest_change', 'region__parent_region')
 
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget},

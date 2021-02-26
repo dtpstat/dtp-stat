@@ -218,3 +218,7 @@ def ticket(request, ticket_id):
 
 def temp_map_icons(request, slug):
     return redirect('/static/media/svg/' + slug)
+
+
+def old_redirect(request, slug):
+    return redirect("home")

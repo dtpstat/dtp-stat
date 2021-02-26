@@ -33,7 +33,11 @@
 
                 <div class="col-12 col-md-auto justify-content-center d-md-block d-none">
                     <div class="scheme-wrap d-flex flex-wrap align-items-center">
-                        <img src="{% static 'scheme' %}/{{ dtp.scheme }}.png" class="scheme">
+                        {% if dtp.scheme and dtp.scheme != "150" %}
+                            <img src="{% static 'scheme' %}/{{ dtp.scheme }}.png" class="scheme">
+                        {% else %}
+                            <img src="{% static 'scheme' %}/empty.png" class="scheme">
+                        {% endif %}
                         <!-- <div class="scheme-label"><span>6</span> фото</div> -->
                     </div>
                 </div>

@@ -627,12 +627,35 @@ def regions_crawl(downloads, tags=False):
         app_utils.opendata()
 
 
+
+
 def update_export_meta_data():
     for dtp in tqdm(models.DTP.objects.all()):
         dtp.data['export'] = dtp.as_dict()
         dtp.save()
 
     app_utils.opendata(force=True)
+
+
+def check_deleted_dtp(download):
+    download_item_dtps = models.DTP.objects.filter(
+        datetime__month=download.date.month,
+        datetime__year=download.date.year,
+        region__parent_region=download.region
+    )
+
+    download_item_dtps.filter(
+        gibdd_latest_check__gt=download.last_update - datetime.timedelta(hours=1),
+        status=False
+    ).update(
+        status=True
+    )
+
+    download_item_dtps.filter(
+        gibdd_latest_check__lt=download.last_update - datetime.timedelta(hours=1),
+        status=True
+    ).update(status=False)
+
 
 #@statsd.timed('dtpstat.check_dtp')
 def check_dtp():
@@ -646,7 +669,6 @@ def check_dtp():
     # downloads_no_update = downloads.filter(region_id=5017, date=datetime.date(2021, 1, 1))
     if downloads_no_update.count() > 0:
         regions_crawl(downloads_no_update, tags=False)
-        cache.clear()
 
     # потом смотрим на архивные данные
     downloads_old_update = downloads.filter(last_update__lte=timezone.now() - datetime.timedelta(days=40))
@@ -660,6 +682,10 @@ def check_dtp():
         region_crawl(downloads_no_tags, tags=True)
     """
 
-    app_utils.opendata()
+    for download in downloads.filter(last_update__isnull=False):
+        check_deleted_dtp(download)
     app_utils.mapdata()
+    app_utils.opendata()
+
+
 

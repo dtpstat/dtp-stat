@@ -5,6 +5,7 @@ import os
 import shutil
 import requests
 import datetime
+from tqdm import tqdm
 
 import pandas as pd
 from django.contrib.gis.db.models.functions import Distance
@@ -12,7 +13,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 from django.contrib.gis.measure import D
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, render
-from tqdm import tqdm
+from django.core.cache import cache
 
 from application import models
 from data import models as data_models
@@ -107,10 +108,11 @@ def opendata(region=None, force=False):
         data = []
 
         for obj in data_models.DTP.objects.filter(
-                region__in=region.region_set.all(),
-                datetime__date__lte=latest_download.date.replace(
-                    day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
-                )
+            region__in=region.region_set.all(),
+            datetime__date__lte=latest_download.date.replace(
+                day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
+            ),
+            status=True
         ):
             if not obj.data.get('export'):
                 obj.data['export'] = obj.as_dict()
@@ -118,25 +120,6 @@ def opendata(region=None, force=False):
 
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
-    """
-    latest_download = data_models.Download.objects.all().latest('date')
-   
-    if models.OpenData.objects.filter(date=latest_download.date, region__isnull=False).count() == data_models.Region.objects.filter(level=1, is_active=True).count():
-        latest_opendata, created = models.OpenData.objects.get_or_create(
-            region=None
-        )
-
-        if latest_opendata.date == latest_download.date and not force:
-            return
-        else:
-            data = [obj.data['export'] for obj in data_models.DTP.objects.filter(
-                datetime__date__lte=latest_download.date.replace(
-                    day=calendar.monthrange(latest_download.date.year, latest_download.date.month)[1]
-                )
-            )]
-
-            export_opendata(data, "russia", latest_download, latest_opendata)
-    """
 
 def export_opendata(data, region_slug, latest_download, latest_opendata):
 
@@ -157,20 +140,6 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     latest_opendata.date = latest_download.date
     latest_opendata.file_size = os.stat(path).st_size
     latest_opendata.save()
-
-
-
-def generate_datasets_geojson():
-    data = [obj.as_dict() for obj in data_models.DTP.objects.all()]
-    geo_data = { "type": "FeatureCollection", "features": [
-        {"type": "Feature",
-         "geometry": {"type": "Point", "coordinates": [item['point']['long'], item['point']['lat']]},
-         "properties": item
-         } for item in data
-    ]}
-
-    with open('static/data/' + 'test.geojson', 'w') as data_file:
-        json.dump(geo_data, data_file, ensure_ascii=False)
 
 
 def load_data():
@@ -218,11 +187,12 @@ def mapdata(region_slug=None, year=None):
     else:
         years = [x for x in range(2015, datetime.datetime.now().year + 1)]
 
-    for region_value in regions:
+    for region_value in tqdm(regions):
         for year_value in years:
-            data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value)
+            data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value, status=True)
             data = data_serializers.DTPSerializer(data, many=True).data
             with open(settings.MEDIA_ROOT + "/mapdata/" + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
                 json.dump(data, data_file, ensure_ascii=False)
 
+    cache.clear()
 
