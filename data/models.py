@@ -223,7 +223,8 @@ class DTP(models.Model):
                 "gender": x.gender,
                 "violations": [y.name for y in x.violations.all()]
             } for x in self.participant_set.filter(vehicle__isnull=True)],
-            "tags": [x.name for x in self.tags.all()]
+            "tags": [x.name for x in self.tags.all()],
+            "scheme": self.scheme
         }
 
 

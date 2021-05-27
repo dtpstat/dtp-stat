@@ -50,6 +50,7 @@ urlpatterns = [
 
     path('api/dtp/', api_views.DTPApiView.as_view()),
     path('api/dtp_load/', cache_page(60 * 60)(api_views.mapdata), name='mapdata'),
+    path('api/dtp_full/<slug>', api_views.dtp_full),
     path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
     path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
     path('api/test/', api_views.mvcs),

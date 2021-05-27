@@ -70,6 +70,11 @@ class DTPApiViewLoad(generics.ListAPIView):
     serializer_class = data_serializers.DTPSerializer
     filterset_class = data_filters.DTPLoadFilterSet
 
+# API Карточка ДТП
+@api_view(['GET'])
+def dtp_full(request, slug):
+    dtp = get_object_or_404(data_models.DTP, gibdd_slug=slug).as_dict()
+    return Response(dtp)
 
 def mapdata(request):
     if not os.path.exists(settings.MEDIA_ROOT + "/mapdata/"):
@@ -284,3 +289,4 @@ class FiltersApiView(APIView):
         )
 
         return Response(filters)
+        
