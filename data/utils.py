@@ -564,6 +564,11 @@ def get_tags():
 
     return tags
 
+def load_regions():
+    first_dir = os.getcwd()
+    os.chdir("./")
+    os.system('./manage.py loaddata data/fixtures/regions.json')
+    os.chdir(first_dir)
 
 def crawl(spider_name, params=None):
     print(spider_name)

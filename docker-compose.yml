@@ -12,9 +12,10 @@ services:
         - .:/code
     working_dir: /code
     command: sh -c 'sleep 5 && python manage.py runserver 0.0.0.0:5000'
+    depends_on:
+      - db
     networks:
       - backend
-      - dd-agent
     environment:
       PYTHONUNBUFFERED: 1
       SECRET_KEY: secret
@@ -26,10 +27,9 @@ services:
       DEBUG: 1
       PROJECT_PATH: /code
       STATSD_HOST: dd-agent
-      ALLOWED_HOSTS: localhost
+      ALLOWED_HOSTS: "*"
+      HERE_TOKEN: 123
+      YANDEX_TOKEN: 123
 
 networks:
   backend:
-  dd-agent:
-    external:
-      name: dd-agent

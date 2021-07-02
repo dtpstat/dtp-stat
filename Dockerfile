@@ -8,5 +8,6 @@ RUN apt-get update && apt-get install -y \
   libproj-dev
 
 WORKDIR /app
-COPY . .
+COPY requirements/app.txt requirements.txt
 RUN pip3 install -r requirements.txt
+COPY . .

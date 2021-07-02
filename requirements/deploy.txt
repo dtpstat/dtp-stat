@@ -1,0 +1,2 @@
+-r app.txt
+ansible==2.9.7

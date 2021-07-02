@@ -7,5 +7,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         utils.extra_filters_data()
-        utils.crawl('regions')
+        utils.load_regions()
+        #TODO: use direct fixture loading instead of ./manage.py call
+        #utils.crawl('regions')
         #utils.get_region_ya_names()
