@@ -11,12 +11,13 @@ import os
 import tweepy
 import telegram
 
+
+
 import locale
 locale.setlocale(locale.LC_TIME, "ru_RU")
 
 import environ
 env = environ.Env()
-
 
 def pogibli(num):
     if num[-1] in ["1"] and num != '11':
@@ -40,7 +41,11 @@ def get_word_form(word, number):
 
 
 def get_today_data():
-    response = requests.get('https://xn--90adear.xn--p1ai/', timeout=60)
+    response = requests.get(
+        'https://xn--90adear.xn--p1ai/',
+        timeout=60,
+        proxies={'https': env('PROXY') or None}
+    )
     soup = BeautifulSoup(response.text, 'html.parser')
 
     block_count = soup.find("table", "b-crash-stat")
