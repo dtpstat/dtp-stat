@@ -115,7 +115,7 @@ def opendata(region=None, force=False):
             status=True
         ):
             if not obj.data.get('export'):
-                obj.data['export'] = obj.as_dict()
+                obj.data['export'] = {**obj.as_dict(), **{'gibdd_id': obj.gibdd_slug}}
             data.append(obj.data['export'])
 
         export_opendata(data, region.slug, latest_download, latest_opendata)
