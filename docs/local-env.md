@@ -39,7 +39,7 @@ docker run hello-world
 мы будем использовать расширение оснастки докера [Docker compose](https://docs.docker.com/compose/). 
 Если вы раньше не работали с этим инструментом, пройдите [короткий гайд](https://docs.docker.com/compose/gettingstarted/)
 
-Конфигурация находится  [docker-compose.yml](./docker-compose.yml)
+Конфигурация находится  [docker-compose.yml](../docker-compose.yml)
 
 #### Собираем docker образ приложения
 ```
