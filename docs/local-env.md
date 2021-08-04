@@ -6,7 +6,7 @@
 
 - Python 3.8
     - Django 3.0+
-    - Django gis
+    - GeoDjango
 - Gdal 3.0+
 - Postgres 12+ (нужно Postgis расширение)
 - WSGI compatible webserver, like Gunicorn (optional for dev)
