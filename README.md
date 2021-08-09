@@ -1,29 +1,29 @@
-# dtp_stat
 
-### Настройка окружения для разработки
-#### Requirements
-- docker
-- docker-compose
-- docker-machine (for win & mac)
-#### Запуск проекта
+# Карта ДТП - backend
+Backend Карты ДТП подготавливает пространственные данные для клиента и отдает их
+через api.
 
-`make run`
+Приложение основано популярном фреймворке Django и его расширении для работы
+с геоданными [GeoDjango](https://docs.djangoproject.com/en/3.2/ref/contrib/gis/). 
+Которое в свою очередь опирается на библиотеку программ [GDAL](https://gdal.org/) и расширение для Postgres - [Postgis](https://postgis.net/).
 
-- зайти в веб-интерфейс: http://localhost:5000/
-- открыть шелл для запуска `manage.py` команд: `make sh`
-- [настроить сборщик метрик](docs/metrics.md)
+## Функциональность
+- API для карты (данные о ДТП, фильтр по областям)
+- html каркас
+- Парсер открытых данных ГИБДД
+- Бот статистики
+- Стандартная админка Django для работы с данными и справочниками.
 
-#### Запуск тестов локально
+---
 
-`make test`
+## Разработка
 
-### Deploy
+- [Развертывание локальной среды](/docs/local-env.md)
+- [Добавление нового API](https://www.django-rest-framework.org/api-guide/views/)
+- [Добавление новых таблиц и моделей для данных](https://docs.djangoproject.com/en/3.2/topics/db/models/)
+- [Встроенный cli](docs/cli.md)
+  
 
-ansible-playbook -i production site.yml
-
-
-crontab -e
-```
-0 1 * * * cd /var/www/dtpstat/ && . .venv/bin/activate && .venv/bin/python manage.py dtp >> /tmp/cronlog-dtp.txt 2>&1
-0 12-20 * * * cd /var/www/dtpstat/ && . .venv/bin/activate && .venv/bin/python manage.py bot >> /tmp/cronlog-dtp.txt 2>&1
-```
+## TODO
+ - [ ] Описание структуры директорий
+ - [ ] Описание методов API
