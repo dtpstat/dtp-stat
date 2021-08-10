@@ -102,6 +102,7 @@ class Tag(models.Model):
 class Severity(models.Model):
     level = models.IntegerField(help_text="level", null=True, blank=True)
     name = models.CharField(max_length=1000, help_text="name", null=True, blank=True, default=None)
+    description = models.CharField(max_length=1000, help_text="description", null=True, blank=True, default=None)
     keywords = JSONField(null=True, blank=True, default=list)
 
     def __str__(self):
