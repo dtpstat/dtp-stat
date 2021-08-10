@@ -204,6 +204,7 @@ class FiltersApiView(APIView):
                 "values": [
                     {
                         'preview': x.name,
+                        'description': x.description,
                         'value': x.level,
                         'color': severity_colors.get(x.level),
                         'disabled': True if x.level == 0 else False,

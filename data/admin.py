@@ -91,7 +91,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(models.Severity)
 class SeverityAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name','description')
 
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget},
