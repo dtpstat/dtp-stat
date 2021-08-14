@@ -2,6 +2,15 @@
 
 {% load static %}
 
+{% block meta-tags %}
+    <meta property="og:title" content="ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}">
+    <meta property="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}.">
+    <meta name="description" content="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}. Показать подробнее на карте.">
+    <meta property="og:image" content="https://api.mapbox.com/styles/v1/piromant/cksbfibfhiveb17pljm5rp24i/static/url-https%3A%2F%2Fdtp-stat.ru%2Fstatic%2Fscheme%2F{{ dtp.scheme }}.png({{ dtp.point.1 }},{{ dtp.point.0 }})/{{ dtp.point.1 }},{{ dtp.point.0 }},11/1200x700?access_token=pk.eyJ1IjoicGlyb21hbnQiLCJhIjoiY2tvNWdvNDhwMWM4NDJxbHk1YjBmbjV4diJ9.oTuQvYYtgnR_DB9fsRIrCw"/>
+    <meta property="og:site_name" content="Карта ДТП" />    
+    <title>ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}</title>
+{% endblock %}
+
 {% block extra-head %}
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec"
             type="text/javascript"></script>
