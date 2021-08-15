@@ -1,2 +1,2 @@
 -r app.txt
-ansible==2.9.7
+ansible==2.9.20
