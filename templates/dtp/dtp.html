@@ -310,7 +310,7 @@
                 <div class="row">
                     {% for post in posts %}
                         <div class="col-12 col-sm-6 col-md-4">
-                            <a href="" class="news-card">
+                            <a href="{% url 'blog_post' post.slug %}" class="news-card">
                                 <div class="news-card__image">
                                     <img src="{{ post.cover.url }}" width="300"
                                          height="200" alt="">
