@@ -54,6 +54,25 @@
             </div>
 
         </div>
+        
+        <related class="news-section">
+            <div class="container">
+                <h2>Новости по теме</h2>
+                <div class="row">
+                    {% for post in posts %}
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <a href="{% url 'blog_post' post.slug %}" class="news-card">
+                                <div class="news-card__image">
+                                    <img src="{{ post.cover.url }}" width="300"
+                                         height="200" alt="">
+                                </div>
+                                <h3>{{ post.title }}</h3>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </related>
 
     </article>
 {% endblock %}
