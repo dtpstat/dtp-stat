@@ -6,6 +6,8 @@ Dockerfile
 docs/
 *.log
 media/
+.idea
+deploy
 
 
 # Python specific
@@ -15,6 +17,7 @@ __pycache__
 *.pyd
 .Python
 env
+venv
 pip-log.txt
 pip-delete-this-directory.txt
 .tox
