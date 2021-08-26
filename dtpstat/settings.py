@@ -11,7 +11,12 @@ env = environ.Env(
     DEBUG=(bool, False),
     STATSD_HOST=(str, 'localhost'),
 )
-environ.Env.read_env()
+
+try:
+    environ.Env.read_env()
+except UserWarning:
+    pass
+
 
 initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
 
@@ -128,7 +133,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,
 }
-
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
