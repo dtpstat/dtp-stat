@@ -171,7 +171,7 @@ if env('STATICFILES_DIRS'):
     STATICFILES_DIRS = [env('STATICFILES_DIRS')]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = env('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 
 DECIMAL_SEPARATOR="."
 
