@@ -4,7 +4,7 @@ import environ
 from datadog import initialize, statsd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+ENV_PATH = os.path.join(BASE_DIR, '.env')
 
 env = environ.Env(
     ALLOWED_HOSTS=(list, []),
@@ -12,10 +12,8 @@ env = environ.Env(
     STATSD_HOST=(str, 'localhost'),
 )
 
-try:
-    environ.Env.read_env()
-except UserWarning:
-    pass
+if os.path.exists(ENV_PATH):
+    environ.Env.read_env(ENV_PATH)
 
 
 initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
