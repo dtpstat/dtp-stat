@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install SSH Key
-        uses: ./.github/actions/docker-ssh.yml
+        uses: ./.github/actions/docker-ssh
         with:
           host: ${{ secrets.STAGING_HOST }}
           key: ${{ secrets.STAGING_KEY }}
