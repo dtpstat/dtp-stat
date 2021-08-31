@@ -1,0 +1,51 @@
+name: 'Docker over SSH'
+description: 'Setup connection to remote Docker Daemon through SSH'
+branding:
+  icon: anchor
+  color: blue
+inputs:
+  host:
+    description: 'Remote Docker host'
+    required: true
+  port:
+    description: 'SSH port'
+    required: false
+    default: '22'
+  user:
+    description: 'SSH user'
+    required: true
+    default: root
+  key:
+    description: 'Content of SSH private key'
+    required: true
+  key_path:
+    description: 'Path to the SSH private key'
+    required: false
+    default: '/home/runner/.ssh/id_rsa'
+  set_docker_host_env:
+    description: 'If the DOCKER_HOST env should be changed'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      env:
+        INPUT_KEY: ${{ inputs.key }}
+        INPUT_PORT: ${{ inputs.port }}
+        INPUT_HOST: ${{ inputs.host }}
+        INPUT_USER: ${{ inputs.user }}
+        INPUT_KEY_PATH: ${{ inputs.key_path }}
+        INPUT_SET_DOCKER_HOST_ENV: ${{ inputs.set_docker_host_env }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$INPUT_KEY" > $INPUT_KEY_PATH
+        chmod 600 $INPUT_KEY_PATH
+        ssh-keyscan -H $INPUT_HOST 2> /dev/null 1> ~/.ssh/known_hosts
+        echo "Host $INPUT_HOST" >> ~/.ssh/config
+        echo "    IdentityFile $INPUT_KEY_PATH" >> ~/.ssh/config
+        export DOCKER_HOST=ssh://$INPUT_USER@$INPUT_HOST:$INPUT_PORT
+        if [ "$INPUT_SET_DOCKER_HOST_ENV" = true ]; then
+          echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
+        fi
+        echo "::set-output name=docker-host::$DOCKER_HOST"
