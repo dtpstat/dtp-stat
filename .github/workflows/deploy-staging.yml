@@ -21,4 +21,8 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
 
       - run: |
-          docker ps
+          docker rm dtpstat-app-cli
+          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest migrate
+          docker stop dtpstat-app
+          docker rm dtpstat-app
+          docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest
