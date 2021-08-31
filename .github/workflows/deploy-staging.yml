@@ -1,0 +1,22 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Deploy and run image
+
+on: workflow_dispatch
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        uses: ./.github/actions/docker-ssh.yml
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          key: ${{ secrets.STAGING_KEY }}
+
+      - run: |
+          docker ps
