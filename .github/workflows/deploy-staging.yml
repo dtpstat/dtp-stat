@@ -8,7 +8,7 @@ name: Deploy and run image
 on: workflow_dispatch
 
 jobs:
-  push_to_registry:
+  deploy_from_regestry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
@@ -21,8 +21,10 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
 
       - run: |
+          ssh root@${{ secrets.STAGING_HOST }} << EOF
           docker rm dtpstat-app-cli
           docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest migrate
           docker stop dtpstat-app
           docker rm dtpstat-app
           docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest
+          EOF
