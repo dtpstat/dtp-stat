@@ -36,8 +36,11 @@ jobs:
       - run: |
           ssh root@${{ secrets.STAGING_HOST }} << EOF
           docker rm dtpstat-app-cli
-          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env ${{ steps.meta.outputs.version }} migrate
+          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ steps.meta.outputs.version }} migrate
           docker stop dtpstat-app
           docker rm dtpstat-app
-          docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env ${{ steps.meta.outputs.version }}
+          docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ steps.meta.outputs.version }}
+          docker rm -f dtpstat-app-cli-dtp dtpstat-app-cli-opendata
+          docker create -d -v /var/www/media:/app/media --pull=always --network host --name dtpstat-app-cli-dtp --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ steps.meta.outputs.version }} dtp
+          docker create -d -v /var/www/media:/app/media --pull=always --network host --name dtpstat-app-cli-opendata --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ steps.meta.outputs.version }} dtp
           EOF
