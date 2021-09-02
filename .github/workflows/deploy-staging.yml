@@ -14,6 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: registry.digitalocean.com/dtp-stat/dtp-stat
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+
       - name: Install SSH Key
         uses: ./.github/actions/docker-ssh
         with:
@@ -23,8 +36,8 @@ jobs:
       - run: |
           ssh root@${{ secrets.STAGING_HOST }} << EOF
           docker rm dtpstat-app-cli
-          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest migrate
+          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env ${{ steps.meta.outputs.version }} migrate
           docker stop dtpstat-app
           docker rm dtpstat-app
-          docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:latest
+          docker run -d --pull=always --network host --name dtpstat-app --env-file /etc/dtpstat.env ${{ steps.meta.outputs.version }}
           EOF
