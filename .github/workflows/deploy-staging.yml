@@ -14,7 +14,7 @@ on:
         default: 'latest'
 jobs:
   deploy_from_regestry:
-    name: Push Docker image to Docker Hub
+    name: Deploy docker image and run containers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
           host: ${{ secrets.STAGING_HOST }}
           key: ${{ secrets.STAGING_KEY }}
 
-      - run: |
+        run: |
           ssh root@${{ secrets.STAGING_HOST }} << EOF
           docker rm -f dtpstat-app-cli
           docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /etc/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} migrate
