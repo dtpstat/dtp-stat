@@ -1,5 +1,6 @@
 # Common
 .git
+.github
 .dockerignore
 Dockerfile
 .md
@@ -8,7 +9,7 @@ docs/
 media/
 .idea
 deploy
-
+docker-compose.yml
 
 # Python specific
 __pycache__

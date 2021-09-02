@@ -1,2 +1,2 @@
-# Mirrors app
+# Mirror app
 -r requirements/app.txt
