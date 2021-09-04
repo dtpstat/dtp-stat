@@ -13,10 +13,10 @@ django-extra-fields = "==2.0.3"
 django-allauth = "==0.45.0"
 django-filter = "==2.4.0"
 django-recaptcha = "==2.0.6"
-djangorestframework = "==3.11.0"
+djangorestframework = "==3.12.4"
 drf-serializer-cache = "==0.3.4"
 datadog = "==0.37.1"
-Pillow = "==7.2.0"
+Pillow = "==8.2.0"
 Scrapy = "==2.5.0"
 beautifulsoup4 = "==4.9.3"
 python-slugify = "==5.0.2"
@@ -29,7 +29,8 @@ python-telegram-bot = "==13.0"
 scrapy-rotating-proxies = "==0.6.2"
 tqdm = "==4.44.1"
 tweepy = "==3.9.0"
-
+#omit old package, it dep for scrapy-rotating-proxies
+typing = { version = "*", markers="python_version < '3.0'" }
 
 [dev-packages]
 
