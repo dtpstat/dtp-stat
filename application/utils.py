@@ -90,6 +90,8 @@ def get_region_by_center_point(center_point):
 
 
 def opendata(region=None, force=False):
+    if not os.path.exists(settings.MEDIA_ROOT + "/opendata/"):
+        os.makedirs(settings.MEDIA_ROOT + "/opendata/")
     if region:
         active_region_ids = [region.id]
     else:
