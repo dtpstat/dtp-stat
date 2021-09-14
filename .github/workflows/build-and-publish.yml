@@ -1,4 +1,4 @@
-name: Publish Docker image
+name: Build app image and publish to registry
 
 on:
   push:
@@ -10,13 +10,13 @@ on:
 
 jobs:
   push_to_registry:
-    name: Push Docker image to Docker Hub
+    name:  Build app image and publish
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Docker meta
+      - name: Collect meta for docker tags
         id: meta
         uses: docker/metadata-action@v3
         with:
@@ -27,14 +27,14 @@ jobs:
             type=semver,pattern={{version}}
             type=sha
 
-      - name: Log in to Docker DO refetry
+      - name: Log in to DO Docker registry
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           password: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           registry: registry.digitalocean.com
       
-      - name: Build and push Docker image to DO
+      - name: Build app image and push
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -42,4 +42,6 @@ jobs:
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - run: echo "::set-output name=version::${{ steps.meta.outputs.tags }}"
+
+      - name: Show applyed tags
+        run: echo "::set-output name=version::${{ steps.meta.outputs.tags }}"
