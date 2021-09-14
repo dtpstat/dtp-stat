@@ -29,8 +29,9 @@ jobs:
           ssh root@${{ secrets.STAGING_HOST }} << EOF
           docker rm -f dtpstat-app-cli
           docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} migrate
-          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} collectstatic --noinput
-          docker cp dtpstat-app-cli:/app/static/ /home/dtpstat/www/static
+          docker rm -f dtpstat-app-cli-static
+          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli-static --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} collectstatic --noinput
+          docker cp dtpstat-app-cli-static:/app/static/ /home/dtpstat/www
           docker stop dtpstat-app
           docker rm dtpstat-app
           docker run -d --pull=always --network host --name dtpstat-app --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }}
