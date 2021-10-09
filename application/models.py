@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from . import middlewares
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.conf import settings
 from django.contrib.gis.geos import Point
 

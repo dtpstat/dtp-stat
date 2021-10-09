@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point, MultiPolygon
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.utils.crypto import get_random_string
 
 from slugify import slugify
