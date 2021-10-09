@@ -2,7 +2,6 @@
 
 import application.middlewares
 from django.conf import settings
-import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -22,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('category', models.CharField(blank=True, choices=[('fix_point', 'Корретировка координат')], default='new', max_length=200, null=True)),
                 ('comment', models.TextField(blank=True, default=None, null=True)),
-                ('data', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=dict, null=True)),
+                ('data', models.JSONField(blank=True, default=dict, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, null=True)),
                 ('status', models.CharField(blank=True, choices=[('new', 'новое'), ('done', 'готово'), ('no', 'невозможно пофиксить')], default='new', max_length=200, null=True)),
                 ('dtp', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='data.DTP')),

@@ -88,11 +88,6 @@ docker-compose up -d
 docker-compose exec web /bin/bash
 ```
 
-#### Готовим миграции на основе имеющихся моделей в коде
-```
-./manage.py makemigrations
-```
-
 ####  Заливаем структуру базы на основе имеющихся миграций
 ```
 ./manage.py migrate --noinput
