@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import requests
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,8 @@ from data import utils as data_utils
 import environ
 env = environ.Env()
 environ.Env.read_env()
+
+log = logging.getLogger(__name__)
 
 @register.filter
 def get_item(dictionary, key):
@@ -89,11 +92,12 @@ def donate(request):
 
 def dtp(request, slug):
     dtp_item = get_object_or_404(data_models.DTP, gibdd_slug=slug)
-    participants = dtp_item.participant_set.order_by('violations').filter(vehicle__isnull=True)
+    participants = dtp_item.participant_set.filter(vehicle__isnull=True)
     vehicles = data_models.Vehicle.objects.filter(participant__dtp=dtp_item).distinct()
     injured = dtp_item.participant_set.filter(severity__level__in=[1,2,3]).count()
     dead = dtp_item.participant_set.filter(severity__level__in=[4]).count()
     tags = dtp_item.tags.all()
+    
     participant_role_map = {
         'Пешеход': 'pedestrian',
         'Велосипедист': 'cyclist',
