@@ -23,7 +23,7 @@
     <noscript><div><img src="https://mc.yandex.ru/watch/49130284" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
 
-    <meta property="og:image" content="http://{{ request.get_host }}{% static "media/og.png" %}"/>
+
 
     {% block meta-tags %}
         <meta property="og:title" content="Карта ДТП">
@@ -33,6 +33,8 @@
         <title>Карта ДТП</title>
     {% endblock %}
 
+    <meta property="og:image" content="http://{{ request.get_host }}{% static "media/og.png" %}"/>
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">

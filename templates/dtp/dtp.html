@@ -2,6 +2,17 @@
 
 {% load static %}
 
+{% block meta-tags %}
+    <meta property="og:title" content="ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}">
+    <meta property="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}.">
+    <meta name="description" content="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}. Показать подробнее на карте.">
+    <meta property="og:image" content="https://api.mapbox.com/styles/v1/piromant/cksbfibfhiveb17pljm5rp24i/static/url-https%3A%2F%2Fdtp-stat.ru%2Fstatic%2Fscheme%2Fmarker%2F{{ dtp.scheme }}.png({{ dtp.point.1 }},{{ dtp.point.0 }})/{{ dtp.point.1 }},{{ dtp.point.0 }},11,0,60/600x350@2x?logo=false&access_token=pk.eyJ1IjoiaXNodW1pbGluIiwiYSI6ImNrZ3l3Z2pzMTB4dHcycXFoOXMwMjdqamoifQ.OXqhHnGXrwiGue3i3pLUYg"/>
+    <meta property="og:site_name" content="Карта ДТП" />    
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="700" />
+    <title>ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}</title>
+{% endblock %}
+
 {% block extra-head %}
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec"
             type="text/javascript"></script>
@@ -299,7 +310,7 @@
                 <div class="row">
                     {% for post in posts %}
                         <div class="col-12 col-sm-6 col-md-4">
-                            <a href="" class="news-card">
+                            <a href="{% url 'blog_post' post.slug %}" class="news-card">
                                 <div class="news-card__image">
                                     <img src="{{ post.cover.url }}" width="300"
                                          height="200" alt="">
