@@ -1,2 +1,0 @@
-# Mirrors app
--r requirements/app.txt

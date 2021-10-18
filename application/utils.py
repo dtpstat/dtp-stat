@@ -90,6 +90,8 @@ def get_region_by_center_point(center_point):
 
 
 def opendata(region=None, force=False):
+    if not os.path.exists(settings.MEDIA_ROOT + "/opendata/"):
+        os.makedirs(settings.MEDIA_ROOT + "/opendata/")
     if region:
         active_region_ids = [region.id]
     else:
@@ -130,12 +132,12 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
          } for item in tqdm(data)
     ]}
 
-    path = 'media/opendata/' + region_slug + '.geojson'
+    path = settings.MEDIA_ROOT + '/opendata/' + region_slug + '.geojson'
     with open(path, 'w') as data_file:
         json.dump(geo_data, data_file, ensure_ascii=False)
 
     if region_slug == "russia":
-        shutil.make_archive(region_slug + '.geojson', 'zip', settings.BASE_DIR + '/media/opendata/')
+        shutil.make_archive(region_slug + '.geojson', 'zip', settings.MEDIA_ROOT + '/opendata/')
 
     latest_opendata.date = latest_download.date
     latest_opendata.file_size = os.stat(path).st_size

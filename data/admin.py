@@ -2,7 +2,7 @@ from django.contrib import admin
 from data import models
 from django.db.models import Q
 
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.forms import widgets
 
 import json

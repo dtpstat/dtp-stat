@@ -163,13 +163,13 @@ class FiltersApiView(APIView):
         filters.append({
             "name": "date",
             "label": "Период данных",
-            "values": [
-                downloads.first().date,
-                downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
-            ],
+            # "values": [
+            #     downloads.first().date,
+            #     downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
+            # ],
             "default_value": {
-                "start_date": downloads.last().date,
-                "end_date": downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
+                "start_date": downloads.last().date if downloads else "2021-01-01",
+                "end_date": downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1]) if downloads else "2021-12-31"
             }
         })
 

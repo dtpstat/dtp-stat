@@ -4,14 +4,17 @@ import environ
 from datadog import initialize, statsd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+ENV_PATH = os.path.join(BASE_DIR, '.env')
 
 env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     DEBUG=(bool, False),
     STATSD_HOST=(str, 'localhost'),
 )
-environ.Env.read_env()
+
+if os.path.exists(ENV_PATH):
+    environ.Env.read_env(ENV_PATH)
+
 
 initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
 
@@ -128,7 +131,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,
 }
-
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -167,7 +169,7 @@ if env('STATICFILES_DIRS'):
     STATICFILES_DIRS = [env('STATICFILES_DIRS')]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = env('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 
 DECIMAL_SEPARATOR="."
 
