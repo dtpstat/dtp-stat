@@ -657,10 +657,10 @@ def check_deleted_dtp(download):
         status=True
     )
 
-    download_item_dtps.filter(
-        gibdd_latest_check__lt=download.last_update - datetime.timedelta(hours=1),
-        status=True
-    ).update(status=False)
+    # download_item_dtps.filter(
+    #     gibdd_latest_check__lt=download.last_update - datetime.timedelta(hours=1),
+    #     status=True
+    # ).update(status=False)
 
 
 #@statsd.timed('dtpstat.check_dtp')
