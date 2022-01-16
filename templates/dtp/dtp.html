@@ -244,65 +244,26 @@
                 </a>
             </div>
         </div>
-
         <hr>
 
-        <!--
+        {% if settings.NEXTJS_IFRAME_WITH_COMMENTS %}
         <section class="comments-section">
             <div class="container">
-                <h2>Комментарии &mdash; <span>2</span></h2>
-                <div class="comments-section__list">
-                    <ul class="comments-list">
-                        <li class="comments-list__item">
-                            <div class="comment-item">
-                                <div class="comment-item__header">
-                                    <div class="comment-item__avatar avatar">
-                                        <img src="{% static 'media/person01.jpg' %}"
-                                             srcset="{% static 'media/person01@2x.jpg 2x' %}" width="28" height="28"
-                                             alt="">
-                                    </div>
-                                    <p class="comment-item__name">Павел Кучерягин</p>
-                                    <p class="comment-item__date">23 апреля 2020</p>
-                                </div>
-                                <div class="comment-item__content">
-                                    <p>информация о верификации данных, если координаты изменены при обработке
-                                        (координаты отличаются от заявленных ГИБДД, но прошли подтверждение
-                                        модератором).</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="comments-list__item">
-                            <div class="comment-item">
-                                <div class="comment-item__header">
-                                    <div class="comment-item__avatar avatar">
-                                        <img src="{% static 'media/person02.jpg' %}"
-                                             srcset="{% static 'media/person02@2x.jpg 2x' %}" width="28" height="28"
-                                             alt="">
-                                    </div>
-                                    <p class="comment-item__name">Anna Kravtz</p>
-                                    <p class="comment-item__date">12 декабря 2019</p>
-                                </div>
-                                <div class="comment-item__content">
-                                    <p>Оставленная пользователями дополнительная/уточняющая информация</p>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-                <div class="comments-section__form">
-                    <form action="#" method="post" class="comment-form">
-                        <div class="comment-form__field-wrapper">
-                            <label class="visually-hidden" for="comment-field">Поле добавления комментария</label>
-                            <textarea id="comment-field" placeholder="Добавить комментарий..."></textarea>
-                            <div class="comment-form__avatar avatar"></div>
-                            <button class="comment-form__submit btn" type="submit">Отправить</button>
-                        </div>
-                    </form>
-                </div>
-
+                <iframe
+                    frameborder="0"
+                    id="iframe-with-comments"
+                    width="100%"
+                    scrolling="no"
+                    src="{{ settings.NEXTJS_BASE_URL }}/iframes/comments/{{ dtp.gibdd_slug }}"
+                    style="width: 1px; min-width: 100%;"
+                ></iframe>
+                <script src="{{ settings.NEXTJS_BASE_URL }}/iframes/iframe-resizer.min.js"></script>
+                <script>
+                    iFrameResize({ log: {% if debug %}true{% else %}false{% endif %} }, '#iframe-with-comments')
+                </script>
             </div>
         </section>
-        -->
+        {% endif %}
 
         <section class="news-section">
             <div class="container">
