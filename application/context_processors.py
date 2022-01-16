@@ -1,6 +1,7 @@
 import requests
 import calendar
 import datetime
+from django.conf import settings as django_settings
 
 
 def get_donate_data(request):
@@ -21,3 +22,8 @@ def get_donate_data(request):
     donate_data['days_left'] = calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[1] + 1 - datetime.datetime.now().day
 
     return {'donate_data':donate_data}
+
+def settings(request):
+    return {
+        'settings': django_settings,
+    }

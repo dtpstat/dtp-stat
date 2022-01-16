@@ -9,6 +9,9 @@ ENV_PATH = os.path.join(BASE_DIR, '.env')
 env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     DEBUG=(bool, False),
+    NEXTJS_BASE_URL=(str, 'https://dtp-stat-on-nextjs.netlify.app'),
+    NEXTJS_IFRAME_WITH_COMMENTS=(bool, False),
+    NEXTJS_IFRAME_WITH_MAP=(bool, False),
     STATSD_HOST=(str, 'localhost'),
 )
 
@@ -18,9 +21,12 @@ if os.path.exists(ENV_PATH):
 
 initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
 
-DEBUG = env('DEBUG')
-SECRET_KEY = env('SECRET_KEY')
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+DEBUG = env('DEBUG')
+NEXTJS_BASE_URL = env('NEXTJS_BASE_URL')
+NEXTJS_IFRAME_WITH_COMMENTS = env('NEXTJS_IFRAME_WITH_COMMENTS')
+NEXTJS_IFRAME_WITH_MAP = env('NEXTJS_IFRAME_WITH_MAP')
+SECRET_KEY = env('SECRET_KEY')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -74,6 +80,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'application.context_processors.get_donate_data',
+                'application.context_processors.settings',
             ],
         },
     },
