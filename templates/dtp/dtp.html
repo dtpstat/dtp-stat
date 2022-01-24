@@ -254,7 +254,7 @@
                     id="iframe-with-comments"
                     width="100%"
                     scrolling="no"
-                    src="{{ settings.NEXTJS_BASE_URL }}/iframes/comments/{{ dtp.gibdd_slug }}"
+                    src="{{ settings.NEXTJS_BASE_URL }}/iframes/comments?accident-id={{ dtp.gibdd_slug }}"
                     style="width: 1px; min-width: 100%;"
                 ></iframe>
                 <script src="{{ settings.NEXTJS_BASE_URL }}/iframes/iframe-resizer.min.js"></script>
