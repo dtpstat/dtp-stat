@@ -255,6 +255,7 @@
                     id="iframe-with-comments"
                     onload="iFrameResize({ log: {% if debug %}true{% else %}false{% endif %} })"
                     width="100%"
+                    height="0"
                     scrolling="no"
                     src="{{ settings.NEXTJS_BASE_URL }}/iframes/comments?accident-id={{ dtp.gibdd_slug }}"
                     style="width: 1px; min-width: 100%;"
