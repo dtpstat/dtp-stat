@@ -249,18 +249,16 @@
         {% if settings.NEXTJS_IFRAME_WITH_COMMENTS %}
         <section class="comments-section">
             <div class="container">
+                <script src="{{ settings.NEXTJS_BASE_URL }}/iframes/iframe-resizer.min.js"></script>
                 <iframe
                     frameborder="0"
                     id="iframe-with-comments"
+                    onload="iFrameResize({ log: {% if debug %}true{% else %}false{% endif %} })"
                     width="100%"
                     scrolling="no"
                     src="{{ settings.NEXTJS_BASE_URL }}/iframes/comments?accident-id={{ dtp.gibdd_slug }}"
                     style="width: 1px; min-width: 100%;"
                 ></iframe>
-                <script src="{{ settings.NEXTJS_BASE_URL }}/iframes/iframe-resizer.min.js"></script>
-                <script>
-                    iFrameResize({ log: {% if debug %}true{% else %}false{% endif %} }, '#iframe-with-comments')
-                </script>
             </div>
         </section>
         {% endif %}
