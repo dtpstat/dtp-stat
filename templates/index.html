@@ -21,25 +21,8 @@
         document
             .getElementById('iframe-with-map')
             .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}/iframes/map' + window.location.search)
-
-        window.addEventListener('message', event => {
-            var data = event.message ? event.message : event.data;
-
-            if (!data) {
-                return
-            }
-
-            if (data.action === 'replaceSearch') {
-                var url = new URL(window.location);
-                url.search = data.search
-                window.history.replaceState({}, '', url);
-            }
-            if (data && data.action === 'navigate') {
-                window.location.href = data.href
-            }
-
-        }, false);
     </script>
+    {% include "iframe_messaging.html" %}
     {% else %}
     <div id="root"></div>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=ad7c40a7-7096-43c9-b6e2-5e1f6d06b9ec&lang=ru_RU" type="text/javascript"></script>

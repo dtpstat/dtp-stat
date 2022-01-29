@@ -1,0 +1,22 @@
+<script>
+  window.addEventListener(
+    "message",
+    (event) => {
+      var data = event.message ? event.message : event.data;
+
+      if (!data) {
+        return;
+      }
+
+      if (data.action === "replaceSearch") {
+        var url = new URL(window.location);
+        url.search = data.search;
+        window.history.replaceState({}, "", url);
+      }
+      if (data && data.action === "navigate") {
+        window.location.href = data.href;
+      }
+    },
+    false
+  );
+</script>

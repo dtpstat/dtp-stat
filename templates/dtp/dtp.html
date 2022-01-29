@@ -253,7 +253,7 @@
                 <iframe
                     frameborder="0"
                     id="iframe-with-comments"
-                    onload="iFrameResize({ log: {% if debug %}true{% else %}false{% endif %} })"
+                    onload="iFrameResize()"
                     width="100%"
                     height="0"
                     scrolling="no"
@@ -262,6 +262,7 @@
                 ></iframe>
             </div>
         </section>
+        {% include "iframe_messaging.html" %}
         {% endif %}
 
         <section class="news-section">
