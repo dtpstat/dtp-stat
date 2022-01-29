@@ -20,7 +20,7 @@
     <script>
         document
             .getElementById('iframe-with-map')
-            .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}/iframes/map?parent-url=' + encodeURIComponent(window.location.href))
+            .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}/iframes/map' + window.location.search)
 
         window.addEventListener('message', event => {
             var data = event.message ? event.message : event.data;
