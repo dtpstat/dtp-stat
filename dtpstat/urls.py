@@ -27,6 +27,7 @@ from application import views_api as api_views
 
 
 urlpatterns = [
+    path("robots.txt", app_views.robots_txt),
     path('svg/<slug>', app_views.temp_map_icons, name='app.views'),
     path('', app_views.home, name='home'),
     path('accounts/', include('allauth.urls')),

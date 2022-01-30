@@ -15,7 +15,9 @@ from data import models as data_models
 from data import utils as data_utils
 
 import environ
-env = environ.Env()
+env = environ.Env(
+    PRODUCTION_HOST=(str, 'dtp-stat.ru'),
+)
 environ.Env.read_env()
 
 log = logging.getLogger(__name__)
@@ -226,3 +228,11 @@ def temp_map_icons(request, slug):
 
 def old_redirect(request, slug):
     return redirect("home")
+
+
+def robots_txt(request):
+    template = "templates/robots.txt" if request.get_host() == env('PRODUCTION_HOST') else "templates/robots-disallow.txt"
+    f = open(template, "r")
+    file_content = f.read()
+    f.close()
+    return HttpResponse(file_content, content_type="text/plain")
