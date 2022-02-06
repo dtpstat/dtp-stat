@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Release master on the prod enviroment
+name: Prod env release
 
 on:
   workflow_dispatch:
