@@ -6,10 +6,10 @@
     <meta property="og:title" content="ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}">
     <meta property="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}.">
     <meta name="description" content="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address }}. Показать подробнее на карте.">
-    <meta property="og:image" content="https://api.mapbox.com/styles/v1/piromant/cksbfibfhiveb17pljm5rp24i/static/url-https%3A%2F%2Fdtp-stat.ru%2Fstatic%2Fscheme%2Fmarker%2F{{ dtp.scheme }}.png({{ dtp.point.1 }},{{ dtp.point.0 }})/{{ dtp.point.1 }},{{ dtp.point.0 }},11,0,60/600x350@2x?logo=false&access_token=pk.eyJ1IjoiaXNodW1pbGluIiwiYSI6ImNrZ3l3Z2pzMTB4dHcycXFoOXMwMjdqamoifQ.OXqhHnGXrwiGue3i3pLUYg"/>
+    <meta property="og:image" content="https://api.mapbox.com/styles/v1/piromant/cksbfibfhiveb17pljm5rp24i/static/url-https%3A%2F%2Fdtp-stat.ru%2Fstatic%2Fscheme%2Fmarker%2F{{ dtp.scheme }}.png({{ dtp.point.0 }},{{ dtp.point.1 }})/{{ dtp.point.0 }},{{ dtp.point.1 }},11,0,60/600x350@2x?logo=false&access_token=pk.eyJ1IjoiaXNodW1pbGluIiwiYSI6ImNrZ3l3Z2pzMTB4dHcycXFoOXMwMjdqamoifQ.OXqhHnGXrwiGue3i3pLUYg"/>
     <meta property="og:site_name" content="Карта ДТП" />    
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="700" />
+    <meta property="og:image:height" content="600" />
     <title>ДТП {{ dtp.category.name }} по адресу {{ dtp.address }}</title>
 {% endblock %}
 
