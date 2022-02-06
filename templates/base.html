@@ -31,10 +31,10 @@
         <meta name="description" content="Карта ДТП">
         <meta name="keywords" content="Карта ДТП">
         <title>Карта ДТП</title>
+        <meta property="og:image" content="http://{{ request.get_host }}{% static "media/og.png" %}"/>
+        <meta property="og:site_name" content="Карта ДТП" />  
     {% endblock %}
 
-    <meta property="og:image" content="http://{{ request.get_host }}{% static "media/og.png" %}"/>
-    <meta property="og:site_name" content="Карта ДТП" />  
 
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
