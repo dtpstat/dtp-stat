@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Deploy app via docker image
+name: Release master on the prod enviroment
 
 on:
   workflow_dispatch:
@@ -13,8 +13,6 @@ jobs:
     name: Build image on prod env
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
       - name: Install SSH Key
         uses: ./.github/actions/simple-ssh
         with:
