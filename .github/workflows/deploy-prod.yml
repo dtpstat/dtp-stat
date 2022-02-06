@@ -39,5 +39,5 @@ jobs:
         run: |
           ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << EOF
           docker exec -ti dtpstat-app ./manage.py collectstatic --noinput   
-          docker cp dtpstat-app:/app/static /var/www/dtpstat
+          docker cp dtpstat-app:/app/static /tmp/static && rsync -rv --size-only /tmp/static/ /var/www/dtpstat/static/ && rm -rf /tmp/static
           EOF
