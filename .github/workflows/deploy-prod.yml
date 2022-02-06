@@ -1,0 +1,43 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Deploy app via docker image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    name: Build image on prod env
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install SSH Key
+        uses: ./.github/actions/simple-ssh
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Build image
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << EOF
+          docker build -t dtp-stat:latest git@github.com:dtpstat/dtp-stat.git
+          EOF
+
+      - name: Replace container
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << EOF
+          docker stop dtpstat-app 
+          docker rm dtpstat-app
+          docker run -d --restart unless-stopped --ip=172.17.0.2 --name dtpstat-app --env-file /home/dtpstat/.docker_env --add-host=dtp-stat-db:10.0.0.2 -v /var/www/dtpstat/media:/app/media dtp-stat:latest
+          EOF
+
+      - name: Apply static changes
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << EOF
+          docker exec -ti dtpstat-app ./manage.py collectstatic --noinput   
+          docker cp dtpstat-app:/app/static /var/www/dtpstat
+          EOF
