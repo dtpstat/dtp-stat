@@ -27,6 +27,9 @@
                 </div>
 
             </li>
+            <li class="nav-item {% if 'dashboard' in request.path and 'pages' in request.path %}active{% endif %}">
+                <a class="nav-link" href="/pages/dashboard/">Статистика</a>
+            </li>
             <li class="nav-item {% if 'data' in request.resolver_match.url_name %}active{% endif %}">
                 <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
             </li>
