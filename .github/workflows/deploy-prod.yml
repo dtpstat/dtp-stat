@@ -13,6 +13,8 @@ jobs:
     name: Build image on prod env
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install SSH Key
         uses: ./.github/actions/simple-ssh
         with:
