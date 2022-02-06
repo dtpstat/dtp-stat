@@ -7,14 +7,10 @@ name: Deploy app via docker image
 
 on:
   workflow_dispatch:
-   inputs:
-      version:
-        description: 'Docker version label'
-        required: true
-        default: 'latest'
+
 jobs:
-  deploy_from_regestry:
-    name: Deploy docker image and run containers
+  build_and_deploy:
+    name: Build image on prod env
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,36 +18,26 @@ jobs:
       - name: Install SSH Key
         uses: ./.github/actions/docker-ssh
         with:
-          host: ${{ secrets.STAGING_HOST }}
-          key: ${{ secrets.STAGING_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-      - name: Apply database migrations
+      - name: Build image
         run: |
-          ssh root@${{ secrets.STAGING_HOST }} << EOF
-          docker rm -f dtpstat-app-cli
-          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} migrate
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.STAGING_HOST }} << EOF
+          docker build -t dtp-stat:latest git@github.com:dtpstat/dtp-stat.git
           EOF
 
-      - name: Apply client changes
+      - name: Replace container
         run: |
-          ssh root@${{ secrets.STAGING_HOST }} << EOF
-          docker rm -f dtpstat-app-cli-static
-          docker run --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli-static --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} collectstatic --noinput
-          docker cp dtpstat-app-cli-static:/app/static/ /home/dtpstat/www
-          EOF
-
-      - name: Replace current version of app with new
-        run: |
-          ssh root@${{ secrets.STAGING_HOST }} << EOF
-          docker stop dtpstat-app
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.STAGING_HOST }} << EOF
+          docker stop dtpstat-app 
           docker rm dtpstat-app
-          docker run -d --pull=always --network host --name dtpstat-app --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }}
+          docker run -d --restart unless-stopped --ip=172.17.0.2 --name dtpstat-app --env-file /home/dtpstat/.docker_env --add-host=dtp-stat-db:10.0.0.2 -v /var/www/dtpstat/media:/app/media dtp-stat:latest
           EOF
 
-      - name: Replace scheduled tasks with new version
+      - name: Apply static changes
         run: |
-          ssh root@${{ secrets.STAGING_HOST }} << EOF
-          docker rm -f dtpstat-app-cli-dtp dtpstat-app-cli-opendata
-          docker create -v /home/dtpstat/www/media:/app/media --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli-dtp --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} dtp
-          docker create -v /home/dtpstat/www/media:/app/media --pull=always --network host --entrypoint ./manage.py --name dtpstat-app-cli-opendata --env-file /home/dtpstat/dtpstat.env registry.digitalocean.com/dtp-stat/dtp-stat:${{ github.event.inputs.version }} opendata
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.STAGING_HOST }} << EOF
+          docker exec -ti dtpstat-app ./manage.py collectstatic --noinput   
+          docker cp dtpstat-app:/app/static /var/www/dtpstat
           EOF
