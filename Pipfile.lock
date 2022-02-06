@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "eb916d192ec1013b838a14913023f8cccefcb09cac2052c127617acd522af956"
+            "sha256": "3164f4bcb11e2e8df8b2ab1a1b629d37a6d15c8e3c8da6702961b5b5a923872c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -805,9 +805,6 @@
             "version": "==1.6.2"
         },
         "requests": {
-            "extras": [
-
-            ],
             "hashes": [
                 "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61",
                 "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"
@@ -825,11 +822,11 @@
         },
         "scrapy": {
             "hashes": [
-                "sha256:0a68ed41f7173679f160c4cef2db05288548c21e7164170552adae8b13cefaab",
-                "sha256:5f590fdc84b496e5a4bb5ef99836b0aa688a07cfcb4bc3bb7290f66486f27424"
+                "sha256:13af6032476ab4256158220e530411290b3b934dd602bb6dacacbf6d16141f49",
+                "sha256:1a9a36970004950ee3c519a14c4db945f9d9a63fecb3d593dddcda477331dde9"
             ],
             "index": "pypi",
-            "version": "==2.5.0"
+            "version": "==2.5.1"
         },
         "scrapy-rotating-proxies": {
             "hashes": [
@@ -848,11 +845,11 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:a4dc3af29a67e7a45620aba43dde2c1af2dd6bc49726d78168f0cc6c4fb0c01b",
-                "sha256:c9097cbcdefe88a64da966a764f2d95feb1cfaff77cc304528a23cefe3359d9a"
+                "sha256:4f783948909b28124388eef286572e9e69c228b6866d44ac7475bd82e94b6503",
+                "sha256:5d7a302d3c3ae24d3bbaaecf5c4544056b2dd44b3e6690014dc096d64f12d672"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==60.7.1"
+            "version": "==60.8.0"
         },
         "six": {
             "hashes": [
