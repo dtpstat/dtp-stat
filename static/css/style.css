@@ -114,6 +114,10 @@ nav li a.nav-link {
 	text-decoration: none;
 }
 
+nav .form-group {
+    	display: contents;
+}
+
 a.button.support {
 	background: #18334A;
 	color: white!important;
