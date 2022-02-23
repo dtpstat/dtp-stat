@@ -36,5 +36,6 @@ runs:
         mkdir -p ~/.ssh
         echo "$INPUT_KEY" > $INPUT_KEY_PATH
         chmod 600 $INPUT_KEY_PATH
+        ssh-keyscan -H $INPUT_HOST 2> /dev/null 1> ~/.ssh/known_hosts
         echo "Host $INPUT_HOST" >> ~/.ssh/config
         echo "    IdentityFile $INPUT_KEY_PATH" >> ~/.ssh/config
