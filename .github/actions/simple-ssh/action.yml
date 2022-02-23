@@ -5,7 +5,7 @@ branding:
   color: blue
 inputs:
   host:
-    description: 'Remote Docker host'
+    description: 'Remote host'
     required: true
   port:
     description: 'SSH port'
@@ -22,10 +22,6 @@ inputs:
     description: 'Path to the SSH private key'
     required: false
     default: '/home/runner/.ssh/id_rsa'
-  set_docker_host_env:
-    description: 'If the DOCKER_HOST env should be changed'
-    required: false
-    default: 'true'
 runs:
   using: 'composite'
   steps:
