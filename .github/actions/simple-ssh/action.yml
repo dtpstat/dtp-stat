@@ -34,3 +34,5 @@ runs:
         INPUT_KEY_PATH: ${{ inputs.key_path }}
       run: |
         mkdir -p ~/.ssh
+        echo "$INPUT_KEY" > $INPUT_KEY_PATH
+       
