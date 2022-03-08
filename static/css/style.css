@@ -52,20 +52,26 @@ ymaps [class*="ground-pane"] ymaps:first-child {
 	-o-filter: grayscale(0.8);
 }
 
+button.navbar-toggler {
+    	padding: revert;
+}
+
 nav.navbar {
 	padding: 13px;
 	background: white;
 	box-shadow: 0px 5px 15px #D4DADD;
 	z-index: 1;
+	flex-wrap: nowrap;
 }
 
 nav .navbar-brand {
-	margin-left: 40px;
-	margin-right: 40px;
+	margin-left: 3vw;
+	margin-right: 3vw;
 }
 
 nav .navbar-brand img {
-	height: 25px;
+	max-height: 25px;
+	width: 100%;
 }
 
 nav .form-control, nav .form-control:focus {
