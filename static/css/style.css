@@ -64,9 +64,11 @@ nav.navbar {
 	flex-wrap: nowrap;
 }
 
-@media screen and (max-width: 800px) nav.navbar {
-    	padding: 4px;
-    	box-shadow: unset;    
+@media screen and (max-width: 800px) 
+	nav.navbar {
+    		padding: 4px;
+    		box-shadow: unset;    
+	}
 }
 
 nav .navbar-brand {
