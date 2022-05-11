@@ -161,7 +161,7 @@
                 <div class="row">
                     {% for participant in participants %}
                         <div class="col-12 col-sm-6 col-md-auto">
-                            <div class="participant-card participant-card_{{ participant.severity.level.name }}">
+                            <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level|default_if_none:0 }}">
                                 <div class="participant-card__header">
                                 <span class="participant-card__icon">
                                     <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
@@ -194,7 +194,7 @@
 
                         {% for participant in vehicle.participant_set.all|dictsort:"role" %}
                             <div class="col-12 col-sm-6 col-md-auto">
-                                <div class="participant-card participant-card_{{ participant.severity.level.name }}">
+                                <div class="participant-card participant-card_{{ participant_severity_map|get_item:participant.severity.level|default_if_none:0 }}">
                                     <div class="participant-card__header">
                                     <span class="participant-card__icon">
                                         <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
