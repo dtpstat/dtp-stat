@@ -161,7 +161,7 @@
                 <div class="row">
                     {% for participant in participants %}
                         <div class="col-12 col-sm-6 col-md-auto">
-                            <div class="participant-card participant-card_{{ participant.severity.level.name | default_if_none:"cостояние неизвестно"}}">
+                            <div class="participant-card participant-card_{{ participant_severity_map|participant.severity.level }}">
                                 <div class="participant-card__header">
                                 <span class="participant-card__icon">
                                     <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
@@ -169,11 +169,11 @@
                                 </span>
                                     <div class="participant-card__info">
                                         <p><b>{{ participant.role }}</b></p>
-                                        <p>{{ participant.gender }}</p>
+                                        <p>{{ participant.gender |default_if_none:"пол неизвестен"}}</p>
                                     </div>
                                 </div>
                                 <div class="participant-card__content">
-                                    <p>{{ participant.health_status }}</p>
+                                    <p>{{ participant.health_status | default_if_none:"cостояние неизвестно" }}</p>
                                 </div>
                                 {% if participant.violations.count %}
                                     <div class="participant-card__footer">
@@ -194,7 +194,7 @@
 
                         {% for participant in vehicle.participant_set.all|dictsort:"role" %}
                             <div class="col-12 col-sm-6 col-md-auto">
-                                <div class="participant-card participant-card_{{ participant.severity.level.name | default_if_none:"cостояние неизвестно" }}">
+                                <div class="participant-card participant-card_{{ participant_severity_map|participant.severity.level }}">
                                     <div class="participant-card__header">
                                     <span class="participant-card__icon">
                                         <img src="/static/media/{{ participant_role_map|get_item:participant.role }}.svg"
@@ -204,16 +204,16 @@
                                             <p><b>{{ participant.role }}</b></p>
                                             <p>
                                                 {% if participant.driving_experience %}
-                                                    {{ participant.gender }}, стаж (лет) —
+                                                    {{ participant.gender | default_if_none:"пол неизвестен"}}, стаж (лет) —
                                                     {{ participant.driving_experience }}
                                                 {% else %}
-                                                    {{ participant.gender }}
+                                                    {{ participant.gender |default_if_none:"пол неизвестен"}}
                                                 {% endif %}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="participant-card__content">
-                                        <p>{{ participant.health_status }}</p>
+                                        <p>{{ participant.health_status |default_if_none:"cостояние неизвестно"}}</p>
                                     </div>
                                     {% if participant.violations.count %}
                                         <div class="participant-card__footer">
