@@ -109,7 +109,9 @@ def dtp(request, slug):
     participant_severity_map = {
         4: 'dead',
         3: 'injured',
-        1: 'injured'
+        1: 'injured',
+        0: 'safe',
+        None: 'unknown'
     }
     posts = models.BlogPost.objects.order_by("?")[:3]
 
