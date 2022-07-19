@@ -49,7 +49,7 @@ class RegionSpider(scrapy.Spider):
                                       headers={'Content-Type': 'application/json; charset=UTF-8'})
 
     def parse_region(self, response):
-        export = json.loads(response.body_as_unicode())['metabase']
+        export = json.loads(response.text)['metabase']
         export = json.loads(literal_eval(export)[0]['maps'])
         for area in export:
             Item = dict()

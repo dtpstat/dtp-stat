@@ -58,7 +58,7 @@ class DtpSpider(scrapy.Spider):
 
     #@statsd.timed('dtpstat.spider.parse_area')
     def parse_area(self, response):
-        export = json.loads(response.body_as_unicode())
+        export = json.loads(response.text)
         if export['data']:
             export = literal_eval(export['data'])
             print("!!!!", response.meta['date'], len(export['tab']))
