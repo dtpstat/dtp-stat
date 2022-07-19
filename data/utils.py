@@ -521,7 +521,7 @@ def check_dates_from_gibdd():
     if source_date_data:
         for year in source_date_data:
             for month in year['nodes']:
-                date_data.append(datetime.datetime.strptime(month['Value'].replace("MONTHS:", ""), '%m.%Y').date())
+                date_data.append(datetime.datetime.strptime(month['value'].replace("MONTHS:", ""), '%m.%Y').date())
 
     with transaction.atomic():
         if date_data:
@@ -536,8 +536,8 @@ def check_dates_from_gibdd():
 def get_tags_data(data, parent_name=None):
     export_data = {}
     for item in data:
-        item_text = item['Text'] if not parent_name else parent_name + ", " + item['Text']
-        export_data[item['Value']] = item_text
+        item_text = item['text'] if not parent_name else parent_name + ", " + item['text']
+        export_data[item['value']] = item_text
         if item.get('nodes'):
             export_data = {**export_data, **get_tags_data(item.get('nodes'), parent_name=item_text)}
     return export_data

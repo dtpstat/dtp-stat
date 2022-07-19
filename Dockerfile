@@ -19,4 +19,4 @@ RUN pip3 install pipenv --no-cache-dir \
 COPY . .
 
 EXPOSE 5000
-ENTRYPOINT ["gunicorn", "--bind", ":5000", "dtpstat.wsgi"]
+CMD ["gunicorn", "--bind", ":5000", "dtpstat.wsgi"]
