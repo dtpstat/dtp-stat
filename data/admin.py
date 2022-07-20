@@ -96,3 +96,9 @@ class SeverityAdmin(admin.ModelAdmin):
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget},
     }
+
+@admin.register(models.Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name','code', 'is_filter')
+    search_fields = ('name','code',)
+    list_filter = ('is_filter',)
