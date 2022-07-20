@@ -102,3 +102,9 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name','code', 'is_filter')
     search_fields = ('name','code',)
     list_filter = ('is_filter',)
+
+@admin.register(models.Vehicle)
+class VehicleAdmin(admin.ModelAdmin):
+    list_display = ('gibdd_slug','vehicle_model', 'year', 'brand','ownership')
+    search_fields = ('brand','year',)
+    list_filter = ('year', 'brand')
