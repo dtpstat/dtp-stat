@@ -3,6 +3,8 @@ import json
 import logging
 import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor
+
 import requests
 import datetime
 from tqdm import tqdm
@@ -188,13 +190,17 @@ def mapdata(region_slug=None, year=None):
         years = [year]
     else:
         years = [x for x in range(2015, datetime.datetime.now().year + 1)]
-
-    for region_value in tqdm(regions):
-        for year_value in years:
-            data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value, status=True)
-            data = data_serializers.DTPSerializer(data, many=True).data
-            with open(settings.MEDIA_ROOT + "/mapdata/" + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
-                json.dump(data, data_file, ensure_ascii=False)
-
+    pbar = tqdm(total=len(regions) * len(years),desc = 'Files to dump')
+    with ThreadPoolExecutor() as e:
+        for region_value in regions:
+            for year_value in years:
+                e.submit(store_region_year_cache, region_value, year_value, pbar)
+    pbar.close()
     cache.clear()
 
+def store_region_year_cache(region_value, year_value, pbar):
+    data = data_models.DTP.objects.filter(region__parent_region=region_value, datetime__year=year_value, status=True)
+    data = data_serializers.DTPSerializer(data, many=True).data
+    with open(settings.MEDIA_ROOT + "/mapdata/" + region_value.slug + "_" + str(year_value) + ".json", 'w') as data_file:
+        json.dump(data, data_file, ensure_ascii=False)
+        pbar.update(1)

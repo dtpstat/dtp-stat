@@ -1,9 +1,9 @@
+import logging
 import django
 django.setup()
 
 from data import utils
 
-import traceback
 
 
 class DtpParserPipeline(object):
@@ -13,8 +13,7 @@ class DtpParserPipeline(object):
         try:
             utils.add_dtp_record(item)
         except:
-            traceback.print_exc()
-            spider.crawler.engine.close_spider(self, reason='failed')
+            spider.log('Failed record adding', logging.ERROR)
 
 
 class RegionParserPipeline(object):

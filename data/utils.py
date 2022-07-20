@@ -572,30 +572,15 @@ def load_fixtures():
     os.chdir(first_dir)
 
 def crawl(spider_name, params=None):
-    print(spider_name)
     first_dir = os.getcwd()
     os.chdir("data/parser")
-    command = 'scrapy crawl ' + spider_name + ' -L INFO'
+    command = 'scrapy crawl ' + spider_name + ' --nolog'
     if params:
         for key, value in params.items():
             command += ' -a ' + key + "=" + value
     print(command)
     os.system(command)
     os.chdir(first_dir)
-
-
-def dates_generator(start, end, gap=0):
-    dates_set = set()
-
-    start_with_gap = start - datetime.timedelta(days=gap)
-    start_with_gap = start_with_gap if start_with_gap >= datetime.date(2015, 1, 1) else start
-
-    while start_with_gap <= end:
-        start_with_gap += datetime.timedelta(days=1)
-        dates_set.add(datetime.datetime(start_with_gap.year, start_with_gap.month, 1).strftime('%m.%Y'))
-
-    return list(dates_set)
-
 
 def download_success(dates, region_code, tags=False):
     region = get_object_or_404(models.Region, gibdd_code=region_code, level=1)
@@ -616,32 +601,16 @@ def regions_crawl(downloads, tags=False):
         region_downloads = downloads.filter(region=region)
 
         if region_downloads:
-            dates = sorted([x['date'] for x in region_downloads.values("date")])
-            export_dates = dates_generator(start=min(dates), end=max(dates), gap=70)
-
-            for date in export_dates:
-                crawl("dtp", params={
-                    "tags": str(tags),
-                    "dates": ",".join([date]),
-                    "region_code": str(region.gibdd_code),
-                    "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
-                })
+            dates = map(lambda d: d.strftime('%m.%Y'),sorted(list(set([x['date'] for x in region_downloads.values("date")]))))
+            crawl("dtp", params={
+                "tags": str(tags),
+                "dates": ",".join(dates),
+                "region_code": str(region.gibdd_code),
+                "area_codes": ",".join([x.gibdd_code for x in region.region_set.all()])
+            })
 
         for dtp in tqdm(models.DTP.objects.filter(severity__isnull=True)):
             update_dtp_data(dtp)
-
-        app_utils.opendata()
-
-
-
-
-def update_export_meta_data():
-    for dtp in tqdm(models.DTP.objects.all()):
-        dtp.data['export'] = dtp.as_dict()
-        dtp.save()
-
-    app_utils.opendata(force=True)
-
 
 def check_deleted_dtp(download):
     download_item_dtps = models.DTP.objects.filter(
@@ -672,7 +641,6 @@ def check_dtp():
 
     # первым делом проверяем наличие вообще не скаченных регионов за конкретные даты
     downloads_no_update = downloads.filter(last_update=None)
-    # downloads_no_update = downloads.filter(region_id=5017, date=datetime.date(2021, 1, 1))
     if downloads_no_update.count() > 0:
         regions_crawl(downloads_no_update, tags=False)
 

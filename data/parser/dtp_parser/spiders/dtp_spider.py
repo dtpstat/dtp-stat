@@ -16,30 +16,33 @@ logging.disable(10)
 
 class DtpSpider(scrapy.Spider):
     name = "dtp"
+    done_count = 0
 
     custom_settings = {
         'ITEM_PIPELINES': {'data.parser.dtp_parser.pipelines.DtpParserPipeline': 300},
         'CLOSESPIDER_TIMEOUT': 84000,
         'RETRY_HTTP_CODES': [502, 503, 504, 522, 524, 408, 429],
         'RETRY_TIMES': 10,
-        "LOG_LEVEL": 'INFO',
-        "CONCURRENT_ITEMS": 8,
-        "CONCURRENT_REQUESTS": 8,
+        "CONCURRENT_ITEMS": 100,
+        "CONCURRENT_REQUESTS": 20,
         "DOWNLOAD_TIMEOUT": 40
     }
 
     def start_requests(self):
+        step_itr = lambda list, step: ((list[start:start + step]) for start in range(0, len(list), step))
         if self.tags == "True":
             tags = models.Tag.objects.filter(is_filter=False)
         else:
             tags = models.Tag.objects.filter(is_filter=True)
-
-        for area_code in self.area_codes.split(','):
-            for date in self.dates.split(","):
-                print("lol", date)
+        areas = self.area_codes.split(',')
+        months = self.dates.split(",")
+        print('Started region:', self.region_code, ', months:', months, ', areas:', areas)
+        for area_code in areas:
+            for dates in step_itr(months, 12):
+                dates_str = ','.join([('"MONTHS:' + date + '"') for date in dates])
                 for tag_code in [x.code for x in tags]:
                     payload = dict()
-                    payload_data = '{"date":["MONTHS:' + date + '"],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
+                    payload_data = '{"date":['+dates_str+'],"ParReg":"' + self.region_code + '","order":{"type":"1","fieldName":"dat"},"reg":"' + area_code + '","ind":"' + tag_code + '","st":"1","en":"10000"}'
                     payload["data"] = payload_data
                     yield Request(
                         'http://stat.gibdd.ru/map/getDTPCardData',
@@ -48,7 +51,7 @@ class DtpSpider(scrapy.Spider):
                             "tag_code": tag_code,
                             "area_code": area_code,
                             "parent_code": self.region_code,
-                            "date": date
+                            "date": dates[0]
                         },
                         body=json.dumps(payload),
                         headers={'Content-Type': 'application/json; charset=UTF-8'},
@@ -61,8 +64,8 @@ class DtpSpider(scrapy.Spider):
         export = json.loads(response.text)
         if export['data']:
             export = literal_eval(export['data'])
-            print("!!!!", response.meta['date'], len(export['tab']))
-
+            self.done_count += len(export['tab'])
+            print("Parsed in region ",  self.region_code, ':', self.done_count)
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
 
