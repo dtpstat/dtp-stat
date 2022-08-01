@@ -78,6 +78,7 @@ nav .navbar-brand {
 
 nav .navbar-brand img {
 	max-height: 25px;
+	max-width: 167px;
 	width: 100%;
 }
 
