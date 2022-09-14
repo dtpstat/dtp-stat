@@ -14,7 +14,7 @@ import telegram
 
 
 import locale
-locale.setlocale(locale.LC_TIME, "ru_RU")
+locale.setlocale(locale.LC_TIME, "ru_RU.utf8")
 
 import environ
 env = environ.Env()
