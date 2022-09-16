@@ -3,7 +3,6 @@ import datetime
 from bs4 import BeautifulSoup
 from application import models
 import pymorphy2
-morph = pymorphy2.MorphAnalyzer()
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
@@ -34,6 +33,7 @@ def postradali(num):
 
 
 def get_word_form(word, number):
+    morph = pymorphy2.MorphAnalyzer()
     result = morph.parse(word)[0].make_agree_with_number(int(number)).word
     if result == "людей":
         return "человек"
@@ -88,6 +88,7 @@ def get_today_data():
 
 
 def generate_text(data, post_type):
+    morph = pymorphy2.MorphAnalyzer()
     if post_type == "today_post":
         return (data['string_date'] + ", " + data['weekday'] + ", в ДТП " + pogibli(data['crashes_deaths']) + " " + data[
             'crashes_deaths'] + " " + get_word_form("человек", data['crashes_deaths']))

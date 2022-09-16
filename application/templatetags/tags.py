@@ -4,7 +4,7 @@ from django.utils.formats import date_format
 import datetime
 from urllib.parse import urlencode
 import pymorphy2
-morph = pymorphy2.MorphAnalyzer()
+
 
 register = template.Library()
 
@@ -35,6 +35,7 @@ def date_standart(value, source_format="%Y-%m-%d", export_format="j E Y года
 
 @register.simple_tag
 def get_word_after_num(word, num):
+    morph = pymorphy2.MorphAnalyzer()
     if num:
         word = morph.parse(word)[0]
         new_word = word.make_agree_with_number(int(num)).word
