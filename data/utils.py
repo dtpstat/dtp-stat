@@ -5,11 +5,9 @@ import os
 import re
 from lxml import html
 from tqdm import tqdm
-import environ
 import herepy
 import pytz
 import requests
-from datadog import statsd
 
 from django.contrib.gis.geos import Point
 from django.db import transaction
@@ -23,10 +21,6 @@ from . import models
 from application import utils as app_utils
 
 
-env = environ.Env(
-    PROXY_LIST=(list, [])
-)
-environ.Env.read_env()
 log = logging.getLogger(__name__)
 
 def open_json(path):
@@ -132,7 +126,7 @@ def get_geo_data(item, dtp):
 def geocoder_yandex(address, kind=None):
     params = {
         "geocode": address,
-        "apikey": env('YANDEX_TOKEN'),
+        "apikey": settings.YANDEX_TOKEN,
         "format": "json"
     }
     if kind is not None:
@@ -187,7 +181,7 @@ def geocoder_yandex(address, kind=None):
 
 
 def geocoder_here(address=None, coords=None):
-    api_key = env('HERE_TOKEN')
+    api_key = settings.HERE_TOKEN
     response = None
 
     if address:
@@ -495,8 +489,8 @@ def add_dtp_record(item):
 
 #@statsd.timed('dtpstat.check_dates_from_gibdd')
 def check_dates_from_gibdd():
-    if env('PROXY_LIST'):
-        proxies = {'http': 'http://' + env('PROXY_LIST')[0]}
+    if settings.PROXY_LIST:
+        proxies = {'http': 'http://' + settings.PROXY_LIST[0]}
     else:
         proxies = None
 
@@ -546,8 +540,8 @@ def get_tags_data(data, parent_name=None):
 def get_tags():
     tags = {}
 
-    if env('PROXY_LIST'):
-        proxies = {'http': 'http://' + env('PROXY_LIST')[0]}
+    if settings.PROXY_LIST:
+        proxies = {'http': 'http://' + settings.PROXY_LIST[0]}
     else:
         proxies = None
 

@@ -1,33 +1,27 @@
 import os
-
 import environ
-from datadog import initialize, statsd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_PATH = os.path.join(BASE_DIR, '.env')
 
-env = environ.Env(
-    ALLOWED_HOSTS=(list, []),
-    DEBUG=(bool, False),
-    NEXTJS_BASE_URL=(str, 'https://dtp-stat-on-nextjs.netlify.app'),
-    NEXTJS_IFRAME_WITH_COMMENTS=(bool, False),
-    NEXTJS_IFRAME_WITH_MAP=(bool, False),
-    STATSD_HOST=(str, 'localhost'),
-)
-
+env = environ.Env()
 if os.path.exists(ENV_PATH):
-    environ.Env.read_env(ENV_PATH)
+    env.read_env(ENV_PATH)
 
-
-initialize(statsd_host=env('STATSD_HOST'), statsd_port=8125)
-
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
-DEBUG = env('DEBUG')
-NEXTJS_BASE_URL = env('NEXTJS_BASE_URL')
-NEXTJS_IFRAME_WITH_COMMENTS = env('NEXTJS_IFRAME_WITH_COMMENTS')
-NEXTJS_IFRAME_WITH_MAP = env('NEXTJS_IFRAME_WITH_MAP')
+# APP SETTINGS FROM ENV
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=[])
+DEBUG = env('DEBUG', default=False)
+NEXTJS_BASE_URL = env('NEXTJS_BASE_URL', default='https://dtp-stat-on-nextjs.netlify.app')
+NEXTJS_IFRAME_WITH_COMMENTS = env('NEXTJS_IFRAME_WITH_COMMENTS', default=False)
+NEXTJS_IFRAME_WITH_MAP = env('NEXTJS_IFRAME_WITH_MAP', default=False)
 SECRET_KEY = env('SECRET_KEY')
+YANDEX_TOKEN = env('YANDEX_TOKEN')
+HERE_TOKEN = env('HERE_TOKEN')
+PRODUCTION_HOST = env('PRODUCTION_HOST', default='dtp-stat.ru')
+PROXY_LIST = env('PROXY_LIST', default=[])
 
+
+# Django stuff
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

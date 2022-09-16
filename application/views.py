@@ -1,10 +1,8 @@
 import datetime
 import logging
 
-import requests
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
-from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaulttags import register
@@ -14,11 +12,7 @@ from application import forms, models, utils
 from data import models as data_models
 from data import utils as data_utils
 
-import environ
-env = environ.Env(
-    PRODUCTION_HOST=(str, 'dtp-stat.ru'),
-)
-environ.Env.read_env()
+from django.conf import settings
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +26,7 @@ def home(request):
 
     return render(request, "index.html", context={
         "dtps": dtps,
-        'here_token': env('HERE_TOKEN')
+        'here_token': settings.HERE_TOKEN
     })
 
 
@@ -233,7 +227,7 @@ def old_redirect(request, slug):
 
 
 def robots_txt(request):
-    template = "templates/robots.txt" if request.get_host() == env('PRODUCTION_HOST') else "templates/robots-disallow.txt"
+    template = "templates/robots.txt" if request.get_host() == settings.PRODUCTION_HOST else "templates/robots-disallow.txt"
     f = open(template, "r")
     file_content = f.read()
     f.close()
