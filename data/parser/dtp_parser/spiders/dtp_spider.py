@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 from ast import literal_eval
@@ -9,7 +8,8 @@ from scrapy.exceptions import CloseSpider
 from scrapy.http.request import Request
 from scrapy.spidermiddlewares.httperror import HttpError
 
-from data import models, utils
+from data.gibdd.download import mark_successful_downloads
+from data import models
 
 logging.disable(10)
 
@@ -35,7 +35,7 @@ class DtpSpider(scrapy.Spider):
             tags = models.Tag.objects.filter(is_filter=True)
         areas = self.area_codes.split(',')
         months = self.dates.split(",")
-        print('Started region:', self.region_code, ', months:', months, ', areas:', areas)
+        print("Started region: %s, months: %d, areas %d " % (self.region_code, len(months),len(areas)))
         for area_code in areas:
             for dates in step_itr(months, 12):
                 dates_str = ','.join([('"MONTHS:' + date + '"') for date in dates])
@@ -62,9 +62,9 @@ class DtpSpider(scrapy.Spider):
     def parse_area(self, response):
         export = json.loads(response.text)
         if export['data']:
-            export = literal_eval(export['data'])
+            export = json.loads(export['data'])
             self.done_count += len(export['tab'])
-            print("Parsed in region ",  self.region_code, ':', self.done_count)
+            print('Parsed in region %s: %d' %  (self.region_code, self.done_count), end="\r" )
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
                 export_dtp['area_code'] = response.meta['area_code']
@@ -87,5 +87,5 @@ class DtpSpider(scrapy.Spider):
 
     def spider_closed(self, reason):
         if reason == "finished":
-            utils.download_success(self.dates, self.region_code, tags=True if self.tags == "True" else False)
+            mark_successful_downloads(self.dates, self.region_code, tags=True if self.tags == "True" else False)
 
