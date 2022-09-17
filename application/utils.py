@@ -5,21 +5,19 @@ import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor
 
-import requests
 import datetime
 from tqdm import tqdm
 
 import pandas as pd
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import GEOSGeometry, Point
-from django.contrib.gis.measure import D
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, render
 from django.core.cache import cache
 
+from data.tools.geocode import geocoder_yandex
 from application import models
 from data import models as data_models
-from data import utils as data_utils
 from data import serializers as data_serializers
 
 from django.conf import settings
@@ -37,9 +35,9 @@ def get_region_by_center_point(center_point):
     if center_point:
         if "," not in center_point:
             # проверяем координаты через Яндекс
-            ya_data = data_utils.geocoder_yandex(center_point)
+            ya_data = geocoder_yandex(center_point)
             if ya_data and ya_data.get('region') == ya_data.get('parent_region'):
-                ya_data_district = data_utils.geocoder_yandex(center_point, kind='district')
+                ya_data_district = geocoder_yandex(center_point, kind='district')
                 if ya_data_district:
                     ya_data = ya_data_district
             log.debug('ya_data: %s', ya_data)

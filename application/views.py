@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
 from django.http import HttpResponse
@@ -10,9 +11,7 @@ from django.utils import timezone
 
 from application import forms, models, utils
 from data import models as data_models
-from data import utils as data_utils
-
-from django.conf import settings
+from data.tools.geocode import geocode
 
 log = logging.getLogger(__name__)
 
@@ -166,7 +165,7 @@ def dtp_fix_point(request, slug):
         else:
             error = form.errors
 
-    geocode_point_data = data_utils.geocode(dtp)
+    geocode_point_data = geocode(dtp)
 
     geo = {
         "source": [dtp.point.coords[1], dtp.point.coords[0]],
