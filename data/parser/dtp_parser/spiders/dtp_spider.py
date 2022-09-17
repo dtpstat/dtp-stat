@@ -4,7 +4,6 @@ import logging
 from ast import literal_eval
 
 import scrapy
-from datadog import statsd
 from scrapy import signals
 from scrapy.exceptions import CloseSpider
 from scrapy.http.request import Request
@@ -68,12 +67,8 @@ class DtpSpider(scrapy.Spider):
             print("Parsed in region ",  self.region_code, ':', self.done_count)
             for dtp in export['tab']:
                 export_dtp = dict(dtp)
-
-
-                if response.meta['date'] in export_dtp['date']:
-                    export_dtp['area_code'] = response.meta['area_code']
-                    export_dtp['parent_code'] = response.meta['parent_code']
-
+                export_dtp['area_code'] = response.meta['area_code']
+                export_dtp['parent_code'] = response.meta['parent_code']
                 export_dtp['tag_code'] = response.meta['tag_code']
                 yield export_dtp
 
