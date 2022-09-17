@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
+from data.tools.geocode import *
 from application import utils
-from data import utils as data_utils
 from data.models import Region
 
 coords = {
@@ -79,7 +79,7 @@ class Command(BaseCommand):
     def collect_coords(self):
         coords = {}
         for region in Region.objects.filter(level=2).all()[30:50]:
-            result = data_utils.geocoder_yandex(region.name)
+            result = geocoder_yandex(region.name)
             coords[region.name] = "%s %s" % (result["long"], result["lat"])
 
         print(coords)

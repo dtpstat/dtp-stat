@@ -1,9 +1,11 @@
 import logging
+
 import django
+
 django.setup()
 
 from data import utils
-
+import data.gibdd.process as p
 
 
 class DtpParserPipeline(object):
@@ -11,9 +13,9 @@ class DtpParserPipeline(object):
 
     def process_item(self, item, spider):
         try:
-            utils.add_dtp_record(item)
-        except:
-            spider.log('Failed record adding', logging.ERROR)
+            p.add_dtp_record(item)
+        except Exception as e:
+            spider.log(e, logging.ERROR)
 
 
 class RegionParserPipeline(object):
@@ -24,5 +26,3 @@ class RegionParserPipeline(object):
             item['region_gibdd_code'],
             item['region_name'],
         )
-        pass
-
