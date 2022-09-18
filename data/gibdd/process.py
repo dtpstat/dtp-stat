@@ -30,10 +30,8 @@ def add_dtp_record(item):
     tag = get_object_or_404(models.Tag, code=tag_code)
     dtp.tags.add(tag)
 
-    dtp.save()
-
     if dtp.only_manual_edit or (dtp.region and dtp.data and dtp.data.get('source') and dtp.data.get('source') == item):
-        return
+        pass
     else:
         dtp.gibdd_latest_change = timezone.now()
         dtp.data['source'] = item
@@ -43,8 +41,7 @@ def add_dtp_record(item):
         _add_participants_records(item, dtp)
         _add_related_data(item, dtp)
         _add_extra_filters(item, dtp)
-
-        dtp.save()
+    dtp.save()
 
 
 def _process_main_data(item, dtp):
