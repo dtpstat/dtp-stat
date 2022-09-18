@@ -6,6 +6,8 @@ services:
       POSTGRES_PASSWORD: docker
       POSTGRES_USER: docker
       POSTGRES_DB: dtpstat
+    ports:
+      - "5431:5432"
     networks:
       - backend
   web:
