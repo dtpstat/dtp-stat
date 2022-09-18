@@ -47,7 +47,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(models.DTP)
 class DTPAdmin(admin.ModelAdmin):
-    list_display = ('datetime', 'category', 'region', 'severity')
+    list_display = ('gibdd_slug', 'region', 'datetime', 'gibdd_latest_change', 'gibdd_latest_check')
     raw_id_fields = ('region',)
     search_fields = ('region__name', 'region__parent_region__name', 'gibdd_slug')
     date_hierarchy = 'datetime'
