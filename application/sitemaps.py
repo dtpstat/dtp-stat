@@ -7,6 +7,7 @@ class DTPSitemap(Sitemap):
     changefreq = "monthly"
     priority = 0.5
     limit = 2000
+    protocol = 'https'
 
     def items(self):
         return DTP.objects.filter(status=True)
