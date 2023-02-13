@@ -16,17 +16,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.decorators.cache import cache_page
-from django.shortcuts import redirect
-from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps import views as sitemaps_views
 
-from data import views as data_views
 from application import views as app_views
 from application import views_api as api_views
+from application.sitemaps import DTPSitemap
 
+
+sitemaps = {'DTP': DTPSitemap}
 
 urlpatterns = [
+    path('sitemap.xml', cache_page(86400)(sitemaps_views.index), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemaps'}),
+    path('sitemap-<section>.xml', cache_page(86400)(sitemaps_views.sitemap), {'sitemaps': sitemaps}, name='sitemaps'),
     path("robots.txt", app_views.robots_txt),
     path('svg/<slug>', app_views.temp_map_icons, name='app.views'),
     path('', app_views.home, name='home'),

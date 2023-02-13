@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.gis',
+    'django.contrib.sitemaps',
     'data',
     'application',
     'rest_framework',

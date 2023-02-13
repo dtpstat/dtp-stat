@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
+
 from data import models
 from django.db.models import Q
 
@@ -45,6 +47,20 @@ class ParticipantAdmin(admin.ModelAdmin):
     raw_id_fields = ('vehicle', 'dtp',)
 
 
+class RegionFilter(SimpleListFilter):
+    title = 'Region'
+    parameter_name = 'region'
+
+    def lookups(self, request, model_admin):
+        regions = models.Region.objects.filter(level=1).order_by('name')
+        return [(c.id, c.name) for c in regions]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(region__parent_region=self.value())
+        return queryset
+
+
 @admin.register(models.DTP)
 class DTPAdmin(admin.ModelAdmin):
     list_display = ('gibdd_slug', 'region', 'datetime', 'gibdd_latest_change', 'gibdd_latest_check')
@@ -52,7 +68,7 @@ class DTPAdmin(admin.ModelAdmin):
     search_fields = ('region__name', 'region__parent_region__name', 'gibdd_slug')
     date_hierarchy = 'datetime'
     filter_horizontal = ('weather', 'nearby', 'road_conditions', 'tags', 'participant_categories')
-    list_filter = ('point_is_verified', 'status', 'gibdd_latest_check', 'gibdd_latest_change', 'region__parent_region')
+    list_filter = ('point_is_verified', 'status', 'gibdd_latest_check', 'gibdd_latest_change', RegionFilter)
 
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget},

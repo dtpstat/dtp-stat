@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point, MultiPolygon
 from django.db.models import JSONField
+from django.urls import reverse
 from django.utils.crypto import get_random_string
 
 from slugify import slugify
@@ -119,7 +119,7 @@ class ParticipantCategory(models.Model):
 
 class DTP(models.Model):
     gibdd_slug = models.CharField(max_length=1000, help_text="slug", null=True, blank=True, default=None, db_index=True)
-    status = models.BooleanField(help_text="show or hide dtp", default=True)
+    status = models.BooleanField(help_text="show or hide dtp", default=True, db_index=True)
     only_manual_edit = models.BooleanField(help_text="only manul adit and update", default=False)
 
     region = models.ForeignKey(Region, help_text="region", null=True, blank=True, default=None,
@@ -169,7 +169,7 @@ class DTP(models.Model):
         return ", ".join([x for x in [self.region.parent_region.name, self.region.name, self.address] if x])
 
     def get_absolute_url(self):
-        return '/dtp/' + self.gibdd_slug + '/'
+        return reverse('dtp', kwargs={'slug': self.gibdd_slug})
 
     def save(self, *args, **kwargs):
         # генерация нового export json
