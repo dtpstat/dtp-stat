@@ -25,7 +25,7 @@ from application import views_api as api_views
 from application.sitemaps import DTPSitemap
 
 
-sitemaps = {'DTP': DTPSitemap}
+sitemaps = {'dtp': DTPSitemap}
 
 urlpatterns = [
     path('sitemap.xml', cache_page(86400)(sitemaps_views.index), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemaps'}),
