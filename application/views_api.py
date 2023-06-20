@@ -23,7 +23,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 import calendar
-import datetime
+from datetime import date
 import os
 import json
 
@@ -97,12 +97,16 @@ def mapdata(request):
 
 #@cache_page(24 * 60 * 60)
 @api_view(['GET'])
-def mvcs(request):
-    mvcs = data_models.DTP.objects.all().values(
-        'id', 'datetime', 'participants', 'injured', 'dead'
-    )
-    print(len(mvcs))
-    return Response(mvcs)
+def status(request):
+    last_download = data_models.Download.objects.filter(last_update__isnull=False).order_by('-date').first().date
+    days = (date.today().replace(day=1) - last_download).days
+    delay_threshold = int(request.query_params.get('delay_threshold',60))
+    return Response({
+        'delay': {
+            'days': days ,
+            'state': 'good' if days < delay_threshold else 'bad'
+        }
+    }, status = 200 if days < delay_threshold else 409)
 
 
 # API статистики

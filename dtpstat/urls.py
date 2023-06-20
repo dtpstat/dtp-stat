@@ -57,7 +57,7 @@ urlpatterns = [
     path('api/dtp_full/<slug>', api_views.dtp_full),
     path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
     path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
-    path('api/test/', api_views.mvcs),
+    path('api/status/', api_views.status),
 
     path('<slug>/', app_views.old_redirect, name='old-redirect')
 ]
