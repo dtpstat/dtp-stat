@@ -183,6 +183,6 @@ def main(message="today"):
         if data:
             text = generate_text(data, "today_post")
             make_img(data)
-            send_tweet(text)
+            #send_tweet(text)
             send_telegram_post(text)
             #send_vk_post(text)
