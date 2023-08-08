@@ -167,9 +167,17 @@ def send_tweet(text):
     access_token_secret = env('TWITTER_CONSUMER_TOKEN_SECRET')
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
+    apiNew = tweepy.Client(
+        access_token=access_token,
+        access_token_secret=access_token_secret,
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret
+    )
 
     filename = os.path.dirname(os.path.abspath(__file__)) + "/img.png"
-    api.update_with_media(filename, status=text)
+    media = api.simple_upload(filename)
+    api.create_media_metadata(media_id=media.media_id, alt_text="")
+    apiNew.create_tweet(text=text, media_ids=[media.media_id])
 
 
 def send_telegram_post(text):
@@ -183,6 +191,6 @@ def main(message="today"):
         if data:
             text = generate_text(data, "today_post")
             make_img(data)
-            #send_tweet(text)
+            send_tweet(text)
             send_telegram_post(text)
             #send_vk_post(text)
