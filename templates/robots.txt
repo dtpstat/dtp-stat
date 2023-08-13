@@ -4,3 +4,5 @@ Disallow: /api
 Disallow: /ckeditor
 Disallow: /board
 Disallow: /accounts
+
+Sitemap: https://dtp-stat.ru/sitemap.xml
