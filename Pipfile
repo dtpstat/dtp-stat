@@ -27,7 +27,7 @@ psycopg2-binary = "==2.8.5"
 pymorphy2 = "==0.9.1"
 python-telegram-bot = "==13.0"
 scrapy-rotating-proxies = "==0.6.2"
-tqdm = "==4.65.1"
+tqdm = "==4.66.3"
 tweepy = "==4.14.0"
 #omit old package, it dep for scrapy-rotating-proxies
 typing = { version = "*", markers="python_version < '3.0'" }
