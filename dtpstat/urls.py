@@ -62,6 +62,6 @@ urlpatterns = [
     path('<slug>/', app_views.old_redirect, name='old-redirect')
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# if settings.DEBUG:
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
