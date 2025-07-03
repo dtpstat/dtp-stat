@@ -182,7 +182,16 @@ def send_tweet(text):
 
 def send_telegram_post(text):
     bot = telegram.Bot(token=env('TELEGRAM_TOKEN'))
-    bot.sendPhoto("@dtp_stat", open(os.path.dirname(os.path.abspath(__file__)) + "/img.png", 'rb'), caption=text)
+
+    channels_str = os.getenv('TELEGRAMM_CHANNELS', '')
+    channels = [ch.strip() for ch in channels_str.split(';') if ch.strip()]
+
+    photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
+    
+    with open(photo_path, 'rb') as photo:
+        for channel in channels:
+            bot.sendPhoto(channel, photo, caption=text)
+            photo.seek(0)
 
 
 def main(message="today"):
@@ -191,6 +200,12 @@ def main(message="today"):
         if data:
             text = generate_text(data, "today_post")
             make_img(data)
-            send_tweet(text)
-            send_telegram_post(text)
-            #send_vk_post(text)
+
+            if os.getenv("SEND_TWEETER") == "1":
+                send_tweet(text)
+
+            if os.getenv("SEND_TELEGRAM") == "1":
+                send_telegram_post(text)
+
+            if os.getenv("SEND_VK") == "1":
+                send_vk_post(text)
