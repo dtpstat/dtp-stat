@@ -73,7 +73,9 @@ class OpenData(models.Model):
     file_size = models.IntegerField(null=True, blank=True, default=None)
 
     def mb_file_size(self):
-        return self.file_size/(1024*1024)
+        if self.file_size is None:
+            return 0 # Вернуть вместо ошибки 0 mb, если файл пустой
+        return self.file_size / 1024 / 1024
 
 
 class Ticket(models.Model):
