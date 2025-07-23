@@ -1,27 +1,36 @@
-import requests
-import calendar
 import datetime
 from django.conf import settings as django_settings
+from constance import config
 
 
 def get_donate_data(request):
-    donate_data_r = requests.get(
-        'https://donate.city4people.ru/ajax/ajax_public.php?context=get__donationsInfo33&domain=beta.dtp-stat.ru'
-    )
+    sum_total = config.DONATE_SUM_TOTAL
+    sum_goal = config.DONATE_SUM_GOAL
+    end_date_str = config.DONATE_END_DATE
 
     try:
-        donate_data = donate_data_r.json()
-    except:
-        donate_data = {}
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        now = datetime.datetime.now()
+        days_left = (end_date - now).days
+    except (ValueError, TypeError):
+        days_left = 0
 
-    if donate_data:
-        donate_data['progress'] = donate_data['paymentsInfo']['sum_total']*100/donate_data['paymentsInfo']['sum_goal']
+    if sum_goal > 0:
+        progress = (sum_total * 100) / sum_goal
     else:
-        donate_data['progress'] = 50
+        progress = 0
 
-    donate_data['days_left'] = calendar.monthrange(datetime.datetime.now().year, datetime.datetime.now().month)[1] + 1 - datetime.datetime.now().day
+    donate_data = {
+        'paymentsInfo': {
+            'sum_total': sum_total,
+            'sum_goal': sum_goal,
+        },
+        'progress': progress,
+        'days_left': days_left,
+    }
 
-    return {'donate_data':donate_data}
+    return {'donate_data': donate_data}
+
 
 def settings(request):
     return {

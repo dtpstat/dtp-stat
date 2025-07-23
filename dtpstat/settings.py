@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'corsheaders',
     'application.templatetags.tags',
+    'constance',
+    'constance.backends.database',
 ]
 
 SITE_ID = 1
@@ -74,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'application.context_processors.get_donate_data',
                 'application.context_processors.settings',
             ],
         },
@@ -195,3 +198,11 @@ if not DEBUG:
     }
 else:
     pass
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'DONATE_SUM_TOTAL': (0, 'Сумма донатов'),
+    'DONATE_SUM_GOAL': (100000, 'Цель сбора'),
+    'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
+}

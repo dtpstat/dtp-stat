@@ -1,4 +1,4 @@
-FROM python:3.8.11-buster
+FROM python:3.8-bullseye
 LABEL org.opencontainers.image.source=https://github.com/dtpstat/dtp-stat
 ENV PYTHONDONTWRITEBYTECODE 1
 

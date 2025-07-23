@@ -29,6 +29,7 @@ python-telegram-bot = "==13.0"
 scrapy-rotating-proxies = "==0.6.2"
 tqdm = "==4.65.1"
 tweepy = "==4.14.0"
+django-constance = "==4.3.2"
 #omit old package, it dep for scrapy-rotating-proxies
 typing = { version = "*", markers="python_version < '3.0'" }
 
