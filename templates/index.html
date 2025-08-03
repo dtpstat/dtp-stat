@@ -18,9 +18,25 @@
         <iframe id="iframe-with-map" frameborder="0" width="100%" height="100%"></iframe>
     </div>
     <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        const cookieLocale = getCookie('django_language') || 'ru';
+        
+        const iframeSrc = cookieLocale === 'ru' 
+            ? '/iframes/map'
+            : `/${cookieLocale}/iframes/map`;
+        
         document
             .getElementById('iframe-with-map')
-            .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}/iframes/map' + window.location.search)
+            .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}' + iframeSrc + window.location.search);
+            
+        console.log('Django locale from context:', '{{ LANGUAGE_CODE }}');
+        console.log('Django locale cookie:', cookieLocale);
+        console.log('Iframe src:', '{{ settings.NEXTJS_BASE_URL }}' + iframeSrc + window.location.search);
     </script>
     {% include "iframe_messaging.html" %}
     {% else %}

@@ -19,6 +19,7 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps import views as sitemaps_views
+from django.conf.urls.i18n import i18n_patterns
 
 from application import views as app_views
 from application import views_api as api_views
@@ -27,11 +28,26 @@ from application.sitemaps import DTPSitemap
 
 sitemaps = {'dtp': DTPSitemap}
 
+# URLs without language prefixes (API, admin, etc.)
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
     path('sitemap.xml', cache_page(86400)(sitemaps_views.index), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemaps'}),
     path('sitemap-<section>.xml', cache_page(86400)(sitemaps_views.sitemap), {'sitemaps': sitemaps}, name='sitemaps'),
     path("robots.txt", app_views.robots_txt),
     path('svg/<slug>', app_views.temp_map_icons, name='app.views'),
+    
+    path('admin/', admin.site.urls),
+    
+    path('api/dtp/', api_views.DTPApiView.as_view()),
+    path('api/dtp_load/', cache_page(60 * 60)(api_views.mapdata), name='mapdata'),
+    path('api/dtp_full/<slug>', api_views.dtp_full),
+    path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
+    path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
+    path('api/status/', api_views.status),
+]
+
+# URLs with language prefixes
+urlpatterns += i18n_patterns(
     path('', app_views.home, name='home'),
     path('accounts/', include('allauth.urls')),
     path('board/', app_views.board, name='board'),
@@ -50,17 +66,9 @@ urlpatterns = [
     path('opendata/', app_views.opendata, name='opendata'),
     path('donate/', app_views.donate, name='donate'),
 
-    path('admin/', admin.site.urls),
-
-    path('api/dtp/', api_views.DTPApiView.as_view()),
-    path('api/dtp_load/', cache_page(60 * 60)(api_views.mapdata), name='mapdata'),
-    path('api/dtp_full/<slug>', api_views.dtp_full),
-    path('api/stat/', api_views.StatApiView.as_view({"get": "stat"})),
-    path('api/filters/', cache_page(24 * 60 * 60)(api_views.FiltersApiView.as_view())),
-    path('api/status/', api_views.status),
-
-    path('<slug>/', app_views.old_redirect, name='old-redirect')
-]
+    path('<slug>/', app_views.old_redirect, name='old-redirect'),
+    prefix_default_language=False,
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
