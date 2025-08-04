@@ -34,9 +34,6 @@
             .getElementById('iframe-with-map')
             .setAttribute('src', '{{ settings.NEXTJS_BASE_URL }}' + iframeSrc + window.location.search);
             
-        console.log('Django locale from context:', '{{ LANGUAGE_CODE }}');
-        console.log('Django locale cookie:', cookieLocale);
-        console.log('Iframe src:', '{{ settings.NEXTJS_BASE_URL }}' + iframeSrc + window.location.search);
     </script>
     {% include "iframe_messaging.html" %}
     {% else %}
