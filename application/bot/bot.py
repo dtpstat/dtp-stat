@@ -236,6 +236,9 @@ def send_vk_post(text):
     try:
         upload = vk_api.VkUpload(vk_session)
         photo = upload.photo_wall(photo_path, group_id=community_id)[0]
+    except Exception as e:
+        print(log_template.format(f"Ошибка загрузки фото на сервер VK: {e}"))
+    try:
         attachment = f"photo{photo['owner_id']}_{photo['id']}"
         vk.wall.post(owner_id=-int(community_id), from_group=1, message=text, attachments=attachment)
     except Exception as e:
