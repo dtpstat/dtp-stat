@@ -220,19 +220,18 @@ def send_telegram_post(text):
 def send_vk_post(text):
     log_template = "[send_vk_post] {0}"
 
-    phone_number = env("VK_ACCOUNT_PHONE_NUMBER")
-    password = env("VK_ACCOUNT_PASSWORD")
+    access_token = env('VK_ACCESS_TOKEN')
     community_id = env("VK_COMMUNITY_ID")
-
-    vk_session = vk_api.VkApi(phone_number, password)
+    
     try:
-        vk_session.auth(token_only=True)
+        vk_session = vk_api.VkApi(token=access_token)
     except Exception as e:
         print(log_template.format(f"Ошибка авторизации в VK: {e}"))
         return
 
     vk = vk_session.get_api()
     photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
+    
     try:
         upload = vk_api.VkUpload(vk_session)
         photo = upload.photo_wall(photo_path, group_id=community_id)[0]
@@ -243,10 +242,10 @@ def send_vk_post(text):
         attachment = f"photo{photo['owner_id']}_{photo['id']}"
         vk.wall.post(owner_id=-int(community_id), from_group=1, message=text, attachments=attachment)
     except Exception as e:
-        print(log_template.format(f"Ошибка при отправке поста в VK: {e}"))
+        print(log_template.format(f"Ошибка при публикации поста в VK: {e}"))
         return
 
-    print(log_template.format("Пост успешно отправлен в VK"))
+    print(log_template.format("Пост успешно опубликован в VK"))
 
 
 def main(message="today"):
