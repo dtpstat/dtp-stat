@@ -53,6 +53,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,6 +75,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'application.context_processors.get_donate_data',
@@ -139,6 +141,27 @@ LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = False
+
+# Supported languages
+from django.utils.translation import gettext_lazy as _
+LANGUAGES = [
+    ('ru', _('Russian')),
+    ('en', _('English')),
+]
+
+# Path for translation files
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_DOMAIN = None
+LANGUAGE_COOKIE_SECURE = False if DEBUG else True
+LANGUAGE_COOKIE_HTTPONLY = False
+LANGUAGE_COOKIE_SAMESITE = None
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
@@ -205,4 +228,5 @@ CONSTANCE_CONFIG = {
     'DONATE_SUM_TOTAL': (0, 'Сумма донатов'),
     'DONATE_SUM_GOAL': (100000, 'Цель сбора'),
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
+    'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }
