@@ -1,6 +1,5 @@
 {% load static %}
 {% load i18n %}
-{% load constance %}
 
 <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="{% url 'home' %}">
@@ -41,8 +40,7 @@
             <li class="nav-item support">
                 <a class="nav-link button support" href="{% url 'donate' %}">Поддержать проект</a>
             </li>
-            {% constance 'SHOW_LANGUAGE_SWITCHER' as show_language_switcher %}
-            {% if show_language_switcher %}
+            {% if config.SHOW_LANGUAGE_SWITCHER %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% get_current_language as LANGUAGE_CODE %}
