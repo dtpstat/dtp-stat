@@ -2,23 +2,33 @@ import datetime
 from django.conf import settings as django_settings
 from constance import config
 
+from donations.models import Goal
+
 
 def get_donate_data(request):
-    sum_total = config.DONATE_SUM_TOTAL
-    sum_goal = config.DONATE_SUM_GOAL
-    end_date_str = config.DONATE_END_DATE
+    if config.DONATE_MANUAL:
+        sum_total = config.DONATE_SUM_TOTAL
+        sum_goal = config.DONATE_SUM_GOAL
+        end_date_str = config.DONATE_END_DATE
 
-    try:
-        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
-        now = datetime.datetime.now()
-        days_left = (end_date - now).days
-    except (ValueError, TypeError):
-        days_left = 0
+        try:
+            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+            now = datetime.datetime.now()
+            days_left = (end_date - now).days
+        except (ValueError, TypeError):
+            days_left = 0
 
-    if sum_goal > 0:
-        progress = (sum_total * 100) / sum_goal
+        if sum_goal > 0:
+            progress = (sum_total * 100) / sum_goal
+        else:
+            progress = 0
+
     else:
-        progress = 0
+        goal = Goal.objects.active_goal()
+        sum_total = goal.current_amount_raised + goal.proposal_contribution
+        sum_goal = goal.target_amount
+        progress = (sum_total * 100) / sum_goal
+        days_left = goal.days_until_end
 
     donate_data = {
         'paymentsInfo': {
@@ -28,7 +38,6 @@ def get_donate_data(request):
         'progress': progress,
         'days_left': days_left,
     }
-
     return {'donate_data': donate_data}
 
 
