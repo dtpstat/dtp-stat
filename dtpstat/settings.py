@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'data',
     'application',
+    'donations',
     'rest_framework',
     'django_filters',
     'ckeditor',
@@ -205,4 +206,5 @@ CONSTANCE_CONFIG = {
     'DONATE_SUM_TOTAL': (0, 'Сумма донатов'),
     'DONATE_SUM_GOAL': (100000, 'Цель сбора'),
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
+    'DONATE_MANUAL': (True, 'Использовать данные из конфига'),
 }
