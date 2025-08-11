@@ -80,6 +80,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'application.context_processors.get_donate_data',
                 'application.context_processors.settings',
+                'constance.context_processors.config',
             ],
         },
     },
