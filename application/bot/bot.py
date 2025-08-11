@@ -9,6 +9,7 @@ from PIL import ImageDraw
 import os
 import tweepy
 import telegram
+import json, io
 
 
 
@@ -49,18 +50,29 @@ def get_today_data():
     soup = BeautifulSoup(response.text, 'html.parser')
 
     block_count = soup.find("table", "b-crash-stat")
+    print("[get_today_data] block_count: ", block_count)
 
     source_date = block_count.find("th").text.strip().split(" ")[-1]
+    print("[get_today_data] source_date: ", source_date)
     date = datetime.datetime.strptime(source_date, '%d.%m.%Y').date()
+    print("[get_today_data] date: ", date)
     string_date = date.strftime("%-d %B")
+    print("[get_today_data] string_date: ", string_date)
     weekday = date.strftime("%A").lower()
+    print("[get_today_data] weekday: ", weekday)
 
     data_blocks = block_count.findAll("tr")
+    print("[get_today_data] data_blocks: ", data_blocks)
     crashes_num = str(data_blocks[1].findChildren()[1].text)
+    print("[get_today_data] crashes_num: ", crashes_num)
     crashes_deaths = str(data_blocks[2].findChildren()[1].text)
+    print("[get_today_data] crashes_deaths: ", crashes_deaths)
     crashes_child_deaths = str(data_blocks[3].findChildren()[1].text)
+    print("[get_today_data] crashes_child_deaths: ", crashes_child_deaths)
     crashes_injured = str(data_blocks[4].findChildren()[1].text)
+    print("[get_today_data] crashes_injured: ", crashes_injured)
     crashes_child_injured = str(data_blocks[5].findChildren()[1].text)
+    print("[get_today_data] crashes_child_injured: ", crashes_child_injured)
 
 
     brief_data_item, created = models.BriefData.objects.update_or_create(
@@ -214,6 +226,51 @@ def send_telegram_post(text):
             except Exception as e:
                 print(f"[send_telegram_post] Ошибка при отправке в {channel}: {e}")
             photo.seek(0)
+
+
+def send_vk_post(text):
+    VK_ID = env('VK_ID')
+    VK_TOKEN = env('VK_TOKEN')
+
+    photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
+
+    with open(photo_path, 'rb') as photo:
+        # 1. URL для загрузки
+        upload_url = requests.post(
+            'https://api.vk.com/method/photos.getWallUploadServer',
+            data={'group_id': abs(VK_ID), 'access_token': VK_TOKEN, 'v': '5.131'}
+        ).json()['response']['upload_url']
+
+        # 2. Загрузка
+        saved = requests.post(upload_url, files={'photo': photo}).json()
+
+        # 3. Сохранение
+        photo_info = requests.post(
+            'https://api.vk.com/method/photos.saveWallPhoto',
+            data={
+                'group_id': abs(VK_ID),
+                'photo'   : saved['photo'],
+                'server'  : saved['server'],
+                'hash'    : saved['hash'],
+                'access_token': VK_TOKEN,
+                'v': '5.131'
+            }
+        ).json()['response'][0]
+
+        attach = f"photo{photo_info['owner_id']}_{photo_info['id']}"
+
+        # 4. Публикация
+        requests.post(
+            'https://api.vk.com/method/wall.post',
+            data={
+                'owner_id': VK_ID,
+                'from_group': 1,
+                'message': text,
+                'attachments': attach,
+                'access_token': VK_TOKEN,
+                'v': '5.131'
+            }
+        )
 
 
 def main(message="today"):

@@ -37,6 +37,7 @@ class ModeratorAdmin(admin.ModelAdmin):
 @admin.register(models.OpenData)
 class OpenDataAdmin(admin.ModelAdmin):
     list_display = ('region', 'date')
+    list_filter = ('file_size',)
 
 
 @admin.register(models.BriefData)

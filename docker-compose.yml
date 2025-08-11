@@ -10,18 +10,22 @@ services:
       - "5431:5432"
     networks:
       - backend
+    volumes:
+      - ./_db_data:/var/lib/postgresql  # Укажите путь к локальной директории
   web:
     build: .
     ports:
       - "5000:5000"
     volumes:
         - .:/code
+        - ./media:/app/media  # Монтирование локальной директории media в контейнер
     working_dir: /code
     command: sh -c 'sleep 5 && python manage.py runserver 0.0.0.0:5000'
     depends_on:
       - db
     networks:
       - backend
+    # env_file: .env
     environment:
       PYTHONUNBUFFERED: 1
       SECRET_KEY: secret
@@ -29,13 +33,22 @@ services:
       STATIC_ROOT: '/static'
       MEDIA_ROOT: '/app/media'
       STATICFILES_DIRS: '/code/static'
-      RECAPTCHA_PUBLIC_KEY: test
-      RECAPTCHA_PRIVATE_KEY: test
+      RECAPTCHA_PUBLIC_KEY:          ** key **
+      RECAPTCHA_PRIVATE_KEY:         ** key **
+      TWITTER_CONSUMER_KEY:          ** key **
+      TWITTER_CONSUMER_SECRET:       ** key **
+      TWITTER_CONSUMER_TOKEN:        ** key **
+      TWITTER_CONSUMER_TOKEN_SECRET: ** key **
+
+      # Also see .env
+      # TODO: move both to one place
+      TELEGRAM_TOKEN:                **key**
+
       DEBUG: 1
       PROJECT_PATH: /code
       ALLOWED_HOSTS: "*"
-      HERE_TOKEN: 123
-      YANDEX_TOKEN: 123
+      YANDEX_TOKEN:                  **key**
+      HERE_TOKEN:                    **key**
 
 networks:
   backend:

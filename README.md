@@ -49,3 +49,15 @@ Backend Карты ДТП подготавливает пространстве�
 
 - [ ] Описание структуры директорий
 - [ ] Описание методов API
+
+
+## Draft
+
+```sh
+docker-compose build --no-cache
+docker-compose exec web python manage.py migrate
+
+docker-compose down
+docker-compose up -d
+```
+

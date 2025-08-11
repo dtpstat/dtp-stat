@@ -101,7 +101,8 @@ def opendata(region=None, force=False):
         region = get_object_or_404(data_models.Region, id=region_id['region'])
         latest_download = region.download_set.filter(last_update__isnull=False).latest('date')
         latest_opendata, created = models.OpenData.objects.get_or_create(
-            region=region
+            region=region,
+            date=latest_download.date
         )
 
         if latest_opendata.date == latest_download.date and not force:
