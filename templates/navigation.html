@@ -1,6 +1,5 @@
 {% load static %}
 {% load i18n %}
-{% load constance %}
 
 <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="{% url 'home' %}">
@@ -41,8 +40,7 @@
             <li class="nav-item support">
                 <a class="nav-link button support" href="{% url 'donate' %}">Поддержать проект</a>
             </li>
-            {% constance 'SHOW_LANGUAGE_SWITCHER' as show_language_switcher %}
-            {% if show_language_switcher %}
+            {% if config.SHOW_LANGUAGE_SWITCHER %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% get_current_language as LANGUAGE_CODE %}
@@ -53,7 +51,6 @@
                     {% endif %}
                 </a>
                 <div class="dropdown-menu" aria-labelledby="languageDropdown">
-                    {% get_current_language as LANGUAGE_CODE %}
                     {% if LANGUAGE_CODE != 'ru' %}
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
@@ -67,7 +64,7 @@
                     {% if LANGUAGE_CODE != 'en' %}
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
-                            <input name="next" type="hidden" value="/en{{ request.path }}" />
+                            <input name="next" type="hidden" value="/en{{ request.get_full_path }}" />
                             <input name="language" type="hidden" value="en" />
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
                                 🇬🇧 English
