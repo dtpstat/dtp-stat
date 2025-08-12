@@ -51,7 +51,6 @@
                     {% endif %}
                 </a>
                 <div class="dropdown-menu" aria-labelledby="languageDropdown">
-                    {% get_current_language as LANGUAGE_CODE %}
                     {% if LANGUAGE_CODE != 'ru' %}
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
@@ -65,7 +64,7 @@
                     {% if LANGUAGE_CODE != 'en' %}
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
-                            <input name="next" type="hidden" value="/en{{ request.path }}" />
+                            <input name="next" type="hidden" value="/en{{ request.get_full_path }}" />
                             <input name="language" type="hidden" value="en" />
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
                                 🇬🇧 English
