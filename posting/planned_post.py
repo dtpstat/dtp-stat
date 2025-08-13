@@ -103,6 +103,13 @@ class PlannedPostAdmin(admin.ModelAdmin):
         }
     }
     
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if obj and obj.status == "success":
+            # делаем все поля недоступными для редактирования
+            readonly += [f.name for f in self.model._meta.fields]
+        return readonly
+    
     def datetime_created_local(self, obj):
         return timezone.localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
