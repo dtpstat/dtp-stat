@@ -1,15 +1,14 @@
 from django.db import models
 from django import forms
-from django.contrib import admin
-from django.urls import reverse
-from django.shortcuts import redirect
+from django.contrib import admin, messages
+from django.urls import path, reverse
+from django.shortcuts import render, redirect
 from django.utils.http import urlencode
-
-
+#from django.contrib.admin.helpers import ActionForm
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-from posting.accounts.social_registry import TYPE_CHOICES
+from posting.accounts.social_registry import TYPE_CHOICES, get_social_network
 
 class Account(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -48,6 +47,14 @@ class AccountForm(forms.ModelForm):
         model = Account
         fields = ['user', 'social_network', 'title']
    
+# action — только перенаправление на custom view с selected ids
+def action_schedule_post(modeladmin, request, queryset):
+    selected = queryset.values_list('pk', flat=True)
+    # Передаём список id через GET (или POST) — если много id, лучше через POST или session.
+    ids = ",".join(str(pk) for pk in selected)
+    url = reverse('admin:accounts_schedule_posts') + "?" + urlencode({'ids': ids})
+    return redirect(url)
+action_schedule_post.short_description = "Запланировать публикацию поста"
 
 class AccountAdmin(admin.ModelAdmin):
     form = AccountForm

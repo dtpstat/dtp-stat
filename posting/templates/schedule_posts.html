@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+  <h1>{% trans "Запланировать публикации" %}</h1>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="ids" value="{{ ids }}">
+    <table class="form-table">
+      <thead><tr><th>Account</th><th>Форма</th></tr></thead>
+      <tbody>
+      {% for account, post_form, extra_form in form_objects %}
+        <tr>
+          <td>
+            {{ account }}<br><small>{{ account.user }}</small>
+          </td>
+          <td>
+            {{ post_form.management_form|default:"" }}
+            {{ post_form.as_p }}
+            {% if extra_form %}
+              <div class="extra-form">
+                {{ extra_form.as_p }}
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <input type="submit" class="default" value="Создать запланированные посты">
+  </form>
+{% endblock %}
