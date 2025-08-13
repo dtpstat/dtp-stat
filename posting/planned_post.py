@@ -2,8 +2,8 @@ from django.db import models
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
-
 from django.utils import timezone
+from django_q.tasks import Schedule
 
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
@@ -25,7 +25,6 @@ class PlannedPost(models.Model):
         null=True,
         verbose_name='Статус'
     )
-    
     @property
     def effective_datetime(self):
         """Возвращает фактическое время публикации: либо запланированное, либо текущее"""
@@ -37,6 +36,25 @@ class PlannedPost(models.Model):
             raise ValidationError({
                 'datetime_planned': "Planned time cannot be in the past!"
             })
+            
+    def save(self, *args, **kwargs):
+        if self.pk:  # если объект уже существует
+            old = PlannedPost.objects.get(pk=self.pk)
+            if old.datetime_planned != self.datetime_planned and self.scheduler_task_id:
+                # Переносим задачу в планировщике
+                sched = Schedule.objects.get(pk=self.scheduler_task_id)
+                sched.next_run = self.effective_datetime
+                sched.save()
+        super().save(*args, **kwargs)
+        
+    def delete(self, *args, **kwargs):
+        if self.scheduler_task_id:
+            try:
+                sched = Schedule.objects.get(pk=self.scheduler_task_id)
+                sched.delete()  # удаляем задачу из планировщика
+            except Schedule.DoesNotExist:
+                pass
+        super().delete(*args, **kwargs)
     
     class Meta:
         ordering = ('-datetime_planned',)
@@ -56,17 +74,45 @@ class PlannedPostForm(forms.ModelForm):
         help_texts = {
             'datetime_planned': "Оставьте пустым, чтобы опубликовать сразу."
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.datetime_planned:
+            local_dt = timezone.localtime(self.instance.datetime_planned)
+            # self.fields['datetime_planned'].initial = local_dt.strftime('%Y-%m-%dT%H:%M')    
+            self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M')  
+            
+    def clean_datetime_planned(self):
+        dt = self.cleaned_data.get('datetime_planned')
+        if dt is None:
+            return dt
+        # Конвертируем локальное время в timezone-aware
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        if dt < timezone.now():
+            raise forms.ValidationError("Запланированное время не может быть в прошлом")
+        return dt    
 
 class PlannedPostAdmin(admin.ModelAdmin):
+    form = PlannedPostForm 
     list_display = ('status', 'short', 'target','datetime_planned', 'datetime_created_local')
+    fields = ('target', 'short', 'text', 'datetime_planned')
     formfield_overrides = {
-        models.DateTimeField: {'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'})}
+        models.DateTimeField: {
+            'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'form_class': forms.DateTimeField  # Заставляем использовать DateTimeField
+        }
     }
     
     def datetime_created_local(self, obj):
         return timezone.localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
     datetime_created_local.short_description = 'Дата создания'
+    
+    def get_object(self, request, object_id, from_field=None):
+        obj = super().get_object(request, object_id, from_field)
+        request.plobj = obj
+        return obj
+    
     
 def status_hook(task):
     # task — это объект Task из django_q
