@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'application.templatetags.tags',
     'constance',
     'constance.backends.database',
+    'posting'
 ]
 
 SITE_ID = 1
