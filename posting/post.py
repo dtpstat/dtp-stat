@@ -4,15 +4,27 @@ from django.contrib import admin
 
 from django.utils.timezone import localtime
 
+STATUS_CHOICES = [
+    ('scheldured', 'Запланирован'),
+    ('success', 'Успех'),
+    ('failed', 'Катастрофа'),
+]
+
 class PlannedPost(models.Model):
     target = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
     text = models.TextField()
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_planned = models.DateTimeField()
-    # сюда можно записывать id задачи в Celery/cron/whatever
-    link_to_cron_task = models.CharField(max_length=255, blank=True, null=True)
-
+    scheduler_task_id = models.PositiveIntegerField(blank=True, null=True)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name='Статус'
+    )
+    
     class Meta:
         ordering = ('-datetime_planned',)
         verbose_name = 'Ручной постинг'
@@ -30,7 +42,7 @@ class PlannedPostForm(forms.ModelForm):
         }
 
 class PlannedPostAdmin(admin.ModelAdmin):
-    list_display = ('short', 'target','datetime_planned', 'datetime_created_local')
+    list_display = ('status', 'short', 'target','datetime_planned', 'datetime_created_local')
     formfield_overrides = {
         models.DateTimeField: {'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'})}
     }
@@ -39,3 +51,17 @@ class PlannedPostAdmin(admin.ModelAdmin):
         return localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
     datetime_created_local.short_description = 'Дата создания'
+    
+def status_hook(task):
+    # task — это объект Task из django_q
+    post_id = task.args[0]  # мы в задачу передали post_id
+    try:
+        post = PlannedPost.objects.get(id=post_id)
+    except PlannedPost.DoesNotExist:
+        return
+    
+    if task.success:
+        post.status = "success"
+    else:
+        post.status = "failed"
+    post.save()

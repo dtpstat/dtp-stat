@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from posting.accounts import account
-from posting.manual import post
+from posting import post
 from .models import RegularPost
 
 admin.site.register(account.Account, account.AccountAdmin)

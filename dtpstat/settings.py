@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'application.templatetags.tags',
     'constance',
     'constance.backends.database',
+    'django_q',
     'posting'
 ]
 
@@ -236,3 +237,14 @@ CONSTANCE_CONFIG = {
 
 USE_TZ = True
 TIME_ZONE = 'UTC'
+
+Q_CLUSTER = {
+    'name': 'DjangoORM',  # имя кластера
+    'workers': 2,         # число воркеров
+    'recycle': 500,       # перезапуск воркеров после N задач
+    'timeout': 120,       # таймаут выполнения задачи
+    'retry': 180,
+    'save_limit': 250,    # максимальное количество сохранённых задач
+    'queue_limit': 100,   # максимальный размер очереди
+    'orm': 'default',     # используем базу данных Django
+}

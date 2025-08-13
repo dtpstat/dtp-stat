@@ -94,3 +94,93 @@ class AccountAdmin(admin.ModelAdmin):
         url_name = f'admin:posting_{social_network}account_change'
         url = reverse(url_name, args=[related_obj_id])
         return redirect(url)
+
+    actions = [action_schedule_post] # Регистрируем action
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path('schedule-posts/', self.admin_site.admin_view(self.schedule_posts_view), name='accounts_schedule_posts'),
+        ]
+        return custom + urls
+
+    def schedule_posts_view(self, request):
+        from posting.post import PlannedPostForm
+        """
+        Первая страница: показываем формы для каждого выбранного аккаунта.
+        Формы могут быть разными per-network (если в реестре есть extra form).
+        """
+        ids = request.GET.get('ids') or request.POST.get('ids')
+        if not ids:
+            self.message_user(request, "Не выбраны аккаунты.", level=messages.WARNING)
+            return redirect(reverse('admin:posting_account_changelist'))
+
+        pks = [int(x) for x in ids.split(',') if x.strip()]
+
+        accounts = Account.objects.filter(pk__in=pks).select_related()  # оптимизируем
+
+        # Сформируем список форм: для каждого account — PlannedPostForm + optional extra form
+        form_objects = []
+        if request.method == 'POST':
+            # POST: создаём формы из incoming data
+            valid = True
+            created = []
+            for i, acc in enumerate(accounts):
+                prefix = f'acc_{acc.pk}'
+                post_form = PlannedPostForm(request.POST, prefix=prefix)
+                # optional network extra
+                extra_form = None
+                if get_social_network:
+                    try:
+                        network = get_social_network(acc.social_network)
+                        extra_cls = getattr(network, 'planned_post_extra_form', None)
+                        if extra_cls:
+                            extra_form = extra_cls(request.POST, prefix=prefix + '_extra')
+                    except Exception:
+                        extra_form = None
+
+                if post_form.is_valid() and (extra_form is None or extra_form.is_valid()):
+                    from posting.scheduler import schedule_task
+                    
+                    # create PlannedPost
+                    pp = post_form.save(commit=False)
+                    pp.target = acc
+                    pp.status = 'scheldured'
+                    pp.save()
+                    
+                    # scheduler
+                    scheduler_task_id = schedule_task(pp)
+                    # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
+                    pp.scheduler_task_id = scheduler_task_id
+                    pp.save(update_fields=['scheduler_task_id'])
+                    
+                    created.append(pp)
+                else:
+                    valid = False
+                    form_objects.append((acc, post_form, extra_form))
+            if valid:
+                self.message_user(request, f"Создано {len(created)} запланированных постов.")
+                return redirect(reverse('admin:posting_plannedpost_changelist'))
+            # если невалидны — fallthrough: render forms with errors
+        else:
+            # GET: показываем пустые формы (prefilled title/user if you want)
+            for acc in accounts:
+                prefix = f'acc_{acc.pk}'
+                pf = PlannedPostForm(prefix=prefix)
+                extra_form = None
+                try:
+                    network = get_social_network(acc.social_network)
+                    extra_cls = getattr(network, 'planned_post_extra_form', None)
+                    if extra_cls:
+                        extra_form = extra_cls(prefix=prefix + '_extra')
+                except Exception:
+                    extra_form = None
+                form_objects.append((acc, pf, extra_form))
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title="Запланировать публикации",
+            form_objects=form_objects,
+            ids=ids,
+        )
+        return render(request, 'schedule_posts.html', context)

@@ -23,5 +23,17 @@ services:
       - backend
     env_file:
       - .env.dev
+  qcluster:
+    build: .
+    command: sh -c 'sleep 5 && python manage.py qcluster'
+    volumes:
+      - .:/code
+    working_dir: /code
+    depends_on:
+      - db
+    networks:
+      - backend
+    env_file:
+      - .env.dev
 networks:
   backend:
