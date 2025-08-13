@@ -77,8 +77,16 @@ docker-compose up -d
 docker-compose exec web /bin/bash
 ```
 
-(!!!) Нужно manage.py сохранить в формате LF only
+(Важно) Проверьте, что manage.py использует переводы строк LF (Unix).
+Иначе внутри Linux-контейнера команды вида `./manage.py` могут падать с ошибкой `/usr/bin/env^M: bad interpreter`.
 
+Как проверить/исправить:
+1) Одноразово в контейнере:
+   `sed -i 's/\r$//' manage.py`
+2) Настроить Git, чтобы всегда сохранять LF (рекомендуется):
+   `git config --global core.autocrlf input`
+3) В самом репозитории (предпочтительно) добавить правило в .gitattributes:
+   `*.py text eol=lf`
 ####  Заливаем структуру базы на основе имеющихся миграций
 ```
 ./manage.py migrate --noinput
