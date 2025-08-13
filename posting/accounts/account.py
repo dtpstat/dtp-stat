@@ -105,7 +105,7 @@ class AccountAdmin(admin.ModelAdmin):
         return custom + urls
 
     def schedule_posts_view(self, request):
-        from posting.post import PlannedPostForm
+        from posting.planned_post import PlannedPostForm
         """
         Первая страница: показываем формы для каждого выбранного аккаунта.
         Формы могут быть разными per-network (если в реестре есть extra form).

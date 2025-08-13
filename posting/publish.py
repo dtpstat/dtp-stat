@@ -1,5 +1,5 @@
 def publish_post(planned_post_id):
-    from posting.post import PlannedPost
+    from posting.planned_post import PlannedPost
     
     post = PlannedPost.objects.get(pk=planned_post_id)
     # здесь логика отправки поста в соцсеть
