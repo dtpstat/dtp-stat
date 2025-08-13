@@ -77,6 +77,8 @@ docker-compose up -d
 docker-compose exec web /bin/bash
 ```
 
+(!!!) Нужно manage.py сохранить в формате LF only
+
 ####  Заливаем структуру базы на основе имеющихся миграций
 ```
 ./manage.py migrate --noinput
