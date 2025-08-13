@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'posting.middleware.TimezoneMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -232,3 +233,6 @@ CONSTANCE_CONFIG = {
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }
+
+USE_TZ = True
+TIME_ZONE = 'UTC'

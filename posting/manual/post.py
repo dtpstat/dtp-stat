@@ -2,6 +2,8 @@ from django.db import models
 from django import forms
 from django.contrib import admin
 
+from django.utils.timezone import localtime
+
 class PlannedPost(models.Model):
     target = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
@@ -28,7 +30,12 @@ class PlannedPostForm(forms.ModelForm):
         }
 
 class PlannedPostAdmin(admin.ModelAdmin):
-    list_display = ('short', 'target','datetime_planned', 'datetime_created')
+    list_display = ('short', 'target','datetime_planned', 'datetime_created_local')
     formfield_overrides = {
         models.DateTimeField: {'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'})}
     }
+    
+    def datetime_created_local(self, obj):
+        return localtime(obj.datetime_created)
+    datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
+    datetime_created_local.short_description = 'Дата создания'
