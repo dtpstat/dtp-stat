@@ -16,7 +16,7 @@ class PlannedPost(models.Model):
     short = models.CharField(max_length=255)
     text = models.TextField()
     datetime_created = models.DateTimeField(auto_now_add=True)
-    datetime_planned = models.DateTimeField()
+    datetime_planned = models.DateTimeField(blank=True, null=True)
     scheduler_task_id = models.PositiveIntegerField(blank=True, null=True)
     status = models.CharField(
         max_length=10,
@@ -26,9 +26,14 @@ class PlannedPost(models.Model):
         verbose_name='Статус'
     )
     
+    @property
+    def effective_datetime(self):
+        """Возвращает фактическое время публикации: либо запланированное, либо текущее"""
+        return self.datetime_planned or timezone.now()
+    
     def clean(self):
         super().clean()
-        if self.datetime_planned < timezone.now():
+        if self.datetime_planned and self.datetime_planned < timezone.now():
             raise ValidationError({
                 'datetime_planned': "Planned time cannot be in the past!"
             })
@@ -47,6 +52,9 @@ class PlannedPostForm(forms.ModelForm):
         fields = ['short', 'text', 'datetime_planned']
         widgets = {
             'datetime_planned': forms.DateTimeInput(attrs={'type': 'datetime-local'})
+        }
+        help_texts = {
+            'datetime_planned': "Оставьте пустым, чтобы опубликовать сразу."
         }
 
 class PlannedPostAdmin(admin.ModelAdmin):
