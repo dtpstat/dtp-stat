@@ -1,8 +1,9 @@
 from django.db import models
 from django import forms
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 
-from django.utils.timezone import localtime
+from django.utils import timezone
 
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
@@ -24,6 +25,13 @@ class PlannedPost(models.Model):
         null=True,
         verbose_name='Статус'
     )
+    
+    def clean(self):
+        super().clean()
+        if self.datetime_planned < timezone.now():
+            raise ValidationError({
+                'datetime_planned': "Planned time cannot be in the past!"
+            })
     
     class Meta:
         ordering = ('-datetime_planned',)
@@ -48,7 +56,7 @@ class PlannedPostAdmin(admin.ModelAdmin):
     }
     
     def datetime_created_local(self, obj):
-        return localtime(obj.datetime_created)
+        return timezone.localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
     datetime_created_local.short_description = 'Дата создания'
     
