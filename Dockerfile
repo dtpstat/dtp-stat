@@ -1,6 +1,6 @@
 FROM python:3.8-bullseye
 LABEL org.opencontainers.image.source=https://github.com/dtpstat/dtp-stat
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   binutils \

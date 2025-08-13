@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   db:
     image: kartoza/postgis:14-3.3
