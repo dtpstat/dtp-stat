@@ -16,7 +16,14 @@ services:
     volumes:
         - .:/code
     working_dir: /code
-    command: sh -c 'sleep 5 && python manage.py runserver 0.0.0.0:5000'
+    # Старт: миграции + проверка суперпользователя + запуск сервера
+    command: >
+      sh -c "
+      sleep 5 &&
+      python manage.py migrate --noinput &&
+      python create_superuser.py &&
+      python manage.py runserver 0.0.0.0:5000
+      "
     depends_on:
       - db
     networks:
