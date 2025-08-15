@@ -8,7 +8,7 @@ from django.utils.http import urlencode
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-from posting.accounts.social_registry import TYPE_CHOICES, get_social_network
+from .socials.socials import TYPE_CHOICES
 
 class Account(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
@@ -130,14 +130,14 @@ class AccountAdmin(admin.ModelAdmin):
                 post_form = PlannedPostForm(request.POST, prefix=prefix)
                 # optional network extra
                 extra_form = None
-                if get_social_network:
-                    try:
-                        network = get_social_network(acc.social_network)
-                        extra_cls = getattr(network, 'planned_post_extra_form', None)
-                        if extra_cls:
-                            extra_form = extra_cls(request.POST, prefix=prefix + '_extra')
-                    except Exception:
-                        extra_form = None
+                # if get_social_network:
+                #     try:
+                #         network = get_social_network(acc.social_network)
+                #         extra_cls = getattr(network, 'planned_post_extra_form', None)
+                #         if extra_cls:
+                #             extra_form = extra_cls(request.POST, prefix=prefix + '_extra')
+                #     except Exception:
+                #         extra_form = None
 
                 if post_form.is_valid() and (extra_form is None or extra_form.is_valid()):
                     from posting.scheduler import schedule_task
@@ -168,13 +168,13 @@ class AccountAdmin(admin.ModelAdmin):
                 prefix = f'acc_{acc.pk}'
                 pf = PlannedPostForm(prefix=prefix)
                 extra_form = None
-                try:
-                    network = get_social_network(acc.social_network)
-                    extra_cls = getattr(network, 'planned_post_extra_form', None)
-                    if extra_cls:
-                        extra_form = extra_cls(prefix=prefix + '_extra')
-                except Exception:
-                    extra_form = None
+                # try:
+                #     network = get_social_network(acc.social_network)
+                #     extra_cls = getattr(network, 'planned_post_extra_form', None)
+                #     if extra_cls:
+                #         extra_form = extra_cls(prefix=prefix + '_extra')
+                # except Exception:
+                #     extra_form = None
                 form_objects.append((acc, pf, extra_form))
 
         context = dict(

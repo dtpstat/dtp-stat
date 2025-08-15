@@ -2,7 +2,7 @@ from django import forms
 from django.db import models
 from django.contrib import admin
 
-from posting.accounts.network_base import SocialNetworkAdminBase, HiddenModelAdmin, SocialNetwork
+from .base import SocialNetworkAdminBase, HiddenModelAdmin, ServiceBase
 
 class TelegramAccount(models.Model):
     token = models.CharField(max_length=255)
@@ -18,4 +18,11 @@ class TelegramAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     
 admin.site.register(TelegramAccount, TelegramAccountAdmin)
 
-telegram = {'telegram': SocialNetwork('telegram', TelegramAccount, TelegramAccountForm, 'Telegram')}
+class TelegramService(ServiceBase):
+    
+    name = 'Telegram'
+    
+    def convert(self, text):
+        return f"TG converted: {text}"
+    def send(self, text):
+        return f"TG sent: {text}"

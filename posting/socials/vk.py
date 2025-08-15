@@ -3,7 +3,7 @@ from django.db import models
 
 from django.contrib import admin
 
-from posting.accounts.network_base import SocialNetworkAdminBase, HiddenModelAdmin, SocialNetwork
+from .base import SocialNetworkAdminBase, HiddenModelAdmin, ServiceBase
 
 class VkAccount(models.Model):
     phone_number = models.CharField(max_length=20)
@@ -20,4 +20,11 @@ class VkAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     
 admin.site.register(VkAccount, VkAccountAdmin)
 
-vk = {'vk': SocialNetwork('vk', VkAccount, VkAccountForm, 'VK')}
+class VkService(ServiceBase):
+    name = 'VK'
+    
+    def convert(self, text):
+        return f"VK converted: {text}"
+    
+    def send(self, text):
+        return f"VK sent: {text}"

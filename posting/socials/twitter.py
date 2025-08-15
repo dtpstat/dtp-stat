@@ -2,7 +2,7 @@ from django import forms
 from django.db import models
 from django.contrib import admin
 
-from posting.accounts.network_base import SocialNetworkAdminBase, HiddenModelAdmin, SocialNetwork
+from .base import SocialNetworkAdminBase, HiddenModelAdmin, ServiceBase
 
 class TwitterAccount(models.Model):
     consumer_key = models.CharField(max_length=255)
@@ -20,4 +20,12 @@ class TwitterAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     
 admin.site.register(TwitterAccount, TwitterAccountAdmin)
 
-twitter = {'twitter': SocialNetwork('twitter', TwitterAccount, TwitterAccount, 'Twitter')}
+class TwitterService(ServiceBase):
+    
+    name = 'Twitter'
+    
+    def convert(self, text):
+        return f"Twitter converted: {text}"
+    
+    def send(self, text):
+        return f"Twitter sent: {text}"

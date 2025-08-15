@@ -4,12 +4,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from abc import ABC, abstractmethod
 
 class SocialNetworkAdminBase(admin.ModelAdmin):
     social_network_name = None  # должен быть переопределён в наследнике
 
     def response_add(self, request, obj, post_url_continue=None):
-        from posting.accounts.account import Account  # импорт внутрь метода!
+        from posting.account import Account  # импорт внутрь метода!
         
         if not self.social_network_name:
             raise NotImplementedError('social_network_name must be set')
@@ -44,9 +45,13 @@ class HiddenModelAdmin(admin.ModelAdmin):
         # Возвращаем пустой словарь — модель не будет видна в админке, но доступна по прямой ссылке
         return {}
     
-class SocialNetwork:
-    def __init__(self, type_name, network, form, verbose_name):
-        self.type_name = type_name
-        self.network = network
-        self.form = form
-        self.verbose_name = verbose_name
+class ServiceBase(ABC):
+    name = None  # должен быть переопределён в наследнике
+
+    @abstractmethod
+    def convert(self, text):
+        pass
+
+    @abstractmethod
+    def send(self, text):
+        pass
