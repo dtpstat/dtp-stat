@@ -48,10 +48,7 @@ class HiddenModelAdmin(admin.ModelAdmin):
 class ServiceBase(ABC):
     name = None  # должен быть переопределён в наследнике
 
+    @classmethod
     @abstractmethod
-    def convert(self, text):
-        pass
-
-    @abstractmethod
-    def send(self, text):
+    def send(self, post):
         pass

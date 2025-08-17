@@ -144,7 +144,7 @@ class AccountAdmin(admin.ModelAdmin):
                     
                     # create PlannedPost
                     pp = post_form.save(commit=False)
-                    pp.target = acc
+                    pp.account = acc
                     pp.status = 'scheldured'
                     pp.save()
                     

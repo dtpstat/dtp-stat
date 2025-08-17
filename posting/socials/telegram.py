@@ -2,6 +2,9 @@ from django import forms
 from django.db import models
 from django.contrib import admin
 
+import telegram
+import os
+
 from .base import SocialNetworkAdminBase, HiddenModelAdmin, ServiceBase
 
 class TelegramAccount(models.Model):
@@ -22,7 +25,19 @@ class TelegramService(ServiceBase):
     
     name = 'Telegram'
     
-    def convert(self, text):
-        return f"TG converted: {text}"
-    def send(self, text):
-        return f"TG sent: {text}"
+    @classmethod
+    def send(self, post):
+        model = post.account.social_data
+        log_template = f"[{self.name}: {post.account.title}][{post.short}]" + " {0}"
+        
+        token = model.token
+        channel_id = model.channel_id
+
+        bot = telegram.Bot(token=token)
+
+        try:
+            bot.send_message(chat_id=channel_id, text=post.text)
+        except Exception as e:
+            raise RuntimeError(log_template.format(f"Ошибка при отправке поста: {e}"))
+            
+        return log_template.format("Пост успешно отправлен")

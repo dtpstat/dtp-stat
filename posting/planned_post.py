@@ -12,7 +12,7 @@ STATUS_CHOICES = [
 ]
 
 class PlannedPost(models.Model):
-    target = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
+    account = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
     text = models.TextField()
     datetime_created = models.DateTimeField(auto_now_add=True)
@@ -62,7 +62,7 @@ class PlannedPost(models.Model):
         verbose_name_plural = 'Ручной постинг'
 
     def __str__(self):
-        return f"Planned {self.short} to {self.target} at {self.datetime_planned}"
+        return f"Planned {self.short} to {self.account} at {self.datetime_planned}"
 
 class PlannedPostForm(forms.ModelForm):
     class Meta:
@@ -94,8 +94,8 @@ class PlannedPostForm(forms.ModelForm):
 
 class PlannedPostAdmin(admin.ModelAdmin):
     form = PlannedPostForm 
-    list_display = ('status', 'short', 'target','datetime_planned', 'datetime_created_local')
-    fields = ('target', 'short', 'text', 'datetime_planned')
+    list_display = ('status', 'short', 'account','datetime_planned', 'datetime_created_local')
+    fields = ('account', 'short', 'text', 'datetime_planned')
     formfield_overrides = {
         models.DateTimeField: {
             'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
