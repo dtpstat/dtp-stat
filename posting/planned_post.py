@@ -105,7 +105,7 @@ class PlannedPostAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
-        if obj and obj.status == "success":
+        if obj and obj.status != "scheldured":
             # делаем все поля недоступными для редактирования
             readonly += [f.name for f in self.model._meta.fields]
         return readonly
