@@ -147,11 +147,10 @@ class AccountAdmin(admin.ModelAdmin):
                     pp.status = 'scheldured'
                     pp.save()
                     
-                    # scheduler
-                    scheduler_task_id = schedule_task(pp)
+                    # Scheduler:
+                    pp.schedule = schedule_task(pp)
                     # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
-                    pp.scheduler_task_id = scheduler_task_id
-                    pp.save(update_fields=['scheduler_task_id'])
+                    pp.save(update_fields=['schedule'])
                     
                     created.append(pp)
                 else:

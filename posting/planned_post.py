@@ -3,7 +3,10 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django_q.tasks import Schedule
+from django_q.tasks import Schedule, Task
+from django_q.models import Success, Failure
+from django.utils.html import format_html
+from django.urls import reverse
 
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
@@ -17,7 +20,8 @@ class PlannedPost(models.Model):
     text = models.TextField()
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_planned = models.DateTimeField(blank=True, null=True)
-    scheduler_task_id = models.PositiveIntegerField(blank=True, null=True)
+    schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL, null=True, blank=True, related_name='planned_posts')
+    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True, related_name='planned_posts')
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
@@ -25,6 +29,7 @@ class PlannedPost(models.Model):
         null=True,
         verbose_name='Статус'
     )
+    
     @property
     def effective_datetime(self):
         """Возвращает фактическое время публикации: либо запланированное, либо текущее"""
@@ -40,17 +45,17 @@ class PlannedPost(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:  # если объект уже существует
             old = PlannedPost.objects.get(pk=self.pk)
-            if old.datetime_planned != self.datetime_planned and self.scheduler_task_id:
+            if old.datetime_planned != self.datetime_planned and self.schedule:
                 # Переносим задачу в планировщике
-                sched = Schedule.objects.get(pk=self.scheduler_task_id)
+                sched = self.schedule
                 sched.next_run = self.effective_datetime
                 sched.save()
         super().save(*args, **kwargs)
         
     def delete(self, *args, **kwargs):
-        if self.scheduler_task_id:
+        if self.schedule:
             try:
-                sched = Schedule.objects.get(pk=self.scheduler_task_id)
+                sched = self.schedule
                 sched.delete()  # удаляем задачу из планировщика
             except Schedule.DoesNotExist:
                 pass
@@ -94,14 +99,33 @@ class PlannedPostForm(forms.ModelForm):
 
 class PlannedPostAdmin(admin.ModelAdmin):
     form = PlannedPostForm 
-    list_display = ('status', 'short', 'account','datetime_planned', 'datetime_created_local')
-    fields = ('account', 'short', 'text', 'datetime_planned')
+    list_display = ('short','account', 'clickable_status', 'datetime_planned', 'datetime_created_local')
+    fields = ('short', 'account', "clickable_status", 'text', 'datetime_planned')
+    readonly_fields = ('clickable_status',)
     formfield_overrides = {
         models.DateTimeField: {
             'widget': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'form_class': forms.DateTimeField  # Заставляем использовать DateTimeField
         }
     }
+    
+    def clickable_status(self, obj):
+        
+        print(f"Task: {obj.task}")
+        
+        if not obj.task:
+            return obj.get_status_display()
+        
+        if Success.objects.filter(id=obj.task.id).exists():
+            url = reverse("admin:django_q_success_change", args=[obj.task.id])
+        elif Failure.objects.filter(id=obj.task.id).exists():
+            url = reverse("admin:django_q_failure_change", args=[obj.task.id])
+        else:
+            return obj.get_status_display()
+        
+        return format_html('<b><a href="{}">{}</a></b>', url, obj.get_status_display())
+
+    clickable_status.short_description = "Status"
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
@@ -121,14 +145,3 @@ class PlannedPostAdmin(admin.ModelAdmin):
         return obj
     
     
-def status_hook(task):
-    # task — это объект Task из django_q
-    post_id = task.args[0]  # мы в задачу передали post_id
-    try:
-        post = PlannedPost.objects.get(id=post_id)
-    except PlannedPost.DoesNotExist:
-        return
-    
-    if not task.success:
-        post.status = "failed"
-    post.save()

@@ -11,9 +11,9 @@ def schedule_task(planned_post):
         planned_post.id,
         schedule_type='O', # One-off
         next_run=planned_post.effective_datetime,
-        hook="posting.planned_post.status_hook"
+        hook="posting.scheduler.status_hook"
     )
-    return str(task.id) if task else None
+    return task if task else None
 
 def publish_post(planned_post_id):
     from .planned_post import PlannedPost
@@ -30,3 +30,20 @@ def publish_post(planned_post_id):
     post.save()
 
     return result
+
+def status_hook(task):
+    from .planned_post import PlannedPost
+    
+    # task — это объект Task из django_q
+    post_id = task.args[0]  # мы в задачу передали post_id
+    
+    try:
+        post = PlannedPost.objects.get(id=post_id)
+    except PlannedPost.DoesNotExist:
+        return
+
+    post.task_id = task.id
+    
+    if not task.success:
+        post.status = "failed"
+    post.save()
