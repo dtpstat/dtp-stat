@@ -8,4 +8,4 @@ socials = {
     'vk': vk.VkAccount,
 }
 
-TYPE_CHOICES = [(key, service.name) for key, service in socials.items()]
+TYPE_CHOICES = [(key, service.full_name) for key, service in socials.items()]

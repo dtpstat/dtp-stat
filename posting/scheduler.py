@@ -19,13 +19,14 @@ def publish_post(planned_post_id):
     from .planned_post import PlannedPost
     
     post = PlannedPost.objects.get(pk=planned_post_id)
+
+    result = post.account.social.send(post)
     
-    print(f"Публикуем пост {post.short} в {post.account}")
+    if result.startswith("[ERROR]"):
+        post.status = 'failed'
+    else:
+        post.status = 'success'
+    
+    post.save()
 
-    print(f"Account: {post.account.title}, Social_model: {post.account.social}")
-
-    try:
-        return post.account.social.send(post)
-        
-    except Exception as e:
-        raise RuntimeError(e)
+    return result

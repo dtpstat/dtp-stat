@@ -129,8 +129,6 @@ def status_hook(task):
     except PlannedPost.DoesNotExist:
         return
     
-    if task.success:
-        post.status = "success"
-    else:
+    if not task.success:
         post.status = "failed"
     post.save()

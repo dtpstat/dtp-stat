@@ -4,19 +4,35 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from abc import ABC, abstractmethod
+
+class SocialNetworkBase(models.Model):
+    class Meta:
+        abstract = True
+
+    full_name = None
+    log_template = None
+    
+    def log(self, message):
+        return self.log_template.format(message)
+        
+    def error(self, message):
+        return "[ERROR]" + self.log_template.format(message)
+    
+    def send(self, post):
+        raise NotImplementedError
 
 class SocialNetworkAdminBase(admin.ModelAdmin):
-    social_network_name = None  # должен быть переопределён в наследнике
-
+    
+    name = None
+    
     def response_add(self, request, obj, post_url_continue=None):
         from posting.account import Account  # импорт внутрь метода!
         
-        if not self.social_network_name:
+        if not self.name:
             raise NotImplementedError('social_network_name must be set')
 
         account_title = request.GET.get('_account_title', '')
-        account_social_network = request.GET.get('_account_social_network', self.social_network_name)
+        account_social_network = request.GET.get('_account_social_network', self.name)
         user_id = request.GET.get('_account_user_id')
 
         User = get_user_model()
@@ -44,11 +60,3 @@ class HiddenModelAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
         # Возвращаем пустой словарь — модель не будет видна в админке, но доступна по прямой ссылке
         return {}
-    
-class ServiceBase(ABC):
-    name = None  # должен быть переопределён в наследнике
-
-    @classmethod
-    @abstractmethod
-    def send(self, post):
-        pass
