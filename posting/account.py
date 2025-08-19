@@ -17,10 +17,9 @@ class Account(models.Model):
     datetime_creation = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
 
-    # Поля для GenericForeignKey
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    social_data = GenericForeignKey('content_type', 'object_id')
+    social_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    social_id = models.PositiveIntegerField()
+    social = GenericForeignKey('social_type', 'social_id')
 
     def __str__(self):
         return f"{self.get_social_network_display()} — {self.title}"
@@ -88,7 +87,7 @@ class AccountAdmin(admin.ModelAdmin):
         # Получаем имя соцсети
         social_network = obj.social_network.lower()
         # Получаем id связанной модели
-        related_obj_id = obj.object_id
+        related_obj_id = obj.social_id
 
         # Строим URL редактирования для конкретной соцсети
         url_name = f'admin:posting_{social_network}account_change'

@@ -22,13 +22,13 @@ class SocialNetworkAdminBase(admin.ModelAdmin):
         User = get_user_model()
         user = User.objects.get(pk=user_id)
 
-        content_type = ContentType.objects.get_for_model(obj)
+        social_type = ContentType.objects.get_for_model(obj)
         Account.objects.create(
             user=user,
             social_network=account_social_network,
             title=account_title,
-            content_type=content_type,
-            object_id=obj.pk,
+            social_type=social_type,
+            social_id=obj.pk,
         )
 
         url = reverse('admin:posting_account_changelist')
