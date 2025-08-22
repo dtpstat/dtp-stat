@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -35,15 +36,15 @@
 
     <meta property="og:type" content="website">
     {% block meta-tags %}
-        <meta property="og:title" content="Карта ДТП">
-        <meta property="og:description" content="Платформа сбора данных о ДТП в России, единственный бесплатный и открытый сервис аналитики ДТП." />
-        <meta name="description" content="Платформа сбора данных о ДТП в России, единственный бесплатный и открытый сервис аналитики ДТП." />
-        <meta name="keywords" content="Карта ДТП">
-        <title>Карта ДТП</title>
+        <meta property="og:title" content="{% trans 'Карта ДТП' %}">
+        <meta property="og:description" content="{% trans 'Платформа сбора данных о ДТП в России, единственный бесплатный и открытый сервис аналитики ДТП.' %}" />
+        <meta name="description" content="{% trans 'Платформа сбора данных о ДТП в России, единственный бесплатный и открытый сервис аналитики ДТП.' %}" />
+        <meta name="keywords" content="{% trans 'Карта ДТП' %}">
+        <title>{% trans 'Карта ДТП' %}</title>
         <meta property="og:image" content="https://dtp-stat.ru/static/media/og.png"/>
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
-    <meta property="og:site_name" content="Карта ДТП" />  
+    <meta property="og:site_name" content="{% trans 'Карта ДТП' %}" />  
 
 
     

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-02 21:44+0000\n"
+"POT-Creation-Date: 2025-08-22 19:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,14 +22,323 @@ msgstr ""
 msgid "Период данных"
 msgstr "Data Period"
 
-#: dtpstat/settings.py:157
+#: dtpstat/settings.py:149
 msgid "Russian"
 msgstr "Russian"
 
-#: dtpstat/settings.py:158
+#: dtpstat/settings.py:150
 msgid "English"
 msgstr "English"
 
-#: templates/navigation.html:27
+#: templates/base.html:39 templates/base.html:42 templates/base.html:43
+#: templates/base.html:47 templates/blog/index.html:6
+#: templates/blog/index.html:10 templates/dtp/dtp.html:11
+#: templates/opendata.html:7 templates/opendata.html:11 templates/page.html:6
+#: templates/page.html:10
+msgid "Карта ДТП"
+msgstr ""
+
+#: templates/base.html:40 templates/base.html:41
+msgid ""
+"Платформа сбора данных о ДТП в России, единственный бесплатный и открытый "
+"сервис аналитики ДТП."
+msgstr ""
+
+#: templates/blog/index.html:6 templates/blog/index.html:7
+#: templates/blog/index.html:8 templates/blog/index.html:10
+msgid "Статьи и исследования"
+msgstr ""
+
+#: templates/blog/index.html:9 templates/donate.html:11
+#: templates/dtp/dtp.html:66 templates/opendata.html:10 templates/page.html:9
+msgid "Карта"
+msgstr ""
+
+#: templates/blog/index.html:9 templates/board/tickets_list.html:11
+#: templates/donate.html:11 templates/dtp/dtp.html:7 templates/dtp/dtp.html:14
+#: templates/opendata.html:10 templates/page.html:9
+msgid "ДТП"
+msgstr ""
+
+#: templates/blog/index.html:9
+msgid "статьи"
+msgstr ""
+
+#: templates/blog/index.html:9
+msgid "исследования"
+msgstr ""
+
+#: templates/board/index.html:10
+msgid "Админка"
+msgstr ""
+
+#: templates/board/index.html:13
+msgid "Блог"
+msgstr ""
+
+#: templates/board/index.html:16
+msgid "Статичные страницы"
+msgstr ""
+
+#: templates/board/index.html:19
+msgid "Тикеты"
+msgstr ""
+
+#: templates/board/index.html:22
+msgid "Выйти из профиля"
+msgstr ""
+
+#: templates/board/tickets_list.html:12
+msgid "Тип"
+msgstr ""
+
+#: templates/board/tickets_list.html:13
+msgid "Дата"
+msgstr ""
+
+#: templates/board/tickets_list.html:14
+msgid "Статус"
+msgstr ""
+
+#: templates/donate.html:8 templates/donate.html:12
+msgid "Поддержать карту ДТП"
+msgstr ""
+
+#: templates/donate.html:9 templates/donate.html:10
+msgid "Сбор ежемесячных пожертвований на проект"
+msgstr ""
+
+#: templates/donate.html:11
+msgid "поддержка"
+msgstr ""
+
+#: templates/donate.html:11
+msgid "пожертвования"
+msgstr ""
+
+#: templates/donate.html:17 templates/donate.html:29 templates/footer.html:24
+#: templates/navigation.html:41
+msgid "Поддержать проект"
+msgstr ""
+
+#: templates/donate.html:20 templates/footer.html:15
+msgid "Сбор пожертвований на проект"
+msgstr ""
+
+#: templates/donate.html:25 templates/footer.html:20
+msgid "Собрано:"
+msgstr ""
+
+#: templates/donate.html:25 templates/footer.html:20
+msgid "р."
+msgstr ""
+
+#: templates/donate.html:25 templates/footer.html:20
+msgid "из"
+msgstr ""
+
+#: templates/donate.html:26 templates/footer.html:21
+msgid "До конца сбора"
+msgstr ""
+
+#: templates/donate.html:38
+msgid "Поддержка проекта осуществляется через"
+msgstr ""
+
+#: templates/donate.html:38
+msgid ""
+"Фонд содействия развитию городов «Городские проекты Ильи Варламова и Максима "
+"Каца»"
+msgstr ""
+
+#: templates/dtp/dtp.html:7 templates/dtp/dtp.html:14
+msgid "по адресу"
+msgstr ""
+
+#: templates/dtp/dtp.html:8 templates/dtp/dtp.html:9
+msgid "в"
+msgstr ""
+
+#: templates/dtp/dtp.html:8 templates/dtp/dtp.html:9
+msgid "произошло ДТП по адресу"
+msgstr ""
+
+#: templates/dtp/dtp.html:9
+msgid "Место отображено на карте"
+msgstr ""
+
+#: templates/dtp/dtp.html:61
+msgid "Показать ДТП рядом"
+msgstr ""
+
+#: templates/dtp/dtp.html:68
+msgid "Панорама"
+msgstr ""
+
+#: templates/dtp/dtp.html:85
+msgid "Транспорт"
+msgstr ""
+
+#: templates/dtp/dtp.html:96
+msgid "Участники"
+msgstr ""
+
+#: templates/dtp/dtp.html:108
+msgid "Пострадали"
+msgstr ""
+
+#: templates/dtp/dtp.html:120
+msgid "Погибли"
+msgstr ""
+
+#: templates/dtp/dtp.html:160
+msgid "Участники ДТП"
+msgstr ""
+
+#: templates/dtp/dtp.html:208
+msgid "стаж (лет)"
+msgstr ""
+
+#: templates/dtp/dtp.html:242
+msgid "Официальные данные ГИБДД"
+msgstr ""
+
+#: templates/dtp/dtp.html:271
+msgid "Новости по теме"
+msgstr ""
+
+#: templates/dtp/fix_point.html:11
+msgid "Перейти на страницу ДТП"
+msgstr ""
+
+#: templates/dtp/fix_point.html:13
+msgid "Вернуться к списку тикетов"
+msgstr ""
+
+#: templates/dtp/fix_point.html:19
+msgid "Корректировка координат ДТП"
+msgstr ""
+
+#: templates/dtp/fix_point.html:23
+msgid "Адрес"
+msgstr ""
+
+#: templates/dtp/fix_point.html:26
+msgid "Поблизости"
+msgstr ""
+
+#: templates/dtp/fix_point.html:30
+msgid "Выберите наиболее подходящие координаты или предложите свои"
+msgstr ""
+
+#: templates/dtp/fix_point.html:37
+msgid "Исходные координаты"
+msgstr ""
+
+#: templates/dtp/fix_point.html:44 templates/dtp/fix_point.html:57
+#: templates/dtp/fix_point.html:70
+msgid "Выбрать"
+msgstr ""
+
+#: templates/dtp/fix_point.html:50
+msgid "От Яндекса"
+msgstr ""
+
+#: templates/dtp/fix_point.html:63
+msgid "От создателя тикета"
+msgstr ""
+
+#: templates/dtp/fix_point.html:76
+msgid "Предложить свои координаты"
+msgstr ""
+
+#: templates/dtp/fix_point.html:77
+msgid "Кликайте на карту"
+msgstr ""
+
+#: templates/dtp/fix_point.html:91
+msgid "Просто сообщить о некорретных координатах"
+msgstr ""
+
+#: templates/dtp/fix_point.html:114
+msgid "Отправить"
+msgstr ""
+
+#: templates/dtp/fix_point.html:145
+msgid "Пройдите капчу"
+msgstr ""
+
+#: templates/dtp/fix_point.html:152
+msgid "Нужно выбрать точку на карте или выбрать другой вариант"
+msgstr ""
+
+#: templates/dtp/fix_point.html:155
+msgid "Вы не выбрали ни один вариант"
+msgstr ""
+
+#: templates/footer.html:11
+msgid ""
+"Проект посвящен проблеме дорожно-транспортных происшествий в России. Цель "
+"проекта — повышение безопасности дорожного движения и снижение смертности в "
+"ДТП."
+msgstr ""
+
+#: templates/footer.html:30
+msgid "Мы в социальных сетях"
+msgstr ""
+
+#: templates/footer.html:32
+msgid "Карта ДТП в Twitter"
+msgstr ""
+
+#: templates/footer.html:33
+msgid "Карта ДТП в Telegram"
+msgstr ""
+
+#: templates/footer.html:38
+msgid "Наши партнёры"
+msgstr ""
+
+#: templates/footer.html:59
+msgid "Использование материалов возможно с указанием активной ссылки на сайт"
+msgstr ""
+
+#: templates/footer.html:67 templates/navigation.html:27
 msgid "Что почитать"
 msgstr "What to read"
+
+#: templates/footer.html:70 templates/navigation.html:32
+msgid "Статистика"
+msgstr ""
+
+#: templates/footer.html:73 templates/navigation.html:35
+#: templates/opendata.html:7 templates/opendata.html:11
+#: templates/opendata.html:16
+msgid "Скачать данные"
+msgstr ""
+
+#: templates/footer.html:76 templates/navigation.html:38
+msgid "О проекте"
+msgstr ""
+
+#: templates/navigation.html:16
+msgid "Поиск по карте"
+msgstr ""
+
+#: templates/opendata.html:8 templates/opendata.html:9
+msgid "Скачать данные ДТП по всем регионам"
+msgstr ""
+
+#: templates/opendata.html:10
+msgid "данные"
+msgstr ""
+
+#: templates/opendata.html:23
+#, fuzzy
+#| msgid "Период данных"
+msgid "Структура данных"
+msgstr "Data Period"
+
+#: templates/opendata.html:79
+msgid "Скачать .geojson"
+msgstr ""

@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block meta-tags %}
-    <meta property="og:title" content="Скачать данные – Карта ДТП">
-    <meta property="og:description" content="Скачать данные ДТП по всем регионам">
-    <meta name="description" content="Скачать данные ДТП по всем регионам">
-    <meta name="keywords" content="Карта, ДТП, данные">
-    <title>Скачать данные – Карта ДТП</title>
+    <meta property="og:title" content="{% trans 'Скачать данные' %} – {% trans 'Карта ДТП' %}">
+    <meta property="og:description" content="{% trans 'Скачать данные ДТП по всем регионам' %}">
+    <meta name="description" content="{% trans 'Скачать данные ДТП по всем регионам' %}">
+    <meta name="keywords" content="{% trans 'Карта' %}, {% trans 'ДТП' %}, {% trans 'данные' %}">
+    <title>{% trans 'Скачать данные' %} – {% trans 'Карта ДТП' %}</title>
 {% endblock %}
 
 {% block content %}
     <div class="container mt-5 mb-5">
-        <h2 class="text-center mb-4">Скачать данные</h2>
+        <h2 class="text-center mb-4">{% trans 'Скачать данные' %}</h2>
         <div class="post mt-5 mb-5 ml-auto mr-auto">
             {{ text | safe }}
             <br>
             <p>
                 <a data-toggle="collapse" href="#collapseExample" role="button"
                    aria-expanded="false" aria-controls="collapseExample">
-                    Структура данных
+                    {% trans 'Структура данных' %}
                 </a>
             </p>
             <div class="collapse" id="collapseExample">
@@ -75,7 +76,7 @@
                     <td class="small">{{ start_date|date:"F Y"|lower }} - {{ opendata_item.date|date:"F Y"|lower }}</td>
                     <td class="small">{{ opendata_item.mb_file_size|floatformat:"2" }} mb</td>
                     <td class="text-center"><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson"
-                                               class="button">Скачать&nbsp;.geojson</a></td>
+                                               class="button">{% trans 'Скачать .geojson' %}</a></td>
                 </tr>
             {% endfor %}
             </tbody>
