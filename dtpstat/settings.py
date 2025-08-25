@@ -169,7 +169,7 @@ LANGUAGE_COOKIE_SAMESITE = None
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
-CKEDITOR_UPLOAD_PATH = 'blog/'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'UltraFull',
@@ -190,7 +190,45 @@ CKEDITOR_CONFIGS = {
             ['Maximize', 'Source'],
         ],
         'language': 'ru',
-        'forcePasteAsPlainText': True,
+    },
+    'social_networks': {
+         'toolbar': [
+            [
+                'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'PasteFromDocs', '-',
+                'SelectAll', '-',
+                'Undo', 'Redo', '-',
+                'Find', 'Replace', '-',
+                'spellchecker', 'Scayt', '-',
+                'Source', '-',
+                'Maximize' 
+            ],
+            '/',
+            [
+                'Bold','Italic','Underline','Strike', '-',
+                'HorizontalRule', '-',
+                'Link','Unlink', '-',
+                'Blockquote', '-',
+                'Image', '-',
+                'SpecialChar','EmojiPanel', '-',
+                'RemoveFormat',
+            ],
+        ],
+        'autoGrow_minHeight': 250,
+        'autoGrow_maxHeight': 600,
+        'autoGrow_onStartup': True,
+        'toolbarCanCollapse': True,
+        'language': 'ru',
+        'removeFormatTags': (
+            'b,i,u,strike,strong,em,hr,a,img,blockquote'
+        ),
+        'allowedContent': (
+            'b i u strike strong em;'           # текстовое форматирование
+            'hr;'                               # разделитель
+            'a[!href];'                         # ссылки и файлы
+            'blockquote;'                       # цитаты
+            'img[!src,alt,width,height];'       # изображения
+        ),
+        "extraPlugins": "emoji,pastefromgdocs,autogrow,selectallcontextmenu",
     },
 }
 

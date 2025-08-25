@@ -8,6 +8,9 @@ from django_q.models import Success, Failure
 from django.utils.html import format_html
 from django.urls import reverse
 
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
+
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
     ('success', 'Успех'),
@@ -17,7 +20,10 @@ STATUS_CHOICES = [
 class PlannedPost(models.Model):
     account = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
-    text = models.TextField()
+    text = RichTextUploadingField(
+        help_text="Текст",
+        config_name='social_networks'
+    )
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_planned = models.DateTimeField(blank=True, null=True)
     schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL, null=True, blank=True, related_name='planned_posts')
@@ -143,5 +149,3 @@ class PlannedPostAdmin(admin.ModelAdmin):
         obj = super().get_object(request, object_id, from_field)
         request.plobj = obj
         return obj
-    
-    
