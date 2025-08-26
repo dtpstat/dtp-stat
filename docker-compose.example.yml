@@ -30,6 +30,7 @@ services:
       - "5000:5000"
     volumes:
       - .:/code
+      - dtpstat:/var/run/dtpstat
     working_dir: /code
     # Старт: миграции + проверка суперпользователя + запуск сервера
     command: >
@@ -67,3 +68,4 @@ networks:
   backend:
 volumes:
   pgdata:
+  dtpstat:
