@@ -25,13 +25,13 @@ ijson = "==2.6.1"
 pandas = "==1.3.0"
 psycopg2-binary = "==2.8.5"
 pymorphy2 = "==0.9.1"
-python-telegram-bot = "==13.0"
 scrapy-rotating-proxies = "==0.6.2"
 tqdm = "==4.65.1"
-tweepy = "==4.14.0"
 django-constance = "==4.3.2"
-#omit old package, it dep for scrapy-rotating-proxies
-typing = { version = "*", markers="python_version < '3.0'" }
+django-q = "==1.3.9"
+tweepy = "==4.14.0"
+python-telegram-bot = "==13.0"
+vk_api = "==11.10.0"
 
 [dev-packages]
 

@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   db:
     image: kartoza/postgis:14-3.3
@@ -17,25 +16,31 @@ services:
     volumes:
         - .:/code
     working_dir: /code
-    command: sh -c 'sleep 5 && python manage.py runserver 0.0.0.0:5000'
+    # Старт: миграции + проверка суперпользователя + запуск сервера
+    command: >
+      sh -c "
+      sleep 5 &&
+      python manage.py migrate --noinput &&
+      python create_superuser.py &&
+      python manage.py runserver 0.0.0.0:5000
+      "
     depends_on:
       - db
     networks:
       - backend
-    environment:
-      PYTHONUNBUFFERED: 1
-      SECRET_KEY: secret
-      DATABASE_URL: 'postgis://docker:docker@db:5432/dtpstat'
-      STATIC_ROOT: '/static'
-      MEDIA_ROOT: '/app/media'
-      STATICFILES_DIRS: '/code/static'
-      RECAPTCHA_PUBLIC_KEY: test
-      RECAPTCHA_PRIVATE_KEY: test
-      DEBUG: 1
-      PROJECT_PATH: /code
-      ALLOWED_HOSTS: "*"
-      HERE_TOKEN: 123
-      YANDEX_TOKEN: 123
-
+    env_file:
+      - .env.dev
+  qcluster:
+    build: .
+    command: sh -c 'sleep 5 && python manage.py qcluster'
+    volumes:
+      - .:/code
+    working_dir: /code
+    depends_on:
+      - db
+    networks:
+      - backend
+    env_file:
+      - .env.dev
 networks:
   backend:
