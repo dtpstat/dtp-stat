@@ -6,7 +6,7 @@ COMPOSE_FILE=docker-compose.example.yml
 up:
 	docker compose -f $(COMPOSE_FILE) up -d
 down:
-	docker compose -f $(COMPOSE_FILE) down
+	docker compose -f $(COMPOSE_FILE) down --remove-orphans
 clean:
 	docker compose -f $(COMPOSE_FILE) down -v
 sh:
