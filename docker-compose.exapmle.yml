@@ -1,10 +1,16 @@
+# Example file to run your dev server
+
+# copy: 'cp docker-compose.example.yml docker-compose.yml'
+# or use 'docker compose -f docker-compose.example.yml up'
+# or just run 'make up' (Makefile handles it)
+
 services:
   db:
     image: kartoza/postgis:14-3.3
     environment:
-      POSTGRES_PASSWORD: docker
-      POSTGRES_USER: docker
-      POSTGRES_DB: dtpstat
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5431:5432"
     networks:
@@ -29,7 +35,7 @@ services:
     networks:
       - backend
     env_file:
-      - .env.dev
+      - .env.example
   qcluster:
     build: .
     command: sh -c 'sleep 5 && python manage.py qcluster'
@@ -41,6 +47,6 @@ services:
     networks:
       - backend
     env_file:
-      - .env.dev
+      - .env.example
 networks:
   backend:
