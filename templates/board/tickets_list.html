@@ -1,16 +1,17 @@
 {% extends "board/index.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block board_content %}
     <div class="m-auto text-center">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>ДТП</th>
-                    <th>Тип</th>
-                    <th>Дата</th>
-                    <th>Статус</th>
+                    <th>{% trans 'ДТП' %}</th>
+                    <th>{% trans 'Тип' %}</th>
+                    <th>{% trans 'Дата' %}</th>
+                    <th>{% trans 'Статус' %}</th>
                 </tr>
             </thead>
             <tbody>

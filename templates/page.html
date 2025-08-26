@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+{% load i18n %}
+
 {% block meta-tags %}
-    <meta property="og:title" content="{{ page.title }} – Карта ДТП">
+    <meta property="og:title" content="{{ page.title }} – {% trans 'Карта ДТП' %}">
     <meta property="og:description" content="{{ page.title }}">
     <meta name="description" content="{{ page.title }}">
-    <meta name="keywords" content="Карта, ДТП, {{ page.title }}">
-    <title>{{ page.title }} – Карта ДТП</title>
+    <meta name="keywords" content="{% trans 'Карта' %}, {% trans 'ДТП' %}, {{ page.title }}">
+    <title>{{ page.title }} – {% trans 'Карта ДТП' %}</title>
 {% endblock %}
 
 {% block content %}

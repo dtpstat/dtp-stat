@@ -9,6 +9,7 @@ from PIL import ImageDraw
 import os
 import tweepy
 import telegram
+import vk_api
 
 
 
@@ -19,14 +20,14 @@ import environ
 env = environ.Env()
 
 def pogibli(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "погиб"
     else:
         return "погибли"
 
 
 def postradali(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "пострадал"
     else:
         return "пострадали"
@@ -42,7 +43,7 @@ def get_word_form(word, number):
 
 def get_today_data():
     response = requests.get(
-        'https://xn--90adear.xn--p1ai/',
+	'https://xn--80aebkobnwfcnsfk1e0h.xn--p1ai/', #'https://xn--90adear.xn--p1ai/',
         timeout=60,
         proxies={'https': env('PROXY') or None}
     )
@@ -62,29 +63,44 @@ def get_today_data():
     crashes_injured = str(data_blocks[4].findChildren()[1].text)
     crashes_child_injured = str(data_blocks[5].findChildren()[1].text)
 
-    brief_data_item, created = models.BriefData.objects.get_or_create(
-        date=date
-    )
-    brief_data_item.dtp_count = crashes_num
-    brief_data_item.death_count = crashes_deaths
-    brief_data_item.injured_count = crashes_injured
-    brief_data_item.child_death_count = crashes_child_deaths
-    brief_data_item.child_injured_count = crashes_child_injured
-    brief_data_item.save()
 
-    if created:
-        return {
-            "date": date,
-            "weekday": weekday,
-            "string_date": string_date,
-            "crashes_num": crashes_num,
-            "crashes_deaths": crashes_deaths,
-            "crashes_child_deaths": crashes_child_deaths,
-            "crashes_injured": crashes_injured,
-            "crashes_child_injured": crashes_child_injured
+    brief_data_item, created = models.BriefData.objects.update_or_create(
+        date=date,
+        defaults={
+            "dtp_count": crashes_num,
+            "death_count": crashes_deaths,
+            "injured_count": crashes_injured,
+            "child_death_count": crashes_child_deaths,
+            "child_injured_count": crashes_child_injured,
         }
-    else:
-        return None
+    )
+
+
+#    brief_data_item, created = models.BriefData.objects.get_or_create(
+#        date=date
+#    )
+#    brief_data_item.dtp_count = crashes_num
+#    brief_data_item.death_count = crashes_deaths
+#    brief_data_item.injured_count = crashes_injured
+#    brief_data_item.child_death_count = crashes_child_deaths
+#    brief_data_item.child_injured_count = crashes_child_injured
+#    brief_data_item.save()
+#    print("[get_today_data] brief_data_item: ", brief_data_item)
+#    print("[get_today_data] created: ", created)
+
+#    if created:
+    return {
+        "date": date,
+        "weekday": weekday,
+        "string_date": string_date,
+        "crashes_num": crashes_num,
+        "crashes_deaths": crashes_deaths,
+        "crashes_child_deaths": crashes_child_deaths,
+        "crashes_injured": crashes_injured,
+        "crashes_child_injured": crashes_child_injured
+    }
+#    else:
+#        return None
 
 
 def generate_text(data, post_type):
@@ -184,28 +200,80 @@ def send_telegram_post(text):
     bot = telegram.Bot(token=env('TELEGRAM_TOKEN'))
 
     channels_str = os.getenv('TELEGRAMM_CHANNELS', '')
+    print(f"[send_telegram_post] TELEGRAMM_CHANNELS = {channels_str}")
+
     channels = [ch.strip() for ch in channels_str.split(';') if ch.strip()]
 
     photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
-    
+
     with open(photo_path, 'rb') as photo:
         for channel in channels:
-            bot.sendPhoto(channel, photo, caption=text)
+            print(f"[send_telegram_post] Отправка фото в канал/чат: {channel}")
+            try:
+                bot.sendPhoto(channel, photo, caption=text)
+                print(f"[send_telegram_post] Успешно отправлено в {channel}")
+            except Exception as e:
+                print(f"[send_telegram_post] Ошибка при отправке в {channel}: {e}")
             photo.seek(0)
 
 
+def send_vk_post(text):
+    log_template = "[send_vk_post] {0}"
+
+    phone_number = env("VK_ACCOUNT_PHONE_NUMBER")
+    password = env("VK_ACCOUNT_PASSWORD")
+    community_id = env("VK_COMMUNITY_ID")
+
+    vk_session = vk_api.VkApi(phone_number, password)
+    try:
+        vk_session.auth(token_only=True)
+    except Exception as e:
+        print(log_template.format(f"Ошибка авторизации в VK: {e}"))
+        return
+
+    vk = vk_session.get_api()
+    photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
+    try:
+        upload = vk_api.VkUpload(vk_session)
+        photo = upload.photo_wall(photo_path, group_id=community_id)[0]
+    except Exception as e:
+        print(log_template.format(f"Ошибка загрузки фото на сервер VK: {e}"))
+        return
+    try:
+        attachment = f"photo{photo['owner_id']}_{photo['id']}"
+        vk.wall.post(owner_id=-int(community_id), from_group=1, message=text, attachments=attachment)
+    except Exception as e:
+        print(log_template.format(f"Ошибка при отправке поста в VK: {e}"))
+        return
+
+    print(log_template.format("Пост успешно отправлен в VK"))
+
+
 def main(message="today"):
+    print("[main] Запуск main() с message =", message)
+
     if message == "today":
         data = get_today_data()
+        print("[main] Получены данные:", bool(data))
+
         if data:
             text = generate_text(data, "today_post")
             make_img(data)
 
             if os.getenv("SEND_TWEETER") == "1":
+                print("[main] SEND_TWEETER=1 → отправка в Twitter")
                 send_tweet(text)
+            else:
+                print("[main] SEND_TWEETER не установлен или не 1 → пропуск")
 
             if os.getenv("SEND_TELEGRAM") == "1":
+                print("[main] SEND_TELEGRAM=1 → отправка в Telegram")
                 send_telegram_post(text)
+            else:
+                print("[main] SEND_TELEGRAM не установлен или не 1 → пропуск")
 
             if os.getenv("SEND_VK") == "1":
+                print("[main] SEND_VK=1 → отправка в VK")
                 send_vk_post(text)
+            else:
+                print("[main] SEND_VK не установлен или не 1 → пропуск")

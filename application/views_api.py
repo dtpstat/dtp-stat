@@ -8,6 +8,7 @@ from rest_framework.decorators import action, api_view
 
 from django.db.models import Sum, Q
 from django.shortcuts import get_object_or_404, render, redirect, reverse, HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 
 from data import models as data_models
 from data import serializers as data_serializers
@@ -166,7 +167,7 @@ class FiltersApiView(APIView):
         # фильтр по дате
         filters.append({
             "name": "date",
-            "label": "Период данных",
+            "label": _("Период данных"),
             # "values": [
             #     downloads.first().date,
             #     downloads.last().date.replace(day=calendar.monthrange(downloads.last().date.year, downloads.last().date.month)[1])
@@ -294,4 +295,4 @@ class FiltersApiView(APIView):
         )
 
         return Response(filters)
-        
+
