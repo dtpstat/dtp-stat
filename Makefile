@@ -1,4 +1,4 @@
-.PHONY: up run down clean sh build test
+.PHONY: up down clean sh build test
 
 # Replace with your compose file
 COMPOSE_FILE=docker-compose.example.yml
