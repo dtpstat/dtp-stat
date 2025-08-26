@@ -1,4 +1,4 @@
-.PHONY: up down clean sh build test
+.PHONY: all up down clean sh build test
 
 # Replace with your compose file
 COMPOSE_FILE=docker-compose.example.yml
@@ -15,3 +15,5 @@ build:
 	docker compose -f $(COMPOSE_FILE) build
 test:
 	docker compose -f $(COMPOSE_FILE) exec -it web pytest
+
+all: build up
