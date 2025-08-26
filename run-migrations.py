@@ -2,11 +2,21 @@ import os
 import sys
 from pathlib import Path
 import django
+import fcntl
 from django.core.management import call_command
 
 #№Путь к файлу-флагу (можно переопределить через MIGRATIONS_FLAG_PATH)
 # По умолчанию используем каталог состояния приложения внутри контейнера
-FLAG_FILE = Path(os.environ.get("MIGRATIONS_FLAG_PATH"))
+MIGRATIONS_FLAG_PATH = os.environ.get(
+    "MIGRATIONS_FLAG_PATH",
+    "/var/run/dtpstat/.migrations_done",
+)
+MIGRATIONS_LOCK_PATH = os.environ.get(
+    "MIGRATIONS_LOCK_PATH",
+    f"{MIGRATIONS_FLAG_PATH}.lock",
+)
+FLAG_FILE = Path(MIGRATIONS_FLAG_PATH)
+LOCK_FILE = Path(MIGRATIONS_LOCK_PATH)
 
 # Настройка Django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dtpstat.settings")
