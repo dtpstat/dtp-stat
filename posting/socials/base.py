@@ -29,6 +29,9 @@ class SocialNetworkBase(models.Model):
     def error(self, message):
         return "[ERROR]" + self.log_template.format(message)
     
+    def clean_publish_data(self, text):
+        raise NotImplementedError
+    
     def post(self, post):
         raise NotImplementedError
 
