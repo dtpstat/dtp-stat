@@ -192,27 +192,7 @@ CKEDITOR_CONFIGS = {
         'language': 'ru',
     },
     'social_networks': {
-         'toolbar': [
-            [
-                'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'PasteFromDocs', '-',
-                'SelectAll', '-',
-                'Undo', 'Redo', '-',
-                'Find', 'Replace', '-',
-                'spellchecker', 'Scayt', '-',
-                'Source', '-',
-                'Maximize' 
-            ],
-            '/',
-            [
-                'Bold','Italic','Underline','Strike', '-',
-                'HorizontalRule', '-',
-                'Link','Unlink', '-',
-                'Blockquote', '-',
-                'Image', '-',
-                'SpecialChar','EmojiPanel', '-',
-                'RemoveFormat',
-            ],
-        ],
+        'toolbar': [],
         'autoGrow_minHeight': 250,
         'autoGrow_maxHeight': 600,
         'autoGrow_onStartup': True,
@@ -221,14 +201,6 @@ CKEDITOR_CONFIGS = {
         'removeFormatTags': (
             'b,i,u,strike,strong,em,hr,a,img,blockquote'
         ),
-        'allowedContent': (
-            'b i u strike strong em;'           # текстовое форматирование
-            'hr;'                               # разделитель
-            'a[!href];'                         # ссылки и файлы
-            'blockquote;'                       # цитаты
-            'img[!src,alt,width,height];'       # изображения
-        ),
-        "extraPlugins": "emoji,pastefromgdocs,autogrow,selectallcontextmenu",
     },
 }
 

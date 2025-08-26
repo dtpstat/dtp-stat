@@ -8,4 +8,5 @@ socials = {
     'vk': vk.VkAccount,
 }
 
-TYPE_CHOICES = [(key, service.full_name) for key, service in socials.items()]
+TYPE_CHOICES = [(key, account.full_name) for key, account in socials.items()]
+CKEDITOR_CONFIGS = {account.full_name: account.ckeditor_config for _, account in socials.items()}

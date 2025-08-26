@@ -7,9 +7,9 @@ from django_q.tasks import Schedule, Task
 from django_q.models import Success, Failure
 from django.utils.html import format_html
 from django.urls import reverse
-
-from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
+from posting.socials.socials import CKEDITOR_CONFIGS
+import json
 
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
@@ -85,12 +85,19 @@ class PlannedPostForm(forms.ModelForm):
         help_texts = {
             'datetime_planned': "Оставьте пустым, чтобы опубликовать сразу."
         }
+        
+    class Media:
+        js = ('js/planned_post_editor.js',)
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.datetime_planned:
             local_dt = timezone.localtime(self.instance.datetime_planned)
             # self.fields['datetime_planned'].initial = local_dt.strftime('%Y-%m-%dT%H:%M')    
             self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M')  
+        
+        # сериализуем конфиги в JSON и кладём в data-атрибут textarea
+        self.fields['text'].widget.attrs['data-ckeditor-configs'] = json.dumps(CKEDITOR_CONFIGS)
             
     def clean_datetime_planned(self):
         dt = self.cleaned_data.get('datetime_planned')

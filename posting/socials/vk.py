@@ -14,6 +14,22 @@ class VkAccount(SocialNetworkBase):
     password = models.CharField(max_length=128)
     community_id = models.CharField(max_length=50)
     
+    ckeditor_config = {
+        'toolbar': [
+            SocialNetworkBase.ckeditor_toolbar_top,
+            '/',
+            [
+                'Image', '-',
+                'SpecialChar','EmojiPanel', '-',
+                'RemoveFormat',
+            ],
+        ],
+        'allowedContent': (
+            'img[!src,alt,width,height];'       # изображения
+        ),
+        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins,
+    }
+    
     def send(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
         

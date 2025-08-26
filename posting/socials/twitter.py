@@ -14,6 +14,26 @@ class TwitterAccount(SocialNetworkBase):
     access_token = models.CharField(max_length=255)
     access_token_secret = models.CharField(max_length=255)
     
+    ckeditor_config = {
+        'toolbar': [
+            SocialNetworkBase.ckeditor_toolbar_top,
+            '/',
+            [
+                'HorizontalRule', '-',
+                'Image', '-',
+                'SpecialChar','EmojiPanel', '-',
+                'RemoveFormat', '-',
+                'TweetSplitter',
+            ],
+        ],
+        'allowedContent': (
+            'img[!src,alt,width,height];'       # изображения
+            'div[*]{*}(tweet-*); span[*]{*}(tweet-*);'  # твиты
+            'a[!href];'                         # твиттер-ссылки
+        ),
+        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins + ',tweet_splitter',
+    }
+    
     def send(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 

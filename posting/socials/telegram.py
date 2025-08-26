@@ -13,6 +13,28 @@ class TelegramAccount(SocialNetworkBase):
     token = models.CharField(max_length=255)
     channel_id = models.CharField(max_length=100)
     
+    ckeditor_config = {
+        'toolbar': [
+            SocialNetworkBase.ckeditor_toolbar_top,
+            '/',
+            [
+                'Bold','Italic','Underline','Strike', '-',
+                'Link','Unlink', '-',
+                'Blockquote', '-',
+                'Image', '-',
+                'SpecialChar','EmojiPanel', '-',
+                'RemoveFormat',
+            ],
+        ],
+        'allowedContent': (
+            'b i u strike strong em;'           # текстовое форматирование
+            'a[!href];'                         # ссылки и файлы
+            'blockquote;'                       # цитаты
+            'img[!src,alt,width,height];'       # изображения
+        ),
+        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins,
+    }
+    
     def send(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
