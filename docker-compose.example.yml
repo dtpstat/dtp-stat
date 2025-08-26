@@ -14,11 +14,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_HOST_PORT}:${POSTGRES_INNER_PORT}"
+      - "${POSTGRES_HOST_PORT}:5432"
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -h 127.0.0.1 -p \"$${POSTGRES_INNER_PORT}\""]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -h 127.0.0.1 -p 5432"]
       interval: 5s       # Check health every 5 second
       timeout: 2s        # Allow 2 seconds for response
       retries: 10        # Retry 10 times
