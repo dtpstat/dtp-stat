@@ -4,7 +4,6 @@ from django.contrib import admin, messages
 from django.urls import path, reverse
 from django.shortcuts import render, redirect
 from django.utils.http import urlencode
-#from django.contrib.admin.helpers import ActionForm
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
@@ -106,6 +105,7 @@ class AccountAdmin(admin.ModelAdmin):
         return custom + urls
 
     def schedule_posts_view(self, request):
+        from django.db import transaction
         from posting.planned_post import PlannedPostForm
        
         ids = request.GET.get('ids') or request.POST.get('ids')
@@ -130,15 +130,22 @@ class AccountAdmin(admin.ModelAdmin):
                 if post_form.is_valid():
                     from posting.scheduler import schedule_task
                     
-                    # create PlannedPost
-                    pp = post_form.save(commit=False)
-                    pp.account = acc
-                    pp.status = 'scheldured'
-                    pp.save()
-                    
-                    # Scheduler:
-                    pp.schedule = schedule_task(pp)
-                    # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
+                    try:
+                        with transaction.atomic():
+                            # create PlannedPost
+                            pp = post_form.save(commit=False)
+                            pp.status = 'scheduled'
+                            pp.save()
+                          
+                            # Scheduler:
+                            pp.schedule = schedule_task(pp)
+                            pp.save(update_fields=['schedule'])
+                            
+                            created.append(pp)
+                    except Exception as e:
+                        self.message_user(request, f"Ошибка при планировании постов: {str(e)}", level=messages.ERROR)
+                        valid = False
+                        
                     pp.save(update_fields=['schedule'])
                     
                     created.append(pp)
