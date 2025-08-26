@@ -15,6 +15,13 @@ services:
       - "5431:5432"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d dtpstat"]
+      interval: 5s       # Check health every 5 second
+      timeout: 2s        # Allow 2 seconds for response
+      retries: 10        # Retry 10 times
+      start_period: 10s  # Run checks during first 10 seconds
+      start_interval: 1s # Check every second during start_period (Docker 25.0+)
   web:
     build: .
     ports:
@@ -25,28 +32,31 @@ services:
     # Старт: миграции + проверка суперпользователя + запуск сервера
     command: >
       sh -c "
-      sleep 5 &&
       python manage.py migrate --noinput &&
       python create_superuser.py &&
       python manage.py runserver 0.0.0.0:5000
       "
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - backend
     env_file:
       - .env.example
+    restart: unless-stopped
   qcluster:
     build: .
-    command: sh -c 'sleep 5 && python manage.py qcluster'
+    command: sh -c 'python manage.py qcluster'
     volumes:
       - .:/code
     working_dir: /code
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - backend
     env_file:
       - .env.example
+    restart: unless-stopped
 networks:
   backend:
