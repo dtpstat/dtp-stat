@@ -20,14 +20,14 @@ import environ
 env = environ.Env()
 
 def pogibli(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "погиб"
     else:
         return "погибли"
 
 
 def postradali(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "пострадал"
     else:
         return "пострадали"
