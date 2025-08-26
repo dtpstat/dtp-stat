@@ -3,7 +3,6 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.contrib.auth import get_user_model
 
 class SocialNetworkBase(models.Model):
     class Meta:
@@ -47,14 +46,9 @@ class SocialNetworkAdminBase(admin.ModelAdmin):
 
         account_title = request.GET.get('_account_title', '')
         account_social_network = request.GET.get('_account_social_network', self.name)
-        user_id = request.GET.get('_account_user_id')
-
-        User = get_user_model()
-        user = User.objects.get(pk=user_id)
-
         social_type = ContentType.objects.get_for_model(obj)
+        
         Account.objects.create(
-            user=user,
             social_network=account_social_network,
             title=account_title,
             social_type=social_type,

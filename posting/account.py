@@ -11,7 +11,6 @@ from django.contrib.contenttypes.models import ContentType
 from .socials.socials import TYPE_CHOICES
 
 class Account(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     
     social_network = models.CharField(max_length=50, choices=TYPE_CHOICES, verbose_name="Соцсеть")
     datetime_creation = models.DateTimeField(auto_now_add=True)
@@ -44,7 +43,7 @@ class AccountForm(forms.ModelForm):
         
     class Meta:
         model = Account
-        fields = ['user', 'social_network', 'title']
+        fields = ['social_network', 'title']
    
 # action — только перенаправление на custom view с selected ids
 def action_schedule_post(modeladmin, request, queryset):
@@ -57,20 +56,18 @@ action_schedule_post.short_description = "Запланировать публи�
 
 class AccountAdmin(admin.ModelAdmin):
     form = AccountForm
-    list_display = ['user', 'social_network', 'title'] 
+    list_display = ['social_network', 'title'] 
     
     def add_view(self, request, form_url=''):
         if request.method == 'POST':
             title = request.POST.get('title', '')
             social_network = request.POST.get('social_network', '')
-            user_id = request.POST.get('user')  # <-- берём id пользователя
 
             url_name = f'admin:posting_{social_network}account_add'
             url = reverse(url_name)
             query = urlencode({
                 '_account_title': title,
                 '_account_social_network': social_network,
-                '_account_user_id': user_id,
             })
             redirect_url = f"{url}?{query}"
             return redirect(redirect_url)
