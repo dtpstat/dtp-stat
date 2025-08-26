@@ -15,7 +15,8 @@ import json
 STATUS_CHOICES = [
     ('scheldured', 'Запланирован'),
     ('success', 'Успех'),
-    ('failed', 'Катастрофа'),
+    ('caughtError', 'Ошибка'),
+    ('uncaughtError', 'Катастрофа'),
 ]
 
 class PlannedPost(models.Model):
@@ -30,7 +31,7 @@ class PlannedPost(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.SET_NULL, null=True, blank=True, related_name='planned_posts')
     task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True, related_name='planned_posts')
     status = models.CharField(
-        max_length=10,
+        max_length=13,
         choices=STATUS_CHOICES,
         blank=True,
         null=True,

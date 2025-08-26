@@ -23,7 +23,7 @@ def publish_post(planned_post_id):
     result = post.account.social.send(post)
     
     if result.startswith("[ERROR]"):
-        post.status = 'failed'
+        post.status = 'caughtError'
     else:
         post.status = 'success'
     
@@ -45,5 +45,5 @@ def status_hook(task):
     post.task_id = task.id
     
     if not task.success:
-        post.status = "failed"
+        post.status = "uncaughtError"
     post.save()
