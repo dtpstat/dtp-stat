@@ -34,7 +34,7 @@ class TwitterAccount(SocialNetworkBase):
         'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins + ',tweet_splitter',
     }
     
-    def send(self, post):
+    def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
         try:

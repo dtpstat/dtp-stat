@@ -29,7 +29,7 @@ class SocialNetworkBase(models.Model):
     def error(self, message):
         return "[ERROR]" + self.log_template.format(message)
     
-    def send(self, post):
+    def post(self, post):
         raise NotImplementedError
 
 class SocialNetworkAdminBase(admin.ModelAdmin):
