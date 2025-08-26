@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function() {
         restartEditor(modeFieldReadonly.textContent)
     }
     function restartEditor(val) {
-        // оставляем только часть до "—"
-        val = val.split('—')[0].trim();
+        // оставляем только часть до ":"
+        val = val.split(':')[0].trim();
 
         const newConfig = ckConfigs[val];
 

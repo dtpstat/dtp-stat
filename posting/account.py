@@ -22,7 +22,7 @@ class Account(models.Model):
     social = GenericForeignKey('social_type', 'social_id')
 
     def __str__(self):
-        return f"{self.get_social_network_display()} — {self.title}"
+        return f"{self.get_social_network_display()}: {self.title}"
     
     class Meta:
         verbose_name = 'Аккаунт соцсети'
