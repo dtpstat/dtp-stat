@@ -55,6 +55,7 @@ services:
       "
     volumes:
       - .:/code
+      - dtpstat:/var/run/dtpstat
     working_dir: /code
     depends_on:
       db:
