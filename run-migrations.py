@@ -38,7 +38,9 @@ if not FLAG_FILE.exists():
                 print("Миграции применены.")
                 FLAG_FILE.touch()  # создаём флаг
     except Exception as e:
+        import traceback
         print("Ошибка при применении миграций:", e)
+        traceback.print_exc()
         sys.exit(1)
 else:
     print("Миграции уже применены, пропускаем.")
