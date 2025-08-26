@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'application.templatetags.tags',
     'constance',
     'constance.backends.database',
+    'django_q',
+    'posting'
 ]
 
 SITE_ID = 1
@@ -60,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'posting.middleware.TimezoneMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -166,7 +169,7 @@ LANGUAGE_COOKIE_SAMESITE = None
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
-CKEDITOR_UPLOAD_PATH = 'blog/'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'UltraFull',
@@ -187,7 +190,17 @@ CKEDITOR_CONFIGS = {
             ['Maximize', 'Source'],
         ],
         'language': 'ru',
-        'forcePasteAsPlainText': True,
+    },
+    'social_networks': {
+        'toolbar': [],
+        'autoGrow_minHeight': 250,
+        'autoGrow_maxHeight': 600,
+        'autoGrow_onStartup': True,
+        'toolbarCanCollapse': True,
+        'language': 'ru',
+        'removeFormatTags': (
+            'b,i,u,strike,strong,em,hr,a,img,blockquote'
+        ),
     },
 }
 
@@ -230,4 +243,18 @@ CONSTANCE_CONFIG = {
     'DONATE_SUM_GOAL': (100000, 'Цель сбора'),
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
+}
+
+USE_TZ = True
+TIME_ZONE = 'UTC'
+
+Q_CLUSTER = {
+    'name': 'DjangoORM',  # имя кластера
+    'workers': 2,         # число воркеров
+    'recycle': 500,       # перезапуск воркеров после N задач
+    'timeout': 120,       # таймаут выполнения задачи
+    'retry': 180,
+    'save_limit': 250,    # максимальное количество сохранённых задач
+    'queue_limit': 100,   # максимальный размер очереди
+    'orm': 'default',     # используем базу данных Django
 }
