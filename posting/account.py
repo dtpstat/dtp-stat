@@ -29,7 +29,12 @@ class Account(models.Model):
         
     def delete(self, using=None, keep_parents=False):
         # Если связанный объект соцсети существует — удаляем его
-        if self.social_data:
+def delete(self, using=None, keep_parents=False):
+    # Если связанный объект соцсети существует — удаляем его
+    if self.social:
+        self.social.delete()
+    # Затем вызываем стандартное удаление самого Account
+    return super().delete(using=using, keep_parents=keep_parents)
             self.social_data.delete()
         # Затем вызываем стандартное удаление самого Account
         return super().delete(using=using, keep_parents=keep_parents)
