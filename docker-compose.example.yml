@@ -34,7 +34,7 @@ services:
     # Старт: миграции + проверка суперпользователя + запуск сервера
     command: >
       sh -c "
-      python manage.py migrate --noinput &&
+      python run_migrations.py &&
       python create_superuser.py &&
       python manage.py runserver 0.0.0.0:5000
       "
@@ -48,7 +48,11 @@ services:
     restart: unless-stopped
   qcluster:
     build: .
-    command: sh -c 'python manage.py qcluster'
+    command: >
+      sh -c "
+      python run_migrations.py &&
+      python manage.py qcluster
+      "
     volumes:
       - .:/code
     working_dir: /code
