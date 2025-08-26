@@ -1,7 +1,14 @@
 {% extends "admin/base_site.html" %}
 {% load i18n %}
 {% block content %}
-  <h1>{% trans "Запланировать публикации" %}</h1>
+  <style>
+    table.form-table td div.django-ckeditor-widget {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+  </style>
+
   <form method="post">{% csrf_token %}
     <input type="hidden" name="ids" value="{{ ids }}">
     <table class="form-table">
@@ -10,7 +17,7 @@
       {% for account, post_form, extra_form in form_objects %}
         <tr>
           <td>
-            {{ account.title }}<br><small>{{ account.social_network }}</small>
+            {{ account.title }}<br><small>{{ account.get_social_network_display }}</small>
           </td>
           <td>
             {{ post_form.management_form|default:"" }}
@@ -27,4 +34,6 @@
     </table>
     <input type="submit" class="default" value="Создать запланированные посты">
   </form>
+  {# Подключаем JS и CSS для виджетов формы #}
+  {{ form_objects.0.1.media }}
 {% endblock %}

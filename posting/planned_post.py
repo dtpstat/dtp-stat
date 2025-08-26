@@ -23,7 +23,7 @@ class PlannedPost(models.Model):
     account = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
     text = RichTextUploadingField(
-        help_text="Текст",
+        verbose_name='Текст',
         config_name='social_networks'
     )
     datetime_created = models.DateTimeField(auto_now_add=True)
@@ -106,7 +106,7 @@ class PlannedPostForm(forms.ModelForm):
             self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M') 
 
         # Block CKEditor if form is read-only
-        if self.instance and self.instance.status != "scheldured":
+        if self.instance and self.instance.status and self.instance.status != "scheldured":
             for field_name in self.fields:
                 model_field = self._meta.model._meta.get_field(field_name)
                 if isinstance(model_field, RichTextUploadingField):
