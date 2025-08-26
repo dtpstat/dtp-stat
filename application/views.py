@@ -58,7 +58,7 @@ def page(request, slug):
 
 
 def opendata(request):
-    opendata = models.OpenData.objects.filter(region__is_active=True).order_by("region__name")
+    opendata = models.OpenData.objects.filter(region__is_active=True).order_by("region__name").distinct()
     start_date = datetime.datetime(2015, 1, 1)
 
     try:

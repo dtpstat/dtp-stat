@@ -1,3 +1,6 @@
+import zipfile
+import io
+
 import calendar
 import json
 import logging
@@ -92,6 +95,7 @@ def get_region_by_center_point(center_point):
 def opendata(region=None, force=False):
     if not os.path.exists(settings.MEDIA_ROOT + "/opendata/"):
         os.makedirs(settings.MEDIA_ROOT + "/opendata/")
+
     if region:
         active_region_ids = [region.id]
     else:
@@ -134,8 +138,15 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     ]}
 
     path = settings.MEDIA_ROOT + '/opendata/' + region_slug + '.geojson'
-    with open(path, 'w') as data_file:
-        json.dump(geo_data, data_file, ensure_ascii=False)
+    zip_path = settings.MEDIA_ROOT + '/opendata/' + region_slug + '.geojson.zip'
+
+    # Сохраняем geojson во временный буфер
+    geojson_bytes = json.dumps(geo_data, ensure_ascii=False).encode('utf-8')
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(region_slug + '.geojson', geojson_bytes)
+
+    # with open(path, 'w') as data_file:
+        # json.dump(geo_data, data_file, ensure_ascii=False)
 
     if region_slug == "russia":
         shutil.make_archive(region_slug + '.geojson', 'zip', settings.MEDIA_ROOT + '/opendata/')
