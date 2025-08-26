@@ -29,7 +29,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-        - .:/code
+      - .:/code
     working_dir: /code
     # Старт: миграции + проверка суперпользователя + запуск сервера
     command: >
