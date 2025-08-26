@@ -98,10 +98,19 @@ class PlannedPostForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Timezones
         if self.instance and self.instance.datetime_planned:
-            local_dt = timezone.localtime(self.instance.datetime_planned)
-            # self.fields['datetime_planned'].initial = local_dt.strftime('%Y-%m-%dT%H:%M')    
-            self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M')  
+            local_dt = timezone.localtime(self.instance.datetime_planned)    
+            self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M') 
+
+        # Block CKEditor if form is read-only
+        if self.instance and self.instance.status != "scheldured":
+            for field_name in self.fields:
+                model_field = self._meta.model._meta.get_field(field_name)
+                if isinstance(model_field, RichTextUploadingField):
+                    # делаем CKEditor disabled
+                    self.fields[field_name].widget.attrs['disabled'] = True
         
         # сериализуем конфиги в JSON и кладём в data-атрибут textarea
         self.fields['text'].widget.attrs['data-ckeditor-configs'] = json.dumps(CKEDITOR_CONFIGS)
@@ -150,8 +159,11 @@ class PlannedPostAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
         if obj and obj.status != "scheldured":
-            # делаем все поля недоступными для редактирования
-            readonly += [f.name for f in self.model._meta.fields]
+            # добавляем все поля кроме RichTextUploadingField
+            readonly += [
+                f.name for f in self.model._meta.fields
+                if not isinstance(f, RichTextUploadingField)
+            ]
         return readonly
     
     def datetime_created_local(self, obj):

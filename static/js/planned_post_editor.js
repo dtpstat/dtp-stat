@@ -5,12 +5,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const modeField = document.getElementById("id_account");
 
-    restartEditor(); // инициализация при загрузке страницы
-
-    modeField.addEventListener("change", restartEditor);
-
-    function restartEditor() {
-        let val = modeField.selectedOptions[0].text;
+    if (modeField) {
+        modeField.addEventListener("change", () => restartEditor(modeField.selectedOptions[0].text));
+        restartEditor(modeField.selectedOptions[0].text); // инициализация при загрузке страницы
+    } else {
+        const modeFieldReadonly = document.querySelector('.form-row.field-account .readonly');
+        restartEditor(modeFieldReadonly.textContent)
+    }
+    function restartEditor(val) {
         // оставляем только часть до "—"
         val = val.split('—')[0].trim();
 
