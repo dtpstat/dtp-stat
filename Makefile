@@ -1,3 +1,5 @@
+.PHONY: up run down sh build test
+
 # Repce with your compose file
 COMPOSE_FILE=docker-compose.example.yml
 
