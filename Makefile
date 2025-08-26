@@ -6,8 +6,8 @@ run:
 down:
 	docker-compose -f $(COMPOSE_FILE) down
 sh:
-	docker-compose -f $(COMPOSE_FILE) exec -T web /bin/bash
+	docker-compose -f $(COMPOSE_FILE) exec -it web /bin/bash
 build:
 	docker-compose -f $(COMPOSE_FILE) build
 test:
-	docker-compose -f $(COMPOSE_FILE) exec -T web pytest
+	docker-compose -f $(COMPOSE_FILE) exec -it web pytest
