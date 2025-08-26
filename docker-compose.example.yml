@@ -34,7 +34,7 @@ services:
     # Старт: миграции + проверка суперпользователя + запуск сервера
     command: >
       sh -c "
-      python run_migrations.py &&
+      python run-migrations.py &&
       python create_superuser.py &&
       python manage.py runserver 0.0.0.0:5000
       "
