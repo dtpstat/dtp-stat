@@ -13,7 +13,7 @@
 
     <form class="form-inline mr-auto mt-lg-0 d-lg-block" role="form">
         <div class="form-group">
-            <input class="form-control" type="text" id="regionSearch" placeholder="Поиск по карте">
+            <input class="form-control" type="text" id="regionSearch" placeholder="{% trans 'Поиск по карте' %}">
             <i class="fas fa-search"></i>
         </div>
     </form>
@@ -29,16 +29,16 @@
 
             </li>
             <li class="nav-item {% if 'dashboard' in request.path and 'pages' in request.path %}active{% endif %}">
-                <a class="nav-link" href="/pages/dashboard/">Статистика</a>
+                <a class="nav-link" href="/pages/dashboard/">{% trans "Статистика" %}</a>
             </li>
             <li class="nav-item {% if 'data' in request.resolver_match.url_name %}active{% endif %}">
-                <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
+                <a class="nav-link" href="{% url "opendata" %}">{% trans "Скачать данные" %}</a>
             </li>
             <li class="nav-item {% if 'about' in request.path and 'pages' in request.path %}active{% endif %}">
-                <a class="nav-link" href="/pages/about/">О проекте</a>
+                <a class="nav-link" href="/pages/about/">{% trans "О проекте" %}</a>
             </li>
             <li class="nav-item support">
-                <a class="nav-link button support" href="{% url 'donate' %}">Поддержать проект</a>
+                <a class="nav-link button support" href="{% url 'donate' %}">{% trans "Поддержать проект" %}</a>
             </li>
             {% if config.SHOW_LANGUAGE_SWITCHER %}
             <li class="nav-item dropdown">
