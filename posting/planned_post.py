@@ -9,6 +9,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from ckeditor_uploader.fields import RichTextUploadingField
 from posting.socials.socials import CKEDITOR_CONFIGS
+from posting.scheduler import schedule_task
 import json
 
 STATUS_CHOICES = [
@@ -51,13 +52,19 @@ class PlannedPost(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:  # если объект уже существует
             old = PlannedPost.objects.get(pk=self.pk)
+            super().save(*args, **kwargs)
             if old.datetime_planned != self.datetime_planned and self.schedule:
                 # Переносим задачу в планировщике
                 sched = self.schedule
                 sched.next_run = self.effective_datetime
                 sched.save()
-        super().save(*args, **kwargs)
-        
+        else:  # новый объект
+            super().save(*args, **kwargs)
+            self.status = 'scheldured'
+            self.schedule = schedule_task(self)
+            # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
+            super().save(update_fields=['status', 'schedule'])
+
     def delete(self, *args, **kwargs):
         if self.schedule:
             try:
