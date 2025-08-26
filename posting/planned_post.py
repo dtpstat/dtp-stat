@@ -50,6 +50,8 @@ class PlannedPost(models.Model):
                 'datetime_planned': "Planned time cannot be in the past!"
             })
             
+from django.db import transaction
+
     def save(self, *args, **kwargs):
         if self.pk:  # если объект уже существует
             old = PlannedPost.objects.get(pk=self.pk)
@@ -60,11 +62,12 @@ class PlannedPost(models.Model):
                 sched.next_run = self.effective_datetime
                 sched.save()
         else:  # новый объект
-            super().save(*args, **kwargs)
-            self.status = 'scheldured'
-            self.schedule = schedule_task(self)
-            # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
-            super().save(update_fields=['status', 'schedule'])
+            with transaction.atomic():
+                super().save(*args, **kwargs)
+                self.status = 'scheduled'
+                self.schedule = schedule_task(self)
+                # self.message_user(request, "Ошибка шедулирования", level=messages.ERROR)
+                super().save(update_fields=['status', 'schedule'])
 
     def delete(self, *args, **kwargs):
         if self.schedule:
