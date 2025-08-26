@@ -37,7 +37,6 @@ if not FLAG_FILE.exists():
                 call_command("migrate", interactive=False)
                 print("Миграции применены.")
                 FLAG_FILE.touch()  # создаём флаг
-            fcntl.flock(lock_fp, fcntl.LOCK_UN)
     except Exception as e:
         print("Ошибка при применении миграций:", e)
         sys.exit(1)
