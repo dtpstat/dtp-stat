@@ -14,7 +14,7 @@
     <table class="form-table">
       <thead><tr><th>Account</th><th>Форма</th></tr></thead>
       <tbody>
-      {% for account, post_form, extra_form in form_objects %}
+      {% for account, post_form in form_objects %}
         <tr>
           <td>
             {{ account.title }}<br><small>{{ account.get_social_network_display }}</small>
@@ -22,11 +22,6 @@
           <td>
             {{ post_form.management_form|default:"" }}
             {{ post_form.as_p }}
-            {% if extra_form %}
-              <div class="extra-form">
-                {{ extra_form.as_p }}
-              </div>
-            {% endif %}
           </td>
         </tr>
       {% endfor %}

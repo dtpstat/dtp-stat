@@ -59,7 +59,7 @@ class AccountAdmin(admin.ModelAdmin):
     form = AccountForm
     list_display = ['user', 'social_network', 'title'] 
     
-    def add_view(self, request, form_url='', extra_context=None):
+    def add_view(self, request, form_url=''):
         if request.method == 'POST':
             title = request.POST.get('title', '')
             social_network = request.POST.get('social_network', '')
@@ -75,7 +75,7 @@ class AccountAdmin(admin.ModelAdmin):
             redirect_url = f"{url}?{query}"
             return redirect(redirect_url)
 
-        return super().add_view(request, form_url, extra_context)
+        return super().add_view(request, form_url)
     
     # TODO: Нормальное редактирование, опции:
     # [DONE] 1. Сохранять account -> перебрасыать на редактирование [network_base]
@@ -105,10 +105,7 @@ class AccountAdmin(admin.ModelAdmin):
 
     def schedule_posts_view(self, request):
         from posting.planned_post import PlannedPostForm
-        """
-        Первая страница: показываем формы для каждого выбранного аккаунта.
-        Формы могут быть разными per-network (если в реестре есть extra form).
-        """
+       
         ids = request.GET.get('ids') or request.POST.get('ids')
         if not ids:
             self.message_user(request, "Не выбраны аккаунты.", level=messages.WARNING)
@@ -118,7 +115,7 @@ class AccountAdmin(admin.ModelAdmin):
 
         accounts = Account.objects.filter(pk__in=pks).select_related()  # оптимизируем
 
-        # Сформируем список форм: для каждого account — PlannedPostForm + optional extra form
+        # Сформируем список форм: для каждого account — PlannedPostForm
         form_objects = []
         if request.method == 'POST':
             # POST: создаём формы из incoming data
@@ -127,18 +124,8 @@ class AccountAdmin(admin.ModelAdmin):
             for i, acc in enumerate(accounts):
                 prefix = f'acc_{acc.pk}'
                 post_form = PlannedPostForm(request.POST, prefix=prefix)
-                # optional network extra
-                extra_form = None
-                # if get_social_network:
-                #     try:
-                #         network = get_social_network(acc.social_network)
-                #         extra_cls = getattr(network, 'planned_post_extra_form', None)
-                #         if extra_cls:
-                #             extra_form = extra_cls(request.POST, prefix=prefix + '_extra')
-                #     except Exception:
-                #         extra_form = None
 
-                if post_form.is_valid() and (extra_form is None or extra_form.is_valid()):
+                if post_form.is_valid():
                     from posting.scheduler import schedule_task
                     
                     # create PlannedPost
@@ -155,7 +142,7 @@ class AccountAdmin(admin.ModelAdmin):
                     created.append(pp)
                 else:
                     valid = False
-                    form_objects.append((acc, post_form, extra_form))
+                    form_objects.append((acc, post_form))
             if valid:
                 self.message_user(request, f"Создано {len(created)} запланированных постов.")
                 return redirect(reverse('admin:posting_plannedpost_changelist'))
@@ -165,15 +152,7 @@ class AccountAdmin(admin.ModelAdmin):
             for acc in accounts:
                 prefix = f'acc_{acc.pk}'
                 pf = PlannedPostForm(prefix=prefix)
-                extra_form = None
-                # try:
-                #     network = get_social_network(acc.social_network)
-                #     extra_cls = getattr(network, 'planned_post_extra_form', None)
-                #     if extra_cls:
-                #         extra_form = extra_cls(prefix=prefix + '_extra')
-                # except Exception:
-                #     extra_form = None
-                form_objects.append((acc, pf, extra_form))
+                form_objects.append((acc, pf))
 
         context = dict(
             self.admin_site.each_context(request),
