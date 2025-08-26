@@ -50,7 +50,6 @@ services:
     build: .
     command: >
       sh -c "
-      python run_migrations.py &&
       python manage.py qcluster
       "
     volumes:
