@@ -7,6 +7,8 @@
 services:
   db:
     image: kartoza/postgis:14-3.3
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -60,3 +62,5 @@ services:
     restart: unless-stopped
 networks:
   backend:
+volumes:
+  pgdata:
