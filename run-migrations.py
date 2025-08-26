@@ -15,11 +15,19 @@ django.setup()
 # Проверяем, был ли уже первый запуск
 if not FLAG_FILE.exists():
     print("Первый запуск контейнера: выполняем миграции...")
+    # Гарантируем наличие каталога для флага/лока заранее
+    FLAG_FILE.parent.mkdir(parents=True, exist_ok=True)
     try:
-        call_command("migrate", interactive=False)
-        print("Миграции применены.")
-        FLAG_FILE.parent.mkdir(parents=True, exist_ok=True)  # гарантируем каталог
-        FLAG_FILE.touch()  # создаём флаг
+        with open(LOCK_FILE, "w") as lock_fp:
+            fcntl.flock(lock_fp, fcntl.LOCK_EX)
+            # Повторная проверка под эксклюзивной блокировкой
+            if FLAG_FILE.exists():
+                print("Миграции уже применены другим процессом, пропускаем.")
+            else:
+                call_command("migrate", interactive=False)
+                print("Миграции применены.")
+                FLAG_FILE.touch()  # создаём флаг
+            fcntl.flock(lock_fp, fcntl.LOCK_UN)
     except Exception as e:
         print("Ошибка при применении миграций:", e)
         sys.exit(1)
