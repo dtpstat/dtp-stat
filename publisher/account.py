@@ -57,20 +57,42 @@ class AccountAdmin(admin.ModelAdmin):
     form = AccountForm
     list_display = ['social_network', 'title'] 
     
-    def add_view(self, request, form_url=''):
-        if request.method == 'POST':
-            title = request.POST.get('title', '')
-            social_network = request.POST.get('social_network', '')
+++ b/publisher/account.py
+@@ -1,1 +1,1 @@
+from django.urls import path, reverse, NoReverseMatch
+@@ -60,8 +60,19 @@ class AccountAdmin(admin.ModelAdmin):
+     def add_view(self, request, form_url=''):
+         if request.method == 'POST':
+             title = request.POST.get('title', '')
+             social_network = request.POST.get('social_network', '')
+-
+-            url_name = f'admin:publisher_{social_network}account_add'
+            # validate network and resolve URL safely
+            if social_network not in dict(TYPE_CHOICES):
+                self.message_user(
+                    request,
+                    "Некорректная соцсеть.",
+                    level=messages.ERROR
+                )
+                return super().add_view(request, form_url)
 
             url_name = f'admin:publisher_{social_network}account_add'
-            url = reverse(url_name)
-            query = urlencode({
-                '_account_title': title,
-                '_account_social_network': social_network,
-            })
-            redirect_url = f"{url}?{query}"
-            return redirect(redirect_url)
+            try:
+                url = reverse(url_name)
+            except NoReverseMatch:
+                self.message_user(
+                    request,
+                    "Страница добавления для этой соцсети не найдена.",
+                    level=messages.ERROR
+                )
+                return super().add_view(request, form_url)
+ 
+             query = urlencode({
+                 '_account_title': title,
+@@ -73,3 +84,4 @@ class AccountAdmin(admin.ModelAdmin):
+             return redirect(redirect_url)
 
+         return super().add_view(request, form_url)
         return super().add_view(request, form_url)
     
     # TODO: Нормальное редактирование, опции:
