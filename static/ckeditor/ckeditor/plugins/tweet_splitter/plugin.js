@@ -1,5 +1,4 @@
 CKEDITOR.plugins.add('tweet_splitter', {
-    icons: 'tweet_splitter',
     init: function(editor) {
         editor.addContentsCss(this.path + 'styles.css');
 
