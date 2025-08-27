@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // safegard
+  if (!window.CKEDITOR) {
+    console.error('CKEditor not found on page; skipping editor initialization.');
+    return;
+  }
+  
   // helper: извлечь "имя аккаунта" до ":"
   function parseAccountName(text) {
     return text.split(':')[0].trim();
