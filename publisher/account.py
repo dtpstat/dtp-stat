@@ -108,8 +108,15 @@ from django.urls import path, reverse, NoReverseMatch
         related_obj_id = obj.social_id
 
         # Строим URL редактирования для конкретной соцсети
+        if not related_obj_id:
+            self.message_user(request, "Связанный объект соцсети ещё не создан.", level=messages.WARNING)
+            return super().response_change(request, obj)
         url_name = f'admin:publisher_{social_network}account_change'
-        url = reverse(url_name, args=[related_obj_id])
+        try:
+            url = reverse(url_name, args=[related_obj_id])
+        except Exception:
+            self.message_user(request, "Страница редактирования для этой соцсети не найдена.", level=messages.ERROR)
+            return super().response_change(request, obj)
         return redirect(url)
 
     actions = [action_schedule_post] # Регистрируем action
