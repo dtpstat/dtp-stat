@@ -19,7 +19,7 @@ CKEDITOR.plugins.add('tweet_splitter', {
                     </div>`
                 );
                 editor.insertElement(separator);
-                setTimeout(() => updateTweetCounters(editor), 100);
+                scheduleTweetCountersUpdate(editor);;
 
                 const editorDom = editor.document.$;
                 editorDom.querySelectorAll('.tweet-separator-remove').forEach(button => {
@@ -27,7 +27,7 @@ CKEDITOR.plugins.add('tweet_splitter', {
                         const separator = button.closest('.tweet-separator');
                         if (separator) {
                             separator.remove();
-                            setTimeout(() => updateTweetCounters(editor), 100);
+                            scheduleTweetCountersUpdate(editor);;
                             editor.focus();
                         }
                     };
@@ -47,11 +47,11 @@ CKEDITOR.plugins.add('tweet_splitter', {
         });
 
         editor.on('key', function() {
-            setTimeout(() => updateTweetCounters(editor), 100);
+            scheduleTweetCountersUpdate(editor);;
         });
 
         editor.on('afterCommandExec', function() {
-            setTimeout(() => updateTweetCounters(editor), 100);
+            scheduleTweetCountersUpdate(editor);;
         });
         editor.on('contentDom', function() {
             editor.document.on('copy', function(evt) {
@@ -135,6 +135,10 @@ function validateTweets(editor) {
         }
     }
     return true;
+}
+function scheduleTweetCountersUpdate(editor, delay = 120) {
+    if (editor._tweetCountersTimer) clearTimeout(editor._tweetCountersTimer);
+    editor._tweetCountersTimer = setTimeout(() => updateTweetCounters(editor), delay);
 }
 
 function updateTweetCounters(editor) {
