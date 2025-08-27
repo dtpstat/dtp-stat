@@ -49,6 +49,7 @@ services:
     build: .
     command: >
       sh -c "
+      while [ ! -f \"\${MIGRATIONS_FLAG_PATH:-/var/run/dtpstat/.migrations_done}\" ]; do sleep 1; done &&
       python manage.py qcluster
       "
     volumes:
