@@ -32,7 +32,7 @@ class SocialNetworkBase(models.Model):
         'removeFormatTags': (
             'b,i,u,strike,strong,em,hr,a,img,blockquote'
         ),
-        'ckeditor_extra_plugins': 'emoji,pastefromgdocs,autogrow,selectallcontextmenu,autolink',
+        'extraPlugins': 'emoji,pastefromgdocs,autogrow,selectallcontextmenu,autolink',
     }
     
     
