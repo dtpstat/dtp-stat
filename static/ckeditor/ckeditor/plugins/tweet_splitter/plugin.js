@@ -9,7 +9,7 @@ CKEDITOR.plugins.add('tweet_splitter', {
                     `<div class="tweet-separator" contenteditable="false">
                         <span class="tweet-separator-line"></span>
                         <span class="tweet-separator-text">Новый твит 
-                            <span class="tweet-separator-remove" title="Объединить твиты">
+                            <span class="tweet-separator-remove" title="Объединить твиты" role="button" tabindex="0" aria-label="Объединить твиты">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 4L4 12M4 4L12 12" stroke="#666" stroke-width="2" stroke-linecap="round"/>
                                 </svg>
