@@ -176,8 +176,3 @@ class PlannedPostAdmin(admin.ModelAdmin):
         return timezone.localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
     datetime_created_local.short_description = 'Дата создания'
-    
-    def get_object(self, request, object_id, from_field=None):
-        obj = super().get_object(request, object_id, from_field)
-        request.plobj = obj
-        return obj
