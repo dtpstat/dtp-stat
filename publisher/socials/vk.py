@@ -62,7 +62,7 @@ class VkAccount(SocialNetworkBase):
         attachment = f"photo{photo['owner_id']}_{photo['id']}" if (photo_src) else None
 
         try:
-            vk.wall.post(owner_id=-int(self.community_id), from_group=1, message=post.content, attachments=attachment)
+            vk.wall.post(owner_id=-int(self.community_id), from_group=1, message=content, attachments=attachment)
         except Exception as e:
             return self.error(f"Ошибка при отправке поста: {e}")
 
