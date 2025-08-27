@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'constance',
     'constance.backends.database',
     'django_q',
-    'posting'
+    'django_cryptography',
+    'posting',
 ]
 
 SITE_ID = 1
@@ -258,3 +259,5 @@ Q_CLUSTER = {
     'queue_limit': 100,   # максимальный размер очереди
     'orm': 'default',     # используем базу данных Django
 }
+
+FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY')
