@@ -41,13 +41,6 @@ class PlannedPost(models.Model):
     def effective_datetime(self):
         """Возвращает фактическое время публикации: либо запланированное, либо текущее"""
         return self.datetime_planned or timezone.now()
-    
-    def clean(self):
-        super().clean()
-        if self.datetime_planned and self.datetime_planned < timezone.now():
-            raise ValidationError({
-                'datetime_planned': "Planned time cannot be in the past!"
-            })
 
     def save(self, *args, **kwargs):
         from django.db import transaction
