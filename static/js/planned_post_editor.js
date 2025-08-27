@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function restartEditorForTextarea(textarea, accountName, ckConfigs, editable) {
     if (!textarea) return;
     const instance = CKEDITOR.instances[textarea.id];
-    const oldData = instance ? cleanTweetMeta(instance.getData({ format: 'html' })) : (textarea.value || '');
+    const oldData = instance ? cleanTweetMeta(instance.getData()) : (textarea.value || '');
     const editorId = textarea.id;
 
     const newConfig = ckConfigs[accountName];
