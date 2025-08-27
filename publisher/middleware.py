@@ -1,20 +1,18 @@
 from django.utils import timezone
 from django.conf import settings
-import pytz
-from pytz import UnknownTimeZoneErro
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from urllib.parse import unquote
 
 class TimezoneMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        tzname = request.COOKIES.get('user_timezone', settings.TIME_ZONE)
+        tzname_raw = request.COOKIES.get('user_timezone')
+        tzname = unquote(tzname_raw) if tzname_raw else settings.TIME_ZONE
         try:
             tz = ZoneInfo(tzname)
-        except Exception:
+        except ZoneInfoNotFoundError:
             tz = ZoneInfo(settings.TIME_ZONE)
-        timezone.activate(tz)
-        try:
+        with timezone.override(tz):
             return self.get_response(request)
-        finally:
-            timezone.deactivate()
