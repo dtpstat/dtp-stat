@@ -67,6 +67,13 @@
     background-color: #ddd;
 }
 
+.tweet-separator-remove:focus-visible {
+    outline: 2px solid #666;
+    outline-offset: 2px;
+    border-radius: 4px;
+    
+}
+
 .tweet-separator-remove svg {
     width: 16px;
     height: 16px;
