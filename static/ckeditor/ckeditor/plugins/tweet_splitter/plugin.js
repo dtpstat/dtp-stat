@@ -58,7 +58,7 @@ CKEDITOR.plugins.add('tweet_splitter', {
                 const e = evt.data.$; // нативный ClipboardEvent
                 e.preventDefault(); // отменяем стандартное копирование
 
-                let html = editor.getSelectedHtml(true);;
+                let html = editor.getSelectedHtml(true);
 
                 // Удаляем div tweet-separator и tweet-char-counter целиком
                 html = html.replace(/<div class="tweet-(separator|char-counter)[^>]*>[\s\S]*?<\/div>/g, '');
