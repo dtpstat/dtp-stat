@@ -61,6 +61,8 @@
     user-select: none;
     vertical-align: middle;
     margin-left: 5px;
+    padding: 2px;
+    border-radius: 4px;
 }
 
 .tweet-separator-remove:hover {
@@ -71,7 +73,6 @@
     outline: 2px solid #666;
     outline-offset: 2px;
     border-radius: 4px;
-    
 }
 
 .tweet-separator-remove svg {
