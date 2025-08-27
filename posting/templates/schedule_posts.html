@@ -12,7 +12,7 @@
   <form method="post" enctype="multipart/form-data">{% csrf_token %}
     <input type="hidden" name="ids" value="{{ ids }}">
     <table class="form-table">
-      <thead><tr><th>Account</th><th>Форма</th></tr></thead>
+      <thead><tr><th>{% trans "Account" %}</th><th>{% trans "Form" %}</th></tr></thead>
       <tbody>
       {% for account, post_form in form_objects %}
         <tr>
@@ -27,7 +27,7 @@
       {% endfor %}
       </tbody>
     </table>
-    <input type="submit" class="default" value="Создать запланированные посты">
+    <input type="submit" class="default" value="{% trans "Create scheduled posts" %}">
   </form>
   {# Подключаем JS и CSS для виджетов формы #}
   {% if form_objects %}
