@@ -1,4 +1,4 @@
-import re, copy
+import re, copy, os, tempfile, urllib
 from django import forms
 from django.db import models
 from django.contrib import admin
@@ -53,11 +53,25 @@ class VkAccount(SocialNetworkBase):
         content, photo_src = self.clean_publish_data(post.content)
         
         if (photo_src):
+            # Скачиваем изображение, если это URL
+            if photo_src.startswith('http'):
+                try:
+                    tmp = tempfile.NamedTemporaryFile(delete=False)
+                    urllib.request.urlretrieve(photo_src, tmp.name)
+                    photo_src = tmp.name
+                except Exception as e:
+                    return self.error(f"Ошибка при скачивании изображения: {e}")
+                
+            # Загрузка фото
             try:
                 upload = vk_api.VkUpload(vk_session)
                 photo = upload.photo_wall(photo_src, group_id=self.community_id)[0]
             except Exception as e:
-                return self.error(f"Ошибка при загрузке фото: {e}")
+                return self.error(f"Ошибка при загрузке изображения: {e}")
+            finally:
+                # Удаляем временный файл
+                if tmp and os.path.exists(tmp.name):
+                    os.remove(tmp.name)
             
         attachment = f"photo{photo['owner_id']}_{photo['id']}" if (photo_src) else None
 

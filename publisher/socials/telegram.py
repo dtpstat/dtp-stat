@@ -52,6 +52,7 @@ class TelegramAccount(SocialNetworkBase):
         
         try:
             if photo_src:
+                # Telegram умеет брать фото как файлом, так и по URL
                 bot.send_photo(chat_id=self.channel_id, photo=photo_src, caption=content)
             else:
                 bot.send_message(chat_id=self.channel_id, text=content)

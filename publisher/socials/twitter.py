@@ -77,20 +77,20 @@ class TwitterAccount(SocialNetworkBase):
         
         last_tweet_id = None
         
-        for content, img_path in clean_tweets:
-            if img_path:
+        for content, photo_src in clean_tweets:
+            if photo_src:
                 # Скачиваем изображение, если это URL
-                if img_path.startswith('http'):
+                if photo_src.startswith('http'):
                     try:
                         tmp = tempfile.NamedTemporaryFile(delete=False)
-                        urllib.request.urlretrieve(img_path, tmp.name)
-                        img_path = tmp.name
+                        urllib.request.urlretrieve(photo_src, tmp.name)
+                        photo_src = tmp.name
                     except Exception as e:
                         return self.error(f"Ошибка при скачивании изображения: {e}")
                     
                 # Загрузка фото
                 try:
-                    media = client.media_upload(img_path)
+                    media = client.media_upload(photo_src)
                 except Exception as e:
                     return self.error(f"Ошибка при загрузке изображения: {e}")
                 finally:
