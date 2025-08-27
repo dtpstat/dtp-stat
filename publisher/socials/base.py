@@ -69,7 +69,7 @@ class SocialNetworkAdminBase(admin.ModelAdmin):
             social_id=obj.pk,
         )
 
-        url = reverse('admin:м_account_changelist')
+        url = reverse('admin:publisher_account_changelist')
         return HttpResponseRedirect(url)
     
     def response_change(self, request, obj):
