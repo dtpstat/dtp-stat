@@ -51,8 +51,8 @@ class TelegramAccount(SocialNetworkBase):
         content, photo_src = self.clean_publish_data(post.content)
         
         try:
-            if (photo_src):
-                bot.sendPhoto(chat_id=self.channel_id, photo=photo_src, caption=content)
+            if photo_src:
+                bot.send_photo(chat_id=self.channel_id, photo=photo_src, caption=content)
             else:
                 bot.send_message(chat_id=self.channel_id, text=content)
         except Exception as e:
