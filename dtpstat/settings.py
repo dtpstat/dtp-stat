@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'constance.backends.database',
     'django_q',
     'django_cryptography',
-    'posting',
+    'publisher',
 ]
 
 SITE_ID = 1
@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'posting.middleware.TimezoneMiddleware',
+    'publisher.middleware.TimezoneMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,6 +142,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,
 }
+
 LANGUAGE_CODE = 'ru'
 USE_TZ = True
 TIME_ZONE = 'UTC'

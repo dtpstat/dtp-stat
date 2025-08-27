@@ -8,8 +8,8 @@ from django_q.models import Success, Failure
 from django.utils.html import format_html
 from django.urls import reverse
 from ckeditor_uploader.fields import RichTextUploadingField
-from posting.socials.socials import CKEDITOR_CONFIGS
-from posting.scheduler import schedule_task
+from publisher.socials.socials import CKEDITOR_CONFIGS
+from publisher.scheduler import schedule_task
 import json
 
 STATUS_CHOICES = [
@@ -20,7 +20,7 @@ STATUS_CHOICES = [
 ]
 
 class PlannedPost(models.Model):
-    account = models.ForeignKey('posting.Account', on_delete=models.CASCADE, related_name='planned_posts')
+    account = models.ForeignKey('publisher.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
     text = RichTextUploadingField(
         verbose_name='Текст',

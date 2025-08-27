@@ -62,7 +62,7 @@ class AccountAdmin(admin.ModelAdmin):
             title = request.POST.get('title', '')
             social_network = request.POST.get('social_network', '')
 
-            url_name = f'admin:posting_{social_network}account_add'
+            url_name = f'admin:publisher_{social_network}account_add'
             url = reverse(url_name)
             query = urlencode({
                 '_account_title': title,
@@ -86,7 +86,7 @@ class AccountAdmin(admin.ModelAdmin):
         related_obj_id = obj.social_id
 
         # Строим URL редактирования для конкретной соцсети
-        url_name = f'admin:posting_{social_network}account_change'
+        url_name = f'admin:publisher_{social_network}account_change'
         url = reverse(url_name, args=[related_obj_id])
         return redirect(url)
 
@@ -101,12 +101,12 @@ class AccountAdmin(admin.ModelAdmin):
 
     def schedule_posts_view(self, request):
         from django.db import transaction
-        from posting.planned_post import PlannedPostForm
+        from publisher.planned_post import PlannedPostForm
        
         ids = request.GET.get('ids') or request.POST.get('ids')
         if not ids:
             self.message_user(request, "Не выбраны аккаунты.", level=messages.WARNING)
-            return redirect(reverse('admin:posting_account_changelist'))
+            return redirect(reverse('admin:publisher_account_changelist'))
 
         pks = [int(x) for x in ids.split(',') if x.strip()]
 
@@ -123,7 +123,7 @@ class AccountAdmin(admin.ModelAdmin):
                 post_form = PlannedPostForm(request.POST, prefix=prefix)
 
                 if post_form.is_valid():
-                    from posting.scheduler import schedule_task
+                    from publisher.scheduler import schedule_task
                     
                     try:
                         with transaction.atomic():
@@ -149,7 +149,7 @@ class AccountAdmin(admin.ModelAdmin):
                     form_objects.append((acc, post_form))
             if valid:
                 self.message_user(request, f"Создано {len(created)} запланированных постов.")
-                return redirect(reverse('admin:posting_plannedpost_changelist'))
+                return redirect(reverse('admin:publisher_plannedpost_changelist'))
             # если невалидны — fallthrough: render forms with errors
         else:
             # GET: показываем пустые формы (prefilled title/user if you want)

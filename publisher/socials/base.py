@@ -39,7 +39,7 @@ class SocialNetworkAdminBase(admin.ModelAdmin):
     name = None
     
     def response_add(self, request, obj, post_url_continue=None):
-        from posting.account import Account  # импорт внутрь метода!
+        from publisher.account import Account  # импорт внутрь метода!
         
         if not self.name:
             raise NotImplementedError('social_network_name must be set')
@@ -55,12 +55,12 @@ class SocialNetworkAdminBase(admin.ModelAdmin):
             social_id=obj.pk,
         )
 
-        url = reverse('admin:posting_account_changelist')
+        url = reverse('admin:м_account_changelist')
         return HttpResponseRedirect(url)
     
     def response_change(self, request, obj):
         # После изменения соцсети → список аккаунтов
-        url = reverse('admin:posting_account_changelist')
+        url = reverse('admin:publisher_account_changelist')
         return HttpResponseRedirect(url)
 
 

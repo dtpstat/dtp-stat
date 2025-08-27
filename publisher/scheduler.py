@@ -7,11 +7,11 @@ def schedule_task(planned_post):
     """
 
     schedule = schedule(
-        'posting.scheduler.publish_post', # Путь к функции, которая отправит пост
+        'publisher.scheduler.publish_post', # Путь к функции, которая отправит пост
         planned_post.id,
         schedule_type='O', # One-off
         next_run=planned_post.effective_datetime,
-        hook="posting.scheduler.status_hook"
+        hook="publisher.scheduler.status_hook"
     )
     if schedule:
         # persist schedule id for later management (cancel/reschedule)
