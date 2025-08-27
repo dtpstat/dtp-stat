@@ -21,7 +21,7 @@ class TelegramAccount(SocialNetworkBase):
         'Image', '-',
         'SpecialChar','EmojiPanel', '-',
         'RemoveFormat',
-    ]);
+    ])
     ckeditor_config['allowedContent'] = (
         'b i u strike strong em;'           # текстовое форматирование
         'a[!href];'                         # ссылки
