@@ -215,9 +215,7 @@ CKEDITOR_CONFIGS = {
 
 STATIC_URL = '/static/'
 STATIC_ROOT = env('STATIC_ROOT')
-static_dirs = env.list('STATICFILES_DIRS', default=[])
-if static_dirs:
-    STATICFILES_DIRS = static_dirs
+STATICFILES_DIRS = env.list('STATICFILES_DIRS', default=[])
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = env('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
