@@ -5,7 +5,7 @@ import django
 import fcntl
 from django.core.management import call_command
 
-#№Путь к файлу-флагу (можно переопределить через MIGRATIONS_FLAG_PATH)
+# Путь к файлу-флагу (можно переопределить через MIGRATIONS_FLAG_PATH)
 # По умолчанию используем каталог состояния приложения внутри контейнера
 MIGRATIONS_FLAG_PATH = os.environ.get(
     "MIGRATIONS_FLAG_PATH",
