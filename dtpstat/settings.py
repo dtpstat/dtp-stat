@@ -46,9 +46,6 @@ INSTALLED_APPS = [
     'application.templatetags.tags',
     'constance',
     'constance.backends.database',
-    'django_q',
-    'django_cryptography',
-    'publisher',
 ]
 
 SITE_ID = 1
@@ -57,7 +54,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'publisher.middleware.TimezoneMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,9 +138,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_PAGINATION_CLASS': None,
 }
-
 LANGUAGE_CODE = 'ru'
-USE_TZ = True
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = False
@@ -172,7 +166,7 @@ LANGUAGE_COOKIE_SAMESITE = None
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
-CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_UPLOAD_PATH = 'blog/'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'UltraFull',
@@ -193,9 +187,7 @@ CKEDITOR_CONFIGS = {
             ['Maximize', 'Source'],
         ],
         'language': 'ru',
-    },
-    'blank': {
-        'toolbar': [],
+        'forcePasteAsPlainText': True,
     },
 }
 
@@ -239,19 +231,3 @@ CONSTANCE_CONFIG = {
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }
-
-Q_CLUSTER = {
-    'name': 'DjangoORM',  # имя кластера
-    'workers': 2,         # число воркеров
-    'recycle': 500,       # перезапуск воркеров после N задач
-    'timeout': 120,       # таймаут выполнения задачи
-    'retry': 180,
-    'save_limit': 250,    # максимальное количество сохранённых задач
-    'queue_limit': 100,   # максимальный размер очереди
-    'orm': 'default',     # используем базу данных Django
-}
-
-FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY')
-
-if not DJANGO_CRYPTOGRAPHY_KEY:
-    raise ValueError("DJANGO_CRYPTOGRAPHY_KEY environment variable must be set")
