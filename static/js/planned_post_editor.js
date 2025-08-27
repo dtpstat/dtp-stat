@@ -106,7 +106,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (select) {
     const apply = () => {
-      const selectedText = select.selectedOptions[0].text;
+      const opt = select.selectedOptions && select.selectedOptions.length
+        ? select.selectedOptions[0]
+        : select.options[select.selectedIndex];
+      const selectedText = opt ? opt.text : '';
       const accountName = parseAccountName(selectedText);
       restartEditorForTextarea(singleTextarea, accountName, ckConfigs, true);
     };
