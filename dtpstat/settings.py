@@ -265,7 +265,10 @@ Q_CLUSTER = {
     'orm': 'default',                                               # используем базу данных Django 
 }
 
-FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY')
+DJANGO_CRYPTOGRAPHY_KEY = env('DJANGO_ENCRYPTION_KEY')
 
 if not DJANGO_CRYPTOGRAPHY_KEY:
-    raise ValueError("DJANGO_CRYPTOGRAPHY_KEY environment variable must be set")
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        "DJANGO_CRYPTOGRAPHY_KEY must be set in the environment"
+    )
