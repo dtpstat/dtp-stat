@@ -14,5 +14,7 @@ class TimezoneMiddleware:
         except Exception:
             tz = ZoneInfo(settings.TIME_ZONE)
         timezone.activate(tz)
-        response = self.get_response(request)
-        return response
+        try:
+            return self.get_response(request)
+        finally:
+            timezone.deactivate()
