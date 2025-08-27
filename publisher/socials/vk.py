@@ -52,27 +52,28 @@ class VkAccount(SocialNetworkBase):
         
         content, photo_src = self.clean_publish_data(post.content)
         
-        if (photo_src):
+        if photo_src:
             # Скачиваем изображение, если это URL
             if photo_src.startswith('http'):
+                tmp_path = None
                 try:
-                    tmp = tempfile.NamedTemporaryFile(delete=False)
-                    urllib.request.urlretrieve(photo_src, tmp.name)
-                    photo_src = tmp.name
+                    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+                        tmp_path = tmp.name
+                    urllib.request.urlretrieve(photo_src, tmp_path)
+                    photo_src = tmp_path
                 except Exception as e:
                     return self.error(f"Ошибка при скачивании изображения: {e}")
-                
+            
             # Загрузка фото
             try:
                 upload = vk_api.VkUpload(vk_session)
-                photo = upload.photo_wall(photo_src, group_id=self.community_id)[0]
+                photo = upload.photo_wall(photo_src, group_id=int(self.community_id))[0]
             except Exception as e:
                 return self.error(f"Ошибка при загрузке изображения: {e}")
             finally:
-                # Удаляем временный файл
-                if tmp and os.path.exists(tmp.name):
-                    os.remove(tmp.name)
-            
+                # Удаляем временный файл (если скачивали)
+                if 'tmp_path' in locals() and tmp_path and os.path.exists(tmp_path):
+                    os.remove(tmp_path)
         attachment = f"photo{photo['owner_id']}_{photo['id']}" if (photo_src) else None
 
         try:
