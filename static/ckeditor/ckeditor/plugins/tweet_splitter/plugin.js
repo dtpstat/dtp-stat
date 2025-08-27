@@ -67,8 +67,13 @@ CKEDITOR.plugins.add('tweet_splitter', {
                 let text = html.replace(/<[^>]+>/g, '');
 
                 // Кладём своё
-                e.clipboardData.setData('text/plain', text);
-                e.clipboardData.setData('text/html', text);
+                if (e.clipboardData && e.clipboardData.setData) {
+                    e.clipboardData.setData('text/plain', text);
+                    e.clipboardData.setData('text/html', text);
+                } else if (window.clipboardData && window.clipboardData.setData) {
+                    // IE fallback
+                    window.clipboardData.setData('Text', text);
+                }
             });
         });
     }
