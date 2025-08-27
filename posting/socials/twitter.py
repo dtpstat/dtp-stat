@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.contrib import admin
+from django_cryptography.fields import encrypt
 
 import tweepy
 
@@ -9,10 +10,10 @@ from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 class TwitterAccount(SocialNetworkBase):
     full_name = 'Twitter'
     
-    consumer_key = models.CharField(max_length=255)
-    consumer_secret = models.CharField(max_length=255)
-    access_token = models.CharField(max_length=255)
-    access_token_secret = models.CharField(max_length=255)
+    consumer_key = encrypt(models.CharField(max_length=255))
+    consumer_secret = encrypt(models.CharField(max_length=255))
+    access_token = encrypt(models.CharField(max_length=255))
+    access_token_secret = encrypt(models.CharField(max_length=255))
     
     ckeditor_config = {
         'toolbar': [

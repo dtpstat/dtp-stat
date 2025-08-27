@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.contrib import admin
+from django_cryptography.fields import encrypt
 
 import telegram
 import os
@@ -10,7 +11,7 @@ from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 class TelegramAccount(SocialNetworkBase):
     full_name = 'Telegram'
     
-    token = models.CharField(max_length=255)
+    token = encrypt(models.CharField(max_length=255))
     channel_id = models.CharField(max_length=100)
     
     ckeditor_config = {

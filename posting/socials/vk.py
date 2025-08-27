@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.contrib import admin
+from django_cryptography.fields import encrypt
 
 import vk_api
 import os
@@ -10,8 +11,8 @@ from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 class VkAccount(SocialNetworkBase):
     full_name = 'VK'
     
-    phone_number = models.CharField(max_length=20)
-    password = models.CharField(max_length=128)
+    phone_number = encrypt(models.CharField(max_length=20))
+    password = encrypt(models.CharField(max_length=128))
     community_id = models.CharField(max_length=50)
     
     ckeditor_config = {
