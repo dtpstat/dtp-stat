@@ -9,8 +9,8 @@ if os.path.exists(ENV_PATH):
     env.read_env(ENV_PATH)
 
 # APP SETTINGS FROM ENV
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=[])
-DEBUG = env('DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+DEBUG = env.bool('DEBUG', default=False)
 NEXTJS_BASE_URL = env('NEXTJS_BASE_URL', default='https://dtp-stat-on-nextjs.netlify.app')
 NEXTJS_IFRAME_WITH_COMMENTS = env('NEXTJS_IFRAME_WITH_COMMENTS', default=False)
 NEXTJS_IFRAME_WITH_MAP = env('NEXTJS_IFRAME_WITH_MAP', default=False)
