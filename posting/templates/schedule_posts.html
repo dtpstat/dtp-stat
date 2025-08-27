@@ -30,5 +30,7 @@
     <input type="submit" class="default" value="Создать запланированные посты">
   </form>
   {# Подключаем JS и CSS для виджетов формы #}
-  {{ form_objects.0.1.media }}
+  {% if form_objects %}
+    {{ form_objects.0.1.media }}
+  {% endif %}
 {% endblock %}
