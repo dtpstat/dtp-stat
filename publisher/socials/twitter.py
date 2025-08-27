@@ -32,7 +32,7 @@ class TwitterAccount(SocialNetworkBase):
     def clean_publish_data(self, content):
         
         # 1. Разбиваем на твиты
-        tweets = re.split(r'<div class="tweet-separator">.*?</div>', html, flags=re.DOTALL)
+        tweets = re.split(r'<div class="tweet-separator">.*?</div>', content, flags=re.DOTALL)
 
         clean_tweets = []
         
