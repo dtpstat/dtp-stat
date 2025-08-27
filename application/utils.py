@@ -164,6 +164,7 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
 
     latest_opendata.date = latest_download.date
     latest_opendata.file_size = os.stat(zip_path).st_size
+    
     latest_opendata.save()
 
 
