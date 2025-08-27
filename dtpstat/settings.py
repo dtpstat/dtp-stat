@@ -194,16 +194,8 @@ CKEDITOR_CONFIGS = {
         ],
         'language': 'ru',
     },
-    'social_networks': {
+    'blank': {
         'toolbar': [],
-        'autoGrow_minHeight': 250,
-        'autoGrow_maxHeight': 600,
-        'autoGrow_onStartup': True,
-        'toolbarCanCollapse': True,
-        'language': 'ru',
-        'removeFormatTags': (
-            'b,i,u,strike,strong,em,hr,a,img,blockquote'
-        ),
     },
 }
 

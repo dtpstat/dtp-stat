@@ -24,7 +24,7 @@ class PlannedPost(models.Model):
     short = models.CharField(max_length=255)
     text = RichTextUploadingField(
         verbose_name='Текст',
-        config_name='social_networks'
+        config_name='blank' # By default, no toolbar
     )
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_planned = models.DateTimeField(blank=True, null=True)

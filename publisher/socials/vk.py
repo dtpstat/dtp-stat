@@ -1,12 +1,11 @@
+import os, copy
 from django import forms
 from django.db import models
 from django.contrib import admin
 from django_cryptography.fields import encrypt
+from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 import vk_api
-import os
-
-from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 class VkAccount(SocialNetworkBase):
     full_name = 'VK'
@@ -15,21 +14,16 @@ class VkAccount(SocialNetworkBase):
     password = encrypt(models.CharField(max_length=128))
     community_id = models.CharField(max_length=50)
     
-    ckeditor_config = {
-        'toolbar': [
-            SocialNetworkBase.ckeditor_toolbar_top,
-            '/',
-            [
-                'Image', '-',
-                'SpecialChar','EmojiPanel', '-',
-                'RemoveFormat',
-            ],
-        ],
-        'allowedContent': (
-            'img[!src,alt,width,height];'       # изображения
-        ),
-        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins,
-    }
+    cckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
+    ckeditor_config['toolbar'].append([
+        'Image', '-',
+        'SpecialChar','EmojiPanel', '-',
+        'RemoveFormat',
+    ])
+    ckeditor_config['allowedContent'] = (
+        'img[!src,alt,width,height];'       # изображения
+        'a[!href];'                         # авто-ссылки
+    )
     
     def clean_publish_data(self, text):    
         # 1. Находим <img> и сохраняем src

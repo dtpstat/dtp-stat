@@ -1,12 +1,11 @@
+import os, copy
 from django import forms
 from django.db import models
 from django.contrib import admin
 from django_cryptography.fields import encrypt
+from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 import telegram
-import os
-
-from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 class TelegramAccount(SocialNetworkBase):
     full_name = 'Telegram'
@@ -14,27 +13,21 @@ class TelegramAccount(SocialNetworkBase):
     token = encrypt(models.CharField(max_length=255))
     channel_id = models.CharField(max_length=100)
     
-    ckeditor_config = {
-        'toolbar': [
-            SocialNetworkBase.ckeditor_toolbar_top,
-            '/',
-            [
-                'Bold','Italic','Underline','Strike', '-',
-                'Link','Unlink', '-',
-                'Blockquote', '-',
-                'Image', '-',
-                'SpecialChar','EmojiPanel', '-',
-                'RemoveFormat',
-            ],
-        ],
-        'allowedContent': (
-            'b i u strike strong em;'           # текстовое форматирование
-            'a[!href];'                         # ссылки и файлы
-            'blockquote;'                       # цитаты
-            'img[!src,alt,width,height];'       # изображения
-        ),
-        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins,
-    }
+    ckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
+    ckeditor_config['toolbar'].append([
+        'Bold','Italic','Underline','Strike', '-',
+        'Link','Unlink', '-',
+        'Blockquote', '-',
+        'Image', '-',
+        'SpecialChar','EmojiPanel', '-',
+        'RemoveFormat',
+    ]);
+    ckeditor_config['allowedContent'] = (
+        'b i u strike strong em;'           # текстовое форматирование
+        'a[!href];'                         # ссылки
+        'blockquote;'                       # цитаты
+        'img[!src,alt,width,height];'       # изображения
+    )
     
     def clean_publish_data(self, text):    
         # 1. Находим <img> и сохраняем src

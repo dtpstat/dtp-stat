@@ -1,11 +1,11 @@
+import os, copy
 from django import forms
 from django.db import models
 from django.contrib import admin
 from django_cryptography.fields import encrypt
+from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 import tweepy
-
-from .base import SocialNetworkBase, SocialNetworkAdminBase, HiddenModelAdmin
 
 class TwitterAccount(SocialNetworkBase):
     full_name = 'Twitter'
@@ -15,25 +15,19 @@ class TwitterAccount(SocialNetworkBase):
     access_token = encrypt(models.CharField(max_length=255))
     access_token_secret = encrypt(models.CharField(max_length=255))
     
-    ckeditor_config = {
-        'toolbar': [
-            SocialNetworkBase.ckeditor_toolbar_top,
-            '/',
-            [
-                'HorizontalRule', '-',
-                'Image', '-',
-                'SpecialChar','EmojiPanel', '-',
-                'RemoveFormat', '-',
-                'TweetSplitter',
-            ],
-        ],
-        'allowedContent': (
-            'img[!src,alt,width,height];'       # изображения
-            'div[*]{*}(tweet-*); span[*]{*}(tweet-*);'  # твиты
-            'a[!href];'                         # твиттер-ссылки
-        ),
-        'extraPlugins': SocialNetworkBase.ckeditor_extra_plugins + ',tweet_splitter',
-    }
+    cckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
+    ckeditor_config['toolbar'].append([
+        'Image', '-',
+        'SpecialChar', 'EmojiPanel', '-',
+        'RemoveFormat', '-',
+        'TweetSplitter',
+    ])
+    ckeditor_config['allowedContent'] = (
+        'img[!src,alt,width,height];'               # изображения
+        'div[*]{*}(tweet-*); span[*]{*}(tweet-*);'  # твиты
+        'a[!href];'                                 # твиттер-ссылки
+    )
+    ckeditor_config['extraPlugins'] += ',tweet_splitter'
     
     def clean_publish_data(self, text):
         

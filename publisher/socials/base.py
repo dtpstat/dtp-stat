@@ -11,16 +11,30 @@ class SocialNetworkBase(models.Model):
     full_name = None
     log_template = None
     
-    ckeditor_toolbar_top = [
-        'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'PasteFromDocs', '-',
-        'SelectAll', '-',
-        'Undo', 'Redo', '-',
-        'Find', 'Replace', '-',
-        'spellchecker', 'Scayt', '-',
-        'Source', '-',
-        'Maximize'
-    ]
-    ckeditor_extra_plugins = 'emoji,pastefromgdocs,autogrow,selectallcontextmenu,autolink'
+    ckeditor_config = {
+        'toolbar': [
+            [
+                'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'PasteFromDocs', '-',
+                'SelectAll', '-',
+                'Undo', 'Redo', '-',
+                'Find', 'Replace', '-',
+                'spellchecker', 'Scayt', '-',
+                'Source', '-',
+                'Maximize'
+            ],
+            '/',
+        ],
+        'autoGrow_minHeight': 250,
+        'autoGrow_maxHeight': 600,
+        'autoGrow_onStartup': True,
+        'toolbarCanCollapse': True,
+        'language': 'ru',
+        'removeFormatTags': (
+            'b,i,u,strike,strong,em,hr,a,img,blockquote'
+        ),
+        'ckeditor_extra_plugins': 'emoji,pastefromgdocs,autogrow,selectallcontextmenu,autolink',
+    }
+    
     
     def log(self, message):
         return self.log_template.format(message)
