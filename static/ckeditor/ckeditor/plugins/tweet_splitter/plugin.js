@@ -143,7 +143,7 @@ function updateTweetCounters(editor) {
     editorDom.querySelectorAll('.tweet-numbering, .tweet-arrow, .tweet-char-counter').forEach(el => el.remove());
 
     const content = editor.getData();
-    const tweetsHtml = content.split(/<div class="tweet-separator".*?\/div>/g);
+    const tweetsHtml = content.split(/<div class="tweet-separator"[^>]*>[\s\S]*?<\/div>/g);
     const separators = editorDom.querySelectorAll('.tweet-separator');
 
     // Собираем все узлы редактора
