@@ -261,3 +261,6 @@ Q_CLUSTER = {
 }
 
 FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY')
+
+if not DJANGO_CRYPTOGRAPHY_KEY:
+    raise ValueError("DJANGO_CRYPTOGRAPHY_KEY environment variable must be set")
