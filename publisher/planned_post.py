@@ -147,15 +147,14 @@ class PlannedPostAdmin(admin.ModelAdmin):
     
     def clickable_status(self, obj):
         
-        
         if not obj.task:
             return obj.get_status_display()
         
-        if Success.objects.filter(id=obj.task.id).exists():
+        if obj.status in ('success', 'caughtError'):
             url = reverse("admin:django_q_success_change", args=[obj.task.id])
-        elif Failure.objects.filter(id=obj.task.id).exists():
+        elif obj.status in ('uncaughtError'):
             url = reverse("admin:django_q_failure_change", args=[obj.task.id])
-        else:
+        else:       
             return obj.get_status_display()
         
         return format_html('<b><a href="{}">{}</a></b>', url, obj.get_status_display())
