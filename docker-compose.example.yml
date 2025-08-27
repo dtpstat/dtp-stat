@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_HOST_PORT}:5432"
+      - "5431:5432"
     networks:
       - backend
     env_file:
