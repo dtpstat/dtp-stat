@@ -1,4 +1,4 @@
-import re, copy
+import re, copy, os, tempfile, urllib
 from django import forms
 from django.db import models
 from django.contrib import admin
@@ -66,40 +66,53 @@ class TwitterAccount(SocialNetworkBase):
     def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
-        apiNew = tweepy.Client(
+        client = tweepy.Client(
             access_token=self.access_token,
             access_token_secret=self.access_token_secret,
             consumer_key=self.consumer_key,
             consumer_secret=self.consumer_secret
         )
         
-        clean_tweats = self.clean_publish_data(post.content)
+        clean_tweets = self.clean_publish_data(post.content)
         
         last_tweet_id = None
         
         for content, img_path in clean_tweets:
             if img_path:
-                
+                # Скачиваем изображение, если это URL
+                if img_path.startswith('http'):
+                    try:
+                        tmp = tempfile.NamedTemporaryFile(delete=False)
+                        urllib.request.urlretrieve(img_path, tmp.name)
+                        img_path = tmp.name
+                    except Exception as e:
+                        return self.error(f"Ошибка при скачивании изображения: {e}")
+                    
                 # Загрузка фото
                 try:
-                    media = api.media_upload(img_path)
+                    media = client.media_upload(img_path)
                 except Exception as e:
                     return self.error(f"Ошибка при загрузке изображения: {e}")
+                finally:
+                    # Удаляем временный файл
+                    if tmp and os.path.exists(tmp.name):
+                        os.remove(tmp.name)
                 
                 # Отправка твита с фото
                 try:
-                    tweet = api.create_tweet(text=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    resp = client.create_tweet(text=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита с фото: {e}")
+                
             else:
                 # Отправка твита без фото
                 try:
-                    tweet = api.create_tweet(text=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    resp = client.create_tweet(text=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита: {e}")
                 
             # сохраняем ID последнего твита для цепочки
-            last_tweet_id = tweet.id
+            last_tweet_id = resp.data.get('id')
             
         return self.log("Твит:ы успешно отправлен:ы")
 
