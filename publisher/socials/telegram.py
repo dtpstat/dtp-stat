@@ -29,32 +29,32 @@ class TelegramAccount(SocialNetworkBase):
         'img[!src,alt,width,height];'       # изображения
     )
     
-    def clean_publish_data(self, text):    
+    def clean_publish_data(self, content):    
         # 1. Находим <img> и сохраняем src
-        img_match = re.search(r'<img [^>]*src="([^"]+)"[^>]*>', text)
+        img_match = re.search(r'<img [^>]*src="([^"]+)"[^>]*>', content)
         photo_src = img_match.group(1) if img_match else None
         
         # 2. Удаляем <img> из текста
-        text = re.sub(r'<img [^>]*>', '', text)
+        content = re.sub(r'<img [^>]*>', '', content)
 
         # 3. Убираем теги <p> и <br />, оставляя переносы строк
-        text = re.sub(r'</?p>', '', text)
-        text = re.sub(r'<br\s*/?>', '\n', text)
+        content = re.sub(r'</?p>', '', content)
+        content = re.sub(r'<br\s*/?>', '\n', content)
     
-        return text.strip(), photo_src
+        return content.strip(), photo_src
     
     def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
         bot = telegram.Bot(token=self.token)
         
-        text, photo_src = self.clean_publish_data(post.text)
+        content, photo_src = self.clean_publish_data(post.content)
         
         try:
             if (photo_src):
-                bot.sendPhoto(chat_id=self.channel_id, photo=photo_src, caption=text)
+                bot.sendPhoto(chat_id=self.channel_id, photo=photo_src, caption=content)
             else:
-                bot.send_message(chat_id=self.channel_id, text=text)
+                bot.send_message(chat_id=self.channel_id, text=content)
         except Exception as e:
             return self.error(f"Ошибка при отправке поста: {e}")
             

@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('short', models.CharField(max_length=255)),
-                ('text', ckeditor_uploader.fields.RichTextUploadingField(verbose_name='Текст')),
+                ('content', ckeditor_uploader.fields.RichTextUploadingField(verbose_name='Текст')),
                 ('datetime_created', models.DateTimeField(auto_now_add=True)),
                 ('datetime_planned', models.DateTimeField(blank=True, null=True)),
                 ('status', models.CharField(blank=True, choices=[('scheldured', 'Запланирован'), ('success', 'Успех'), ('caughtError', 'Ошибка'), ('uncaughtError', 'Катастрофа')], max_length=13, null=True, verbose_name='Статус')),

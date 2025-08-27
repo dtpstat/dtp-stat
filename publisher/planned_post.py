@@ -22,8 +22,8 @@ STATUS_CHOICES = [
 class PlannedPost(models.Model):
     account = models.ForeignKey('publisher.Account', on_delete=models.CASCADE, related_name='planned_posts')
     short = models.CharField(max_length=255)
-    text = RichTextUploadingField(
-        verbose_name='Текст',
+    content = RichTextUploadingField(
+        verbose_name='Содержимое',
         config_name='blank' # By default, no toolbar
     )
     datetime_created = models.DateTimeField(auto_now_add=True)
@@ -92,7 +92,7 @@ class PlannedPost(models.Model):
 class PlannedPostForm(forms.ModelForm):
     class Meta:
         model = PlannedPost
-        fields = ['short', 'text', 'datetime_planned']
+        fields = ['short', 'content', 'datetime_planned']
         widgets = {
             'datetime_planned': forms.DateTimeInput(attrs={'type': 'datetime-local'})
         }
@@ -120,7 +120,7 @@ class PlannedPostForm(forms.ModelForm):
                     self.fields[field_name].disabled = True
         
         # сериализуем конфиги в JSON и кладём в data-атрибут textarea
-        self.fields['text'].widget.attrs['data-ckeditor-configs'] = json.dumps(CKEDITOR_CONFIGS)
+        self.fields['content'].widget.attrs['data-ckeditor-configs'] = json.dumps(CKEDITOR_CONFIGS)
             
     def clean_datetime_planned(self):
         dt = self.cleaned_data.get('datetime_planned')
@@ -136,7 +136,7 @@ class PlannedPostForm(forms.ModelForm):
 class PlannedPostAdmin(admin.ModelAdmin):
     form = PlannedPostForm 
     list_display = ('short','account', 'clickable_status', 'datetime_planned', 'datetime_created_local')
-    fields = ('short', 'account', "clickable_status", 'text', 'datetime_planned')
+    fields = ('short', 'account', "clickable_status", 'content', 'datetime_planned')
     readonly_fields = ('clickable_status',)
     formfield_overrides = {
         models.DateTimeField: {

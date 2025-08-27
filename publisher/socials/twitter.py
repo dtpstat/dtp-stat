@@ -29,7 +29,7 @@ class TwitterAccount(SocialNetworkBase):
     )
     ckeditor_config['extraPlugins'] += ',tweet_splitter'
     
-    def clean_publish_data(self, text):
+    def clean_publish_data(self, content):
         
         # 1. Разбиваем на твиты
         tweets = re.split(r'<div class="tweet-separator">.*?</div>', html, flags=re.DOTALL)
@@ -73,11 +73,11 @@ class TwitterAccount(SocialNetworkBase):
             consumer_secret=self.consumer_secret
         )
         
-        clean_tweats = self.clean_publish_data(post.text)
+        clean_tweats = self.clean_publish_data(post.content)
         
         last_tweet_id = None
         
-        for text, img_path in clean_tweets:
+        for content, img_path in clean_tweets:
             if img_path:
                 
                 # Загрузка фото
@@ -88,13 +88,13 @@ class TwitterAccount(SocialNetworkBase):
                 
                 # Отправка твита с фото
                 try:
-                    tweet = api.create_tweet(status=text, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    tweet = api.create_tweet(status=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита с фото: {e}")
             else:
                 # Отправка твита без фото
                 try:
-                    tweet = api.create_tweet(status=text, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    tweet = api.create_tweet(status=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита: {e}")
                 

@@ -25,19 +25,19 @@ class VkAccount(SocialNetworkBase):
         'a[!href];'                         # авто-ссылки
     )
     
-    def clean_publish_data(self, text):    
+    def clean_publish_data(self, content):    
         # 1. Находим <img> и сохраняем src
-        img_match = re.search(r'<img [^>]*src="([^"]+)"[^>]*>', text)
+        img_match = re.search(r'<img [^>]*src="([^"]+)"[^>]*>', content)
         photo_src = img_match.group(1) if img_match else None
         
         # 2. Удаляем <img> из текста
-        text = re.sub(r'<img [^>]*>', '', text)
+        content = re.sub(r'<img [^>]*>', '', content)
 
         # 3. Убираем теги <p> и <br />, оставляя переносы строк
-        text = re.sub(r'</?p>', '', text)
-        text = re.sub(r'<br\s*/?>', '\n', text)
+        content = re.sub(r'</?p>', '', content)
+        content = re.sub(r'<br\s*/?>', '\n', content)
     
-        return text.strip(), photo_src
+        return content.strip(), photo_src
     
     def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
@@ -50,7 +50,7 @@ class VkAccount(SocialNetworkBase):
      
         vk = vk_session.get_api()
         
-        text, photo_src = self.clean_publish_data(post.text)
+        content, photo_src = self.clean_publish_data(post.content)
         
         if (photo_src):
             try:
@@ -62,7 +62,7 @@ class VkAccount(SocialNetworkBase):
         attachment = f"photo{photo['owner_id']}_{photo['id']}" if (photo_src) else None
 
         try:
-            vk.wall.post(owner_id=-int(self.community_id), from_group=1, message=post.text, attachments=attachment)
+            vk.wall.post(owner_id=-int(self.community_id), from_group=1, message=post.content, attachments=attachment)
         except Exception as e:
             return self.error(f"Ошибка при отправке поста: {e}")
 
