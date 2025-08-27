@@ -1,4 +1,4 @@
-import os, copy
+import re, copy
 from django import forms
 from django.db import models
 from django.contrib import admin
