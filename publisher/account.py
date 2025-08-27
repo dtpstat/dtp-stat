@@ -1,7 +1,7 @@
 from django.db import models
 from django import forms
 from django.contrib import admin, messages
-from django.urls import path, reverse,NoReverseMatch
+from django.urls import path, reverse, NoReverseMatch
 from django.shortcuts import render, redirect
 from django.utils.http import urlencode
 from django.contrib.contenttypes.fields import GenericForeignKey
