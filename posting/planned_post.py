@@ -13,7 +13,7 @@ from posting.scheduler import schedule_task
 import json
 
 STATUS_CHOICES = [
-    ('scheldured', 'Запланирован'),
+    ('scheduled', 'Запланирован'),
     ('success', 'Успех'),
     ('caughtError', 'Ошибка'),
     ('uncaughtError', 'Катастрофа'),
