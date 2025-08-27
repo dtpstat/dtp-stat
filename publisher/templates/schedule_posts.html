@@ -15,12 +15,11 @@
       <thead><tr><th>{% trans "Account" %}</th><th>{% trans "Form" %}</th></tr></thead>
       <tbody>
       {% for account, post_form in form_objects %}
-        <tr data-ckeditor-config-key="{{ account.get_social_network_display }}">
+        <tr data-ckeditor-config-key="{{ account.get_social_network_display|slugify }}">
           <td>
             {{ account.title }}<br><small>{{ account.get_social_network_display }}</small>
           </td>
           <td>
-            {{ post_form.management_form|default:"" }}
             {{ post_form.as_p }}
           </td>
         </tr>
