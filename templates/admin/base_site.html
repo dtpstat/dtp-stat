@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block extrahead %}
+ {% block extrahead %}
     {{ block.super }}
-    <script src="{% static 'js/detect_timezone.js' %}"></script>
-{% endblock %}
+    <script defer src="{% static 'js/detect_timezone.js' %}"></script>
+ {% endblock %}
