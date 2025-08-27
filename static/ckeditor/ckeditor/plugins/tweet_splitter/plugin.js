@@ -21,17 +21,26 @@ CKEDITOR.plugins.add('tweet_splitter', {
                 editor.insertElement(separator);
                 scheduleTweetCountersUpdate(editor);;
 
-                const editorDom = editor.document.$;
-                editorDom.querySelectorAll('.tweet-separator-remove').forEach(button => {
-                    button.onclick = function() {
-                        const separator = button.closest('.tweet-separator');
-                        if (separator) {
-                            separator.remove();
-                            scheduleTweetCountersUpdate(editor);;
+                const nativeDoc = editor.document.$;
+                if (!nativeDoc._tweetSplitterRemoveBound) {
+                    nativeDoc._tweetSplitterRemoveBound = true;
+                    nativeDoc.addEventListener('click', (ev) => {
+                        const btn = ev.target.closest && ev.target.closest('.tweet-separator-remove');
+                        if (!btn) return;
+                        const sep = btn.closest('.tweet-separator');
+                        if (sep) {
+                            sep.remove();
+                            scheduleTweetCountersUpdate(editor);
                             editor.focus();
                         }
-                    };
-                });
+                    });
+                    nativeDoc.addEventListener('keydown', (ev) => {
+                        if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('tweet-separator-remove')) {
+                            ev.preventDefault();
+                            ev.target.click();
+                        }
+                    });
+                }
             }
         });
 
