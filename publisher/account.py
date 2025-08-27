@@ -146,26 +146,23 @@ from django.urls import path, reverse, NoReverseMatch
 
                 if post_form.is_valid():
                     from publisher.scheduler import schedule_task
-                    
+                        
                     try:
                         with transaction.atomic():
                             # create PlannedPost
                             pp = post_form.save(commit=False)
+                            pp.account = acc
                             pp.status = 'scheduled'
                             pp.save()
-                          
+                            
                             # Scheduler:
                             pp.schedule = schedule_task(pp)
-                            pp.save(update_fields=['schedule'])
+                            pp.save(update_fields=['status', 'schedule'])
                             
                             created.append(pp)
                     except Exception as e:
                         self.message_user(request, f"Ошибка при планировании постов: {str(e)}", level=messages.ERROR)
                         valid = False
-                        
-                    pp.save(update_fields=['schedule'])
-                    
-                    created.append(pp)
                 else:
                     valid = False
                     form_objects.append((acc, post_form))
