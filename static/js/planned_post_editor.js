@@ -28,9 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const newConfig = ckConfigs[accountName];
     if (!newConfig) {
-        const error_msg = `CKEditor config для "${accountName}" не найден`;
-        console.error(error_msg);
-        alert(`Ошибка: ${error_msg}`);
+        const warn_msg = `CKEditor config для "${accountName}" не найден`;
+        console.warn(warn_msg);
         return; // прекращаем выполнение, чтобы не ломать редактор
     }
 
