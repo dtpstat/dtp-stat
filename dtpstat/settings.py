@@ -143,6 +143,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': None,
 }
 LANGUAGE_CODE = 'ru'
+USE_TZ = True
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = False
@@ -245,9 +246,6 @@ CONSTANCE_CONFIG = {
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }
-
-USE_TZ = True
-TIME_ZONE = 'UTC'
 
 Q_CLUSTER = {
     'name': 'DjangoORM',  # имя кластера
