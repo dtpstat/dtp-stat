@@ -114,6 +114,12 @@ class TwitterAccountForm(forms.ModelForm):
     class Meta:
         model = TwitterAccount
         fields = ['consumer_key', 'consumer_secret', 'access_token', 'access_token_secret']
+        widgets = {
+            'consumer_key': forms.PasswordInput(render_value=False),
+            'consumer_secret': forms.PasswordInput(render_value=False),
+            'access_token': forms.PasswordInput(render_value=False),
+            'access_token_secret': forms.PasswordInput(render_value=False),
+        }
 
 class TwitterAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     name = 'twitter'

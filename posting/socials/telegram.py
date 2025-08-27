@@ -71,6 +71,9 @@ class TelegramAccountForm(forms.ModelForm):
     class Meta:
         model = TelegramAccount
         fields = ['token', 'channel_id']
+        widgets = {
+            'token': forms.PasswordInput(render_value=False),
+        }
         
 class TelegramAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     name = 'telegram'

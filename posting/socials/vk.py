@@ -78,6 +78,10 @@ class VkAccountForm(forms.ModelForm):
     class Meta:
         model = VkAccount
         fields = ['phone_number', 'password', 'community_id']
+        widgets = {
+            'phone_number': forms.PasswordInput(render_value=False),
+            'password': forms.PasswordInput(render_value=False),
+        }
         
 class VkAccountAdmin(SocialNetworkAdminBase, HiddenModelAdmin):
     name = 'vk'
