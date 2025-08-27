@@ -117,7 +117,7 @@ class PlannedPostForm(forms.ModelForm):
                 model_field = self._meta.model._meta.get_field(field_name)
                 if isinstance(model_field, RichTextUploadingField):
                     # делаем CKEditor disabled
-                    self.fields[field_name].widget.attrs['disabled'] = True
+                    self.fields[field_name].disabled = True
         
         # сериализуем конфиги в JSON и кладём в data-атрибут textarea
         self.fields['text'].widget.attrs['data-ckeditor-configs'] = json.dumps(CKEDITOR_CONFIGS)
