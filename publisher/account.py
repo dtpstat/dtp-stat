@@ -110,7 +110,7 @@ class AccountAdmin(admin.ModelAdmin):
 
         pks = [int(x) for x in ids.split(',') if x.strip()]
 
-        accounts = Account.objects.filter(pk__in=pks).select_related()  # оптимизируем
+        accounts = Account.objects.filter(pk__in=pks).select_related('social_type')
 
         # Сформируем список форм: для каждого account — PlannedPostForm
         form_objects = []
