@@ -118,7 +118,7 @@ class AccountAdmin(admin.ModelAdmin):
             # POST: создаём формы из incoming data
             valid = True
             created = []
-            for i, acc in enumerate(accounts):
+            for acc in accounts:
                 prefix = f'acc_{acc.pk}'
                 post_form = PlannedPostForm(request.POST, prefix=prefix)
 
