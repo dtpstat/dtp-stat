@@ -255,14 +255,14 @@ CONSTANCE_CONFIG = {
 }
 
 Q_CLUSTER = {
-    'name': 'DjangoORM',  # имя кластера
-    'workers': 2,         # число воркеров
-    'recycle': 500,       # перезапуск воркеров после N задач
-    'timeout': 120,       # таймаут выполнения задачи
-    'retry': 180,
-    'save_limit': 250,    # максимальное количество сохранённых задач
-    'queue_limit': 100,   # максимальный размер очереди
-    'orm': 'default',     # используем базу данных Django
+    'name': env('Q_CLUSTER_NAME', default='DjangoORM'),             # имя кластера
+    'workers': env.int('Q_CLUSTER_WORKERS', default=2),             # количество воркеров
+    'recycle': env.int('Q_CLUSTER_RECYCLE', default=500),           # перезапуск воркеров после N задач
+    'timeout': env.int('Q_CLUSTER_TIMEOUT', default=120),           # таймаут выполнения задачи
+    'retry': env.int('Q_CLUSTER_RETRY', default=180),               # время ожидания перед повтором задачи
+    'save_limit': env.int('Q_CLUSTER_SAVE_LIMIT', default=250),     # максимальное количество сохранённых задач
+    'queue_limit': env.int('Q_CLUSTER_QUEUE_LIMIT', default=100),   # максимальный размер очереди
+    'orm': 'default',                                               # используем базу данных Django 
 }
 
 FIELD_ENCRYPTION_KEY = os.environ.get('FIELD_ENCRYPTION_KEY')
