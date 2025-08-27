@@ -66,7 +66,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ALLOWED_ORIGINS = env.list(
+        'CORS_ALLOWED_ORIGINS',
+        default=[f'https://{PRODUCTION_HOST}']
+    )
 
 ROOT_URLCONF = 'dtpstat.urls'
 
