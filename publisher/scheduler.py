@@ -1,4 +1,4 @@
-from django_q.tasks import schedule
+from django_q.tasks import schedule as q_schedule
 
 def schedule_task(planned_post):
     """
@@ -6,18 +6,18 @@ def schedule_task(planned_post):
     Возвращает объект Schedule (или None).
     """
 
-    schedule = schedule(
-        'publisher.scheduler.publish_post', # Путь к функции, которая отправит пост
+    job = q_schedule(
+        'publisher.scheduler.publish_post',  # Путь к функции, которая отправит пост
         planned_post.id,
-        schedule_type='O', # One-off
+        schedule_type='O',  # One-off
         next_run=planned_post.effective_datetime,
         hook="publisher.scheduler.status_hook"
     )
-    if schedule:
+    if job:
         # persist schedule id for later management (cancel/reschedule)
-        planned_post.schedule_id = schedule.id
+        planned_post.schedule_id = job.id
         planned_post.save(update_fields=['schedule_id'])
-    return schedule or None
+    return job or None
 
 def publish_post(planned_post_id):
     from .planned_post import PlannedPost
