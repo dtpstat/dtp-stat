@@ -151,13 +151,12 @@ class PlannedPostAdmin(admin.ModelAdmin):
         
         if obj.status in ('success', 'caughtError'):
             url = reverse("admin:django_q_success_change", args=[obj.task.id])
-        elif obj.status in ('uncaughtError'):
+        elif obj.status == 'uncaughtError':
             url = reverse("admin:django_q_failure_change", args=[obj.task.id])
         else:       
             return obj.get_status_display()
         
         return format_html('<b><a href="{}">{}</a></b>', url, obj.get_status_display())
-
     clickable_status.short_description = "Status"
     
     def get_readonly_fields(self, request, obj=None):
