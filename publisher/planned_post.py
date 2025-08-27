@@ -112,7 +112,7 @@ class PlannedPostForm(forms.ModelForm):
             self.initial['datetime_planned'] = local_dt.strftime('%Y-%m-%dT%H:%M') 
 
         # Block CKEditor if form is read-only
-        if self.instance and self.instance.status and self.instance.status != "scheldured":
+        if self.instance and self.instance.status and self.instance.status != "schedured":
             for field_name in self.fields:
                 model_field = self._meta.model._meta.get_field(field_name)
                 if isinstance(model_field, RichTextUploadingField):
@@ -164,7 +164,7 @@ class PlannedPostAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
-        if obj and obj.status != "scheldured":
+        if obj and obj.status != "schedured":
             # добавляем все поля кроме RichTextUploadingField
             readonly += [
                 f.name for f in self.model._meta.fields
