@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ckConfigs = JSON.parse(textarea.dataset.ckeditorconfigs || textarea.dataset.ckeditorConfigs || '{}');
     } catch (e) {
       console.error('Невалидный JSON в data-ckeditor-configs для', textarea, e);
+      return;
     }
 
     const accountName = leftTd.dataset.ckeditorConfigKey;
