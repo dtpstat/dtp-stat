@@ -147,7 +147,6 @@ class PlannedPostAdmin(admin.ModelAdmin):
     
     def clickable_status(self, obj):
         
-        print(f"Task: {obj.task}")
         
         if not obj.task:
             return obj.get_status_display()
