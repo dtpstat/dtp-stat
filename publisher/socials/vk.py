@@ -14,7 +14,7 @@ class VkAccount(SocialNetworkBase):
     password = encrypt(models.CharField(max_length=128))
     community_id = models.CharField(max_length=50)
     
-    cckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
+    ckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
     ckeditor_config['toolbar'].append([
         'Image', '-',
         'SpecialChar','EmojiPanel', '-',

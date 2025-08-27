@@ -15,7 +15,7 @@ class TwitterAccount(SocialNetworkBase):
     access_token = encrypt(models.CharField(max_length=255))
     access_token_secret = encrypt(models.CharField(max_length=255))
     
-    cckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
+    ckeditor_config = copy.deepcopy(SocialNetworkBase.ckeditor_config)
     ckeditor_config['toolbar'].append([
         'Image', '-',
         'SpecialChar', 'EmojiPanel', '-',
