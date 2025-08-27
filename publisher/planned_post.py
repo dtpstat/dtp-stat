@@ -3,8 +3,7 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django_q.tasks import Schedule, Task
-from django_q.models import Success, Failure
+from django_q.models import Schedule, Task
 from django.utils.html import format_html
 from django.urls import reverse
 from ckeditor_uploader.fields import RichTextUploadingField
