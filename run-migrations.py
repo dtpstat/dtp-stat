@@ -27,6 +27,7 @@ if not FLAG_FILE.exists():
     print("Первый запуск контейнера: выполняем миграции...")
     # Гарантируем наличие каталога для флага/лока заранее
     FLAG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
     try:
         with open(LOCK_FILE, "w") as lock_fp:
             fcntl.flock(lock_fp, fcntl.LOCK_EX)
