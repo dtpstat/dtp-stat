@@ -49,6 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // создаём/заменяем
+    if (!config || typeof config !== 'object') {
+      console.error('Invalid CKEditor config for', editorId, config);
+      return;
+    }
     const newEditor = CKEDITOR.replace(editorId, config);
 
     // после инициализации ставим содержимое и readonly-режим
