@@ -13,7 +13,11 @@ def schedule_task(planned_post):
         next_run=planned_post.effective_datetime,
         hook="posting.scheduler.status_hook"
     )
-    return schedule if schedule else None
+    if schedule:
+        # persist schedule id for later management (cancel/reschedule)
+        planned_post.schedule_id = schedule.id
+        planned_post.save(update_fields=['schedule_id'])
+    return schedule or None
 
 def publish_post(planned_post_id):
     from .planned_post import PlannedPost
