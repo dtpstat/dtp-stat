@@ -15,7 +15,7 @@
       <thead><tr><th>{% trans "Account" %}</th><th>{% trans "Form" %}</th></tr></thead>
       <tbody>
       {% for account, post_form in form_objects %}
-        <tr>
+        <tr data-ckeditor-config-key="{{ account.get_social_network_display }}">
           <td>
             {{ account.title }}<br><small>{{ account.get_social_network_display }}</small>
           </td>

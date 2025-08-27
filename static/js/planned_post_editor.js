@@ -73,8 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error('Невалидный JSON в data-ckeditor-configs для', textarea, e);
     }
 
-    const small = leftTd.querySelector('small');
-    const accountName = small.textContent.trim();
+    const accountName = leftTd.dataset.ckeditorConfigKey;
     restartEditorForTextarea(textarea, accountName, ckConfigs, true);
   }
 
