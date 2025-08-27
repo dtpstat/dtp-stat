@@ -88,13 +88,13 @@ class TwitterAccount(SocialNetworkBase):
                 
                 # Отправка твита с фото
                 try:
-                    tweet = api.create_tweet(status=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    tweet = api.create_tweet(text=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита с фото: {e}")
             else:
                 # Отправка твита без фото
                 try:
-                    tweet = api.create_tweet(status=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    tweet = api.create_tweet(text=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита: {e}")
                 
