@@ -138,7 +138,9 @@ class AccountAdmin(admin.ModelAdmin):
         except ValueError:
             self.message_user(request, "Некорректные идентификаторы аккаунтов.", level=messages.ERROR)
             return redirect(reverse('admin:publisher_account_changelist'))        except ValueError:
-            
+        
+        accounts = Account.objects.filter(pk__in=pks).select_related()
+         
         # Сформируем список форм: для каждого account — PlannedPostForm
         form_objects = []
         if request.method == 'POST':
