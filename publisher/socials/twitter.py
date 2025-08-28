@@ -1,4 +1,4 @@
-import re, copy, os, tempfile, urllib
+import re, copy, os, tempfile, urllib.request
 from django import forms
 from django.db import models
 from django.contrib import admin
