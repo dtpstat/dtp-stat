@@ -50,10 +50,13 @@ class PlannedPost(models.Model):
                 old = PlannedPost.objects.select_for_update().get(pk=self.pk)
                 super().save(*args, **kwargs)
                 if old.datetime_planned != self.datetime_planned and self.schedule:
-                    # Переносим задачу в планировщике
-                    sched = self.schedule
-                    sched.next_run = self.effective_datetime
-                    sched.save(update_fields=['next_run']) 
+                    try:
+                        # Переносим задачу в планировщике
+                        sched = self.schedule
+                        sched.next_run = self.effective_datetime
+                        sched.save(update_fields=['next_run'])
+                    except Exception as e:
+                        raise ValidationError(f"Ошибка при обновлении расписания: {e}")
         else:  # новый объект
             try:
                 with transaction.atomic():
@@ -62,9 +65,7 @@ class PlannedPost(models.Model):
                     self.schedule = schedule_task(self)
                     super().save(update_fields=['status', 'schedule'])
             except Exception as e:
-                raise ValidationError(f"Ошибка при создании задачи в планировщике: {e}")
-    
-    def delete(self, *args, **kwargs):
+                raise ValidationError(f"Ошибка при создании задачи в планировщике: {e}")    def delete(self, *args, **kwargs):
         if self.schedule:
             try:
                 sched = self.schedule
