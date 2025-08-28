@@ -46,21 +46,36 @@ class TelegramAccount(SocialNetworkBase):
     def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
-        bot = telegram.Bot(token=self.token)
-        
+        try:
+            bot = telegram.Bot(token=self.token)
+        except telegram.error.InvalidToken as e:
+            return self.error(f"Недействительный токен: {e}")
+
         content, photo_src = self.clean_publish_data(post.content)
-        
+
         try:
             if photo_src:
                 # Telegram умеет брать фото как файлом, так и по URL
-                bot.send_photo(chat_id=self.channel_id, photo=photo_src, caption=content)
+                bot.send_photo(
+                    chat_id=self.channel_id,
+                    photo=photo_src,
+                    caption=content,
+                    timeout=30
+                )
             else:
-                bot.send_message(chat_id=self.channel_id, text=content)
+                bot.send_message(
+                    chat_id=self.channel_id,
+                    text=content,
+                    timeout=30
+                )
+        except telegram.error.Unauthorized as e:
+            return self.error(f"Ошибка авторизации: {e}")
+        except telegram.error.BadRequest as e:
+            return self.error(f"Некорректный запрос: {e}")
         except Exception as e:
             return self.error(f"Ошибка при отправке поста: {e}")
-            
-        return self.log("Пост успешно отправлен")
 
+        return self.log("Пост успешно отправлен")
 class TelegramAccountForm(forms.ModelForm):
     class Meta:
         model = TelegramAccount
