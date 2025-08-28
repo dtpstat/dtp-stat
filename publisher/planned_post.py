@@ -46,13 +46,14 @@ class PlannedPost(models.Model):
         from django.db import transaction
         
         if self.pk:  # если объект уже существует
-            old = PlannedPost.objects.get(pk=self.pk)
-            super().save(*args, **kwargs)
-            if old.datetime_planned != self.datetime_planned and self.schedule:
-                # Переносим задачу в планировщике
-                sched = self.schedule
-                sched.next_run = self.effective_datetime
-                sched.save(update_fields=['next_run']) 
+            with transaction.atomic():
+                old = PlannedPost.objects.select_for_update().get(pk=self.pk)
+                super().save(*args, **kwargs)
+                if old.datetime_planned != self.datetime_planned and self.schedule:
+                    # Переносим задачу в планировщике
+                    sched = self.schedule
+                    sched.next_run = self.effective_datetime
+                    sched.save(update_fields=['next_run']) 
         else:  # новый объект
             try:
                 with transaction.atomic():
