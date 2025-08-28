@@ -69,7 +69,7 @@ class TwitterAccount(SocialNetworkBase):
             self.consumer_key, self.consumer_secret,
             self.access_token, self.access_token_secret
         )
-        api_v1 = tweepy.API(auth)
+        api_v1 = tweepy.API(auth, wait_on_rate_limit=True)
         
         # v2 Client for tweet/thread creation
         client = tweepy.Client(
@@ -77,9 +77,8 @@ class TwitterAccount(SocialNetworkBase):
             consumer_secret=self.consumer_secret,
             access_token=self.access_token,
             access_token_secret=self.access_token_secret,
-        )
-        
-        clean_tweets = self.clean_publish_data(post.content)
+            wait_on_rate_limit=True,
+        )        clean_tweets = self.clean_publish_data(post.content)
         
         last_tweet_id = None
         
