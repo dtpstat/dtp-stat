@@ -71,8 +71,6 @@ class AccountAdmin(admin.ModelAdmin):
                     level=messages.ERROR
                 )
                 return super().add_view(request, form_url)
-
-            url_name = f'admin:publisher_{social_network}account_add'
             
             try:
                 url = reverse(url_name)
