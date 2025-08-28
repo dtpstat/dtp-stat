@@ -1,8 +1,19 @@
-run:
-	docker-compose up
+.PHONY: all up down clean sh build test
+
+# Replace with your compose file
+COMPOSE_FILE=docker-compose.example.yml
+
+up:
+	docker compose -f $(COMPOSE_FILE) up -d
+down:
+	docker compose -f $(COMPOSE_FILE) down --remove-orphans
+clean:
+	docker compose -f $(COMPOSE_FILE) down -v
 sh:
-	docker-compose exec web /bin/bash
+	docker compose -f $(COMPOSE_FILE) exec -it web /bin/bash
 build:
-	docker-compose build
+	docker compose -f $(COMPOSE_FILE) build
 test:
-	docker-compose exec web pytest
+	docker compose -f $(COMPOSE_FILE) exec -it web pytest
+
+all: build up

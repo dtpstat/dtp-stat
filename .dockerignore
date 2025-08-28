@@ -11,6 +11,10 @@ media/
 deploy
 docker-compose.yml
 
+# Exclude environment files
+.env*
+!*.example
+
 # Python specific
 __pycache__
 *.pyc

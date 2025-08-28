@@ -1,0 +1,71 @@
+# Example file to run your dev server
+
+# copy: 'cp docker-compose.example.yml docker-compose.yml'
+# or use 'docker compose -f docker-compose.example.yml up'
+# or just run 'make up' (Makefile handles it)
+
+services:
+  db:
+    image: kartoza/postgis:14-3.3
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5431:5432"
+    networks:
+      - backend
+    env_file:
+      - .env.example
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -h 127.0.0.1 -p 5432"]
+      interval: 5s       # Check health every 5 second
+      timeout: 2s        # Allow 2 seconds for response
+      retries: 10        # Retry 10 times
+      start_period: 10s  # Run checks during first 10 seconds
+      start_interval: 1s # Check every second during start_period (Docker 25.0+)
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+      - dtpstat:/var/run/dtpstat
+    working_dir: /code
+    # Старт: миграции + проверка суперпользователя + запуск сервера
+    command: >
+      sh -c "
+      python run-migrations.py &&
+      python create_superuser.py &&
+      python manage.py runserver 0.0.0.0:5000
+      "
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    env_file:
+      - .env.example
+    restart: unless-stopped
+  qcluster:
+    build: .
+    command: >
+      sh -c "
+      while [ ! -f \"\${MIGRATIONS_FLAG_PATH:-/var/run/dtpstat/.migrations_done}\" ]; do sleep 1; done &&
+      python manage.py qcluster
+      "
+    volumes:
+      - .:/code
+      - dtpstat:/var/run/dtpstat
+    working_dir: /code
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    env_file:
+      - .env.example
+    restart: unless-stopped
+networks:
+  backend:
+volumes:
+  pgdata:
+  dtpstat:

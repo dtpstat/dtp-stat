@@ -9,8 +9,8 @@ if os.path.exists(ENV_PATH):
     env.read_env(ENV_PATH)
 
 # APP SETTINGS FROM ENV
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=[])
-DEBUG = env('DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+DEBUG = env.bool('DEBUG', default=False)
 NEXTJS_BASE_URL = env('NEXTJS_BASE_URL', default='https://dtp-stat-on-nextjs.netlify.app')
 NEXTJS_IFRAME_WITH_COMMENTS = env('NEXTJS_IFRAME_WITH_COMMENTS', default=False)
 NEXTJS_IFRAME_WITH_MAP = env('NEXTJS_IFRAME_WITH_MAP', default=False)
@@ -46,15 +46,19 @@ INSTALLED_APPS = [
     'application.templatetags.tags',
     'constance',
     'constance.backends.database',
+    'django_q',
+    'django_cryptography',
+    'publisher',
 ]
 
 SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'publisher.middleware.TimezoneMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -62,7 +66,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    CORS_ORIGIN_ALLOW_ALL = False
+    CORS_ALLOWED_ORIGINS = env.list(
+        'CORS_ALLOWED_ORIGINS',
+        default=[f'https://{PRODUCTION_HOST}']
+    )
 
 ROOT_URLCONF = 'dtpstat.urls'
 
@@ -139,6 +150,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': None,
 }
 LANGUAGE_CODE = 'ru'
+USE_TZ = True
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = False
@@ -162,11 +174,11 @@ LANGUAGE_COOKIE_PATH = '/'
 LANGUAGE_COOKIE_DOMAIN = None
 LANGUAGE_COOKIE_SECURE = False if DEBUG else True
 LANGUAGE_COOKIE_HTTPONLY = False
-LANGUAGE_COOKIE_SAMESITE = None
+LANGUAGE_COOKIE_SAMESITE = 'Lax' if DEBUG else 'None'
 DATETIME_FORMAT = 'd.m.Y H:i'
 DATE_FORMAT = 'd.m.Y'
 
-CKEDITOR_UPLOAD_PATH = 'blog/'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'UltraFull',
@@ -187,14 +199,23 @@ CKEDITOR_CONFIGS = {
             ['Maximize', 'Source'],
         ],
         'language': 'ru',
-        'forcePasteAsPlainText': True,
+    },
+    'social_networks': {
+        'toolbar': [],
+        'autoGrow_minHeight': 250,
+        'autoGrow_maxHeight': 600,
+        'autoGrow_onStartup': True,
+        'toolbarCanCollapse': True,
+        'language': 'ru',
+        'removeFormatTags': (
+            'b,i,u,strike,strong,em,hr,a,img,blockquote'
+        ),
     },
 }
 
 STATIC_URL = '/static/'
 STATIC_ROOT = env('STATIC_ROOT')
-if env('STATICFILES_DIRS'):
-    STATICFILES_DIRS = [env('STATICFILES_DIRS')]
+STATICFILES_DIRS = env.list('STATICFILES_DIRS', default=[])
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = env('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
@@ -231,3 +252,22 @@ CONSTANCE_CONFIG = {
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }
+
+Q_CLUSTER = {
+    'name': env('Q_CLUSTER_NAME', default='DjangoORM'),             # имя кластера
+    'workers': env.int('Q_CLUSTER_WORKERS', default=2),             # количество воркеров
+    'recycle': env.int('Q_CLUSTER_RECYCLE', default=500),           # перезапуск воркеров после N задач
+    'timeout': env.int('Q_CLUSTER_TIMEOUT', default=120),           # таймаут выполнения задачи
+    'retry': env.int('Q_CLUSTER_RETRY', default=180),               # время ожидания перед повтором задачи
+    'save_limit': env.int('Q_CLUSTER_SAVE_LIMIT', default=250),     # максимальное количество сохранённых задач
+    'queue_limit': env.int('Q_CLUSTER_QUEUE_LIMIT', default=100),   # максимальный размер очереди
+    'orm': 'default',                                               # используем базу данных Django 
+}
+
+DJANGO_CRYPTOGRAPHY_KEY = env('DJANGO_ENCRYPTION_KEY')
+
+if not DJANGO_CRYPTOGRAPHY_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        "DJANGO_CRYPTOGRAPHY_KEY must be set in the environment"
+    )

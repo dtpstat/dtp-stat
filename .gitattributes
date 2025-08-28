@@ -1,0 +1,5 @@
+# Пометить всю директорию плагинов как vendored
+/static/ckeditor/ckeditor/plugins/** linguist-vendored
+
+# Отменить правило для плагина кастомного плагина
+/static/ckeditor/ckeditor/plugins/tweet-splitter/** linguist-vendored=false
