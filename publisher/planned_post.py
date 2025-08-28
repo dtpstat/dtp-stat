@@ -65,7 +65,9 @@ class PlannedPost(models.Model):
                     self.schedule = schedule_task(self)
                     super().save(update_fields=['status', 'schedule'])
             except Exception as e:
-                raise ValidationError(f"Ошибка при создании задачи в планировщике: {e}")    def delete(self, *args, **kwargs):
+                raise ValidationError(f"Ошибка при создании задачи в планировщике: {e}")
+    
+    def delete(self, *args, **kwargs):
         if self.schedule:
             try:
                 sched = self.schedule
