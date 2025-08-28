@@ -84,10 +84,10 @@ class VkAccount(SocialNetworkBase):
                 return self.error(f"Ошибка при отправке поста: {e}")
         finally:
             if tmp_path and os.path.exists(tmp_path):
-                    try:
-                        os.remove(tmp_path)
-                    except OSError:
-                        pass
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
                 
         return self.log("Пост успешно отправлен")
     
