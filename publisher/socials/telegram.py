@@ -63,18 +63,13 @@ class TelegramAccount(SocialNetworkBase):
                     parse_mode='HTML',
                     timeout=30
                 )
-
+            else:
                 bot.send_message(
                     chat_id=self.channel_id,
                     text=content,
                     parse_mode='HTML',
                     timeout=30
-                )            else:
-                bot.send_message(
-                    chat_id=self.channel_id,
-                    text=content,
-                    timeout=30
-                )
+                )   
         except telegram.error.Unauthorized as e:
             return self.error(f"Ошибка авторизации: {e}")
         except telegram.error.BadRequest as e:
