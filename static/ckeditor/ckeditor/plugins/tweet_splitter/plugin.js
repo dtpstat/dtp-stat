@@ -18,7 +18,7 @@ CKEDITOR.plugins.add('tweet_splitter', {
                     </div>`
                 );
                 editor.insertElement(separator);
-                scheduleTweetCountersUpdate(editor);;
+                scheduleTweetCountersUpdate(editor);
 
                 const nativeDoc = editor.document.$;
                 if (!nativeDoc._tweetSplitterRemoveBound) {
@@ -55,11 +55,11 @@ CKEDITOR.plugins.add('tweet_splitter', {
         });
 
         editor.on('key', function() {
-            scheduleTweetCountersUpdate(editor);;
+            scheduleTweetCountersUpdate(editor);
         });
 
         editor.on('afterCommandExec', function() {
-            scheduleTweetCountersUpdate(editor);;
+            scheduleTweetCountersUpdate(editor);
         });
 
         editor.on('contentDom', function() {
