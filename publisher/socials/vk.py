@@ -52,35 +52,43 @@ class VkAccount(SocialNetworkBase):
         
         content, photo_src = self.clean_publish_data(post.content)
         
-        if photo_src:
-            # Скачиваем изображение, если это URL
-            if photo_src.startswith('http'):
-                tmp_path = None
-                try:
-                    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-                        tmp_path = tmp.name
-                    urllib.request.urlretrieve(photo_src, tmp_path)
-                    photo_src = tmp_path
-                except Exception as e:
-                    return self.error(f"Ошибка при скачивании изображения: {e}")
-            
-            # Загрузка фото
-            try:
-                upload = vk_api.VkUpload(vk_session)
-                photo = upload.photo_wall(photo_src, group_id=int(self.community_id))[0]
-            except Exception as e:
-                return self.error(f"Ошибка при загрузке изображения: {e}")
-            finally:
-                # Удаляем временный файл (если скачивали)
-                if 'tmp_path' in locals() and tmp_path and os.path.exists(tmp_path):
-                    os.remove(tmp_path)
-        attachment = f"photo{photo['owner_id']}_{photo['id']}" if (photo_src) else None
-
+        attachment = None
+        tmp_path = None
+        
         try:
-            vk.wall.post(owner_id=-int(self.community_id), from_group=1, message=content, attachments=attachment)
-        except Exception as e:
-            return self.error(f"Ошибка при отправке поста: {e}")
+            if photo_src:
+                # Скачиваем изображение, если это URL
+                if photo_src.startswith('http'):
+                    try:
+                        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+                            tmp_path = tmp.name
+                        urllib.request.urlretrieve(photo_src, tmp_path)
+                        photo_src = tmp_path
+                    except Exception as e:
+                        return self.error(f"Ошибка при скачивании изображения: {e}")
+                
+                # Загрузка фото
+                try:
+                    upload = vk_api.VkUpload(vk_session)
+                    photo = upload.photo_wall(photo_src, group_id=int(self.community_id))[0]
+                    attachment = f"photo{photo['owner_id']}_{photo['id']}"
+                except Exception as e:
+                    return self.error(f"Ошибка при загрузке изображения: {e}")
 
+            try:
+                params = dict(owner_id=-int(self.community_id), from_group=1, message=content)
+                if attachment:
+                    params['attachments'] = attachment
+                vk.wall.post(**params)
+            except Exception as e:
+                return self.error(f"Ошибка при отправке поста: {e}")
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                    try:
+                        os.remove(tmp_path)
+                    except OSError:
+                        pass
+                
         return self.log("Пост успешно отправлен")
     
 class VkAccountForm(forms.ModelForm):
