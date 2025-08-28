@@ -228,9 +228,7 @@ function updateTweetCounters(editor) {
         counter.className = 'tweet-char-counter';
         counter.setAttribute('contenteditable', 'false');
         counter.innerText = `[${finalLength}/${TWEET_LIMIT}]`;
-        if (finalLength > TWEET_LIMIT) {
-            counter.style.color = 'red';
-        }
+        counter.classList.toggle('over-limit', finalLength > TWEET_LIMIT);
 
         // Нумерация
         if (tweetNumbering && firstP) {
