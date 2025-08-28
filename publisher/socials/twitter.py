@@ -78,7 +78,9 @@ class TwitterAccount(SocialNetworkBase):
             access_token=self.access_token,
             access_token_secret=self.access_token_secret,
             wait_on_rate_limit=True,
-        )        clean_tweets = self.clean_publish_data(post.content)
+        )
+        
+        clean_tweets = self.clean_publish_data(post.content)
         
         last_tweet_id = None
         
