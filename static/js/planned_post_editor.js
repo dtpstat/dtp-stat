@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // safeguard  if (!window.CKEDITOR) {
+  // safeguard
+  if (!window.CKEDITOR) {
     console.error('CKEditor not found on page; skipping editor initialization.');
     return;
   }
