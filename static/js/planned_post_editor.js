@@ -103,7 +103,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const select = document.getElementById('id_account');
   const readonlyDiv = document.querySelector('.form-row.field-account .readonly');
   let ckConfigs = {};
-  try { ckConfigs = JSON.parse(singleTextarea.dataset.ckeditorConfigs || '{}'); } catch(e){}  if (select) {
+  try {
+    ckConfigs = JSON.parse(singleTextarea.dataset.ckeditorConfigs || '{}');
+  } catch (e) {
+    console.error('Failed to parse ckeditor configs:', e);
+  }
+
+  if (select) {
     const apply = () => {
       const opt = select.selectedOptions && select.selectedOptions.length
         ? select.selectedOptions[0]
