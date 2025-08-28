@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('short', models.CharField(max_length=255)),
-                ('content', ckeditor_uploader.fields.RichTextUploadingField(verbose_name='Текст')),
+                ('content', ckeditor_uploader.fields.RichTextUploadingField(verbose_name='Содержимое')),
                 ('datetime_created', models.DateTimeField(auto_now_add=True)),
                 ('datetime_planned', models.DateTimeField(blank=True, null=True)),
                 ('status', models.CharField(
@@ -96,7 +96,8 @@ class Migration(migrations.Migration):
                     max_length=13,
                     null=True,
                     verbose_name='Статус'
-                )),                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='planned_posts', to='publisher.account')),
+                )),                
+                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='planned_posts', to='publisher.account')),
                 ('schedule', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='planned_posts', to='django_q.schedule')),
                 ('task', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='planned_posts', to='django_q.task')),
             ],
