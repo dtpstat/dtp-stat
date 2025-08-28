@@ -103,8 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const select = document.getElementById('id_account');
   const readonlyDiv = document.querySelector('.form-row.field-account .readonly');
   let ckConfigs = {};
-  try { ckConfigs = JSON.parse(singleTextarea.dataset.ckeditorconfigs || singleTextarea.dataset.ckeditorConfigs || '{}'); } catch(e){}
-
+  try { ckConfigs = JSON.parse(singleTextarea.dataset.ckeditorconfigs || '{}'); } catch(e){}
   if (select) {
     const apply = () => {
       const opt = select.selectedOptions && select.selectedOptions.length
