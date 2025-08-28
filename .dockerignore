@@ -11,9 +11,9 @@ media/
 deploy
 docker-compose.yml
 
-# Exclude environment files (avoid baking dev secrets into image)
+# Exclude environment files
 .env*
-!*.dev
+!*.example
 
 # Python specific
 __pycache__
