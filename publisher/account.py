@@ -137,7 +137,7 @@ class AccountAdmin(admin.ModelAdmin):
             pks = [int(x) for x in ids.split(',') if x.strip()]
         except ValueError:
             self.message_user(request, "Некорректные идентификаторы аккаунтов.", level=messages.ERROR)
-            return redirect(reverse('admin:publisher_account_changelist'))        except ValueError:
+            return redirect(reverse('admin:publisher_account_changelist'))
         
         accounts = Account.objects.filter(pk__in=pks).select_related()
          
