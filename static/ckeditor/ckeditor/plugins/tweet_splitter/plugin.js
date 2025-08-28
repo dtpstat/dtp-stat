@@ -61,7 +61,17 @@ CKEDITOR.plugins.add('tweet_splitter', {
         editor.on('afterCommandExec', function() {
             scheduleTweetCountersUpdate(editor);;
         });
+
         editor.on('contentDom', function() {
+            editor.on('paste', function() {
+                scheduleTweetCountersUpdate(editor);
+            });
+            editor.on('afterPaste', function() {
+                scheduleTweetCountersUpdate(editor);
+            });
+            editor.on('drop', function() {
+                scheduleTweetCountersUpdate(editor);
+            });
             editor.document.on('copy', function(evt) {
                 const e = evt.data.$; // нативный ClipboardEvent
                 e.preventDefault(); // отменяем стандартное копирование
