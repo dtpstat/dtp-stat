@@ -61,8 +61,8 @@ class PlannedPost(models.Model):
                     self.schedule = schedule_task(self)
                     super().save(update_fields=['status', 'schedule'])
             except Exception as e:
-                self.message_user(request, f"Ошибка при планировании поста: {str(e)}", level=messages.ERROR)
                 valid = False
+                raise ValidationError(f"Ошибка при создании задачи в планировщике: {e}")
 
     def delete(self, *args, **kwargs):
         if self.schedule:
@@ -166,3 +166,13 @@ class PlannedPostAdmin(admin.ModelAdmin):
         return timezone.localtime(obj.datetime_created)
     datetime_created_local.admin_order_field = 'datetime_created'  # сортировка по исходному полю
     datetime_created_local.short_description = 'Дата создания'
+
+    def save_model(self, request, obj, form, change):
+        try:
+            super().save_model(request, obj, form, change)
+        except Exception as e:
+            self.message_user(
+                request,
+                f"{e}",
+                level=messages.ERROR
+            )
