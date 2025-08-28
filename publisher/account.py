@@ -135,10 +135,12 @@ class AccountAdmin(admin.ModelAdmin):
             self.message_user(request, "Не выбраны аккаунты.", level=messages.WARNING)
             return redirect(reverse('admin:publisher_account_changelist'))
 
-        pks = [int(x) for x in ids.split(',') if x.strip()]
-
-        accounts = Account.objects.filter(pk__in=pks).select_related('social_type')
-
+        try:
+            pks = [int(x) for x in ids.split(',') if x.strip()]
+        except ValueError:
+            self.message_user(request, "Некорректные идентификаторы аккаунтов.", level=messages.ERROR)
+            return redirect(reverse('admin:publisher_account_changelist'))        except ValueError:
+            
         # Сформируем список форм: для каждого account — PlannedPostForm
         form_objects = []
         if request.method == 'POST':
