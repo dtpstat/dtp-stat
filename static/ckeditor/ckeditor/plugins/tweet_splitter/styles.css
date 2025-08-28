@@ -69,6 +69,10 @@
     background-color: #ddd;
 }
 
+tweet-separator-remove:active {
+    background-color: #e3e3e3;
+}
+
 .tweet-separator-remove:focus-visible {
     outline: 2px solid #666;
     outline-offset: 2px;
@@ -78,4 +82,8 @@
 .tweet-separator-remove svg {
     width: 16px;
     height: 16px;
+}
+
+.tweet-char-counter.over-limit {
+    color: #b3261e;
 }
