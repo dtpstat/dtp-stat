@@ -13,6 +13,6 @@ class TimezoneMiddleware:
         try:
             tz = ZoneInfo(tzname)
         except ZoneInfoNotFoundError:
-            tz = ZoneInfo(settings.TIME_ZONE)
+            tz = timezone.get_default_timezone()
         with timezone.override(tz):
             return self.get_response(request)
