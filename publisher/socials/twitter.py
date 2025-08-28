@@ -66,11 +66,19 @@ class TwitterAccount(SocialNetworkBase):
     def post(self, post):
         self.log_template = f"[{self.full_name}: {post.account.title}][{post.short}]" + " {0}"
 
+        # v1.1 API for media upload
+        auth = tweepy.OAuth1UserHandler(
+            self.consumer_key, self.consumer_secret,
+            self.access_token, self.access_token_secret
+        )
+        api_v1 = tweepy.API(auth)
+        
+        # v2 Client for tweet/thread creation
         client = tweepy.Client(
+            consumer_key=self.consumer_key,
+            consumer_secret=self.consumer_secret,
             access_token=self.access_token,
             access_token_secret=self.access_token_secret,
-            consumer_key=self.consumer_key,
-            consumer_secret=self.consumer_secret
         )
         
         clean_tweets = self.clean_publish_data(post.content)
@@ -78,44 +86,52 @@ class TwitterAccount(SocialNetworkBase):
         last_tweet_id = None
         
         for content, photo_src in clean_tweets:
-            if photo_src:
-                # Скачиваем изображение, если это URL
-                if photo_src.startswith('http'):
-                    try:
-                        tmp = tempfile.NamedTemporaryFile(delete=False)
-                        urllib.request.urlretrieve(photo_src, tmp.name)
-                        photo_src = tmp.name
-                    except Exception as e:
-                        return self.error(f"Ошибка при скачивании изображения: {e}")
+            tmp_path = None
+            try:
+                media_ids = None
+                if photo_src:
                     
-                # Загрузка фото
+                    # Скачиваем изображение, если это URL
+                    if photo_src.startswith('http'):
+                        try:
+                            tmp = tempfile.NamedTemporaryFile(delete=False)
+                            urllib.request.urlretrieve(photo_src, tmp.name)
+                            tmp_path = tmp.name
+                            tmp.close()
+                            local_path = tmp_path
+                        except Exception as e:
+                            return self.error(f"Ошибка при скачивании изображения: {e}")
+                    else:
+                        local_path = photo_src
+                        
+                    # Загрузка фото (v1.1)
+                    try:
+                        media = api_v1.media_upload(local_path)
+                        media_id = getattr(media, "media_id_string", None) or str(media.media_id)
+                        media_ids = [media_id]
+                    except Exception as e:
+                        return self.error(f"Ошибка при загрузке изображения: {e}")
+
+                # Отправка твита (с фото или без)
                 try:
-                    media = client.media_upload(photo_src)
-                except Exception as e:
-                    return self.error(f"Ошибка при загрузке изображения: {e}")
-                finally:
-                    # Удаляем временный файл
-                    if tmp and os.path.exists(tmp.name):
-                        os.remove(tmp.name)
-                
-                # Отправка твита с фото
-                try:
-                    resp = client.create_tweet(text=content, media_ids=[media.media_id], in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
-                except Exception as e:
-                    return self.error(f"Ошибка при отправке твита с фото: {e}")
-                
-            else:
-                # Отправка твита без фото
-                try:
-                    resp = client.create_tweet(text=content, in_reply_to_status_id=last_tweet_id, auto_populate_reply_metadata=True)
+                    params = {}
+                    if media_ids:
+                        params["media"] = {"media_ids": media_ids}
+                    if last_tweet_id:
+                        params["reply"] = {"in_reply_to_tweet_id": last_tweet_id}
+                    resp = client.create_tweet(text=content, **params)
                 except Exception as e:
                     return self.error(f"Ошибка при отправке твита: {e}")
-                
-            # сохраняем ID последнего твита для цепочки
-            last_tweet_id = resp.data.get('id')
-            
+                # сохраняем ID последнего твита для цепочки
+                last_tweet_id = resp.data.get("id")
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    try:
+                        os.remove(tmp_path)
+                    except OSError:
+                        pass
+    
         return self.log("Твит:ы успешно отправлен:ы")
-
 
 class TwitterAccountForm(forms.ModelForm):
     class Meta:
