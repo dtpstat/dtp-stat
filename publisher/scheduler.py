@@ -41,9 +41,9 @@ def status_hook(task):
     from .planned_post import PlannedPost
     
     # task — это объект Task из django_q
-    post_id = task.args[0] if getattr(task, 'args', None) else None  # мы в задачу передали post_id
+    post_id = task.args[0] if getattr(task, 'args', None) else None
     if post_id is None:
-        return  # мы в задачу передали post_id
+        return
     
     try:
         post = PlannedPost.objects.get(id=post_id)
