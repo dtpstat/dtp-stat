@@ -5,13 +5,14 @@ def schedule_task(planned_post):
     Ставит задачу через django-q на указанное время.
     Возвращает объект Schedule (или None).
     """
-
     job = q_schedule(
-        'publisher.scheduler.publish_post',  # Путь к функции, которая отправит пост
-        planned_post.id,
-        schedule_type='O',  # One-off
+        'publisher.scheduler.publish_post',
+        args=[planned_post.id],
+        schedule_type='O',                # One-off
         next_run=planned_post.effective_datetime,
-        hook="publisher.scheduler.status_hook"
+        hook='publisher.scheduler.status_hook',
+        name=f'publish-post:{planned_post.id}',  # helps avoid duplicates
+        timeout=60
     )
     if job:
         # persist schedule id for later management (cancel/reschedule)
