@@ -27,13 +27,14 @@ def publish_post(planned_post_id):
 
     result = post.account.social.post(post)
     
-    if result.startswith("[ERROR]"):
+    if not isinstance(result, str):
+        post.status = 'caughtError'
+    elif result.startswith("[ERROR]"):
         post.status = 'caughtError'
     else:
         post.status = 'success'
     
     post.save()
-
     return result
 
 def status_hook(task):
