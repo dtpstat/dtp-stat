@@ -38,11 +38,10 @@ class TwitterAccount(SocialNetworkBase):
         
         for t in tweets:
             # 2. Находим <img> и сохраняем src
-            img_match = re.search(r'<img[^>]*src="([^"]+)"[^>]*>', t)
+            img_match = re.search(r'<img\s+[^>]*?\bsrc="([^"]+)"[^>]*?>', t)
             image_src = img_match.group(1) if img_match else None
             # Удаляем тег <img>
-            t = re.sub(r'<img[^>]*>', '', t)
-
+            t = re.sub(r'<img\s+[^>]*?>', '', t)
             # 3. Убираем <div class="tweet-char-counter">...</div>
             t = re.sub(r'<div class="tweet-char-counter">.*?</div>', '', t, flags=re.DOTALL)
             
