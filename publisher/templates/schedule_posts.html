@@ -1,0 +1,35 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+  <style>
+    table.form-table td div.django-ckeditor-widget {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+  </style>
+
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    <input type="hidden" name="ids" value="{{ ids }}">
+    <table class="form-table">
+      <thead><tr><th>{% trans "Account" %}</th><th>{% trans "Form" %}</th></tr></thead>
+      <tbody>
+      {% for account, post_form in form_objects %}
+        <tr data-ckeditor-config-key="{{ account.get_social_network_display|slugify }}">
+          <td>
+            {{ account.title }}<br><small>{{ account.get_social_network_display }}</small>
+          </td>
+          <td>
+            {{ post_form.as_p }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <input type="submit" class="default" value="{% trans "Create scheduled posts" %}">
+  </form>
+  {# Подключаем JS и CSS для виджетов формы #}
+  {% if form_objects %}
+    {{ form_objects.0.1.media }}
+  {% endif %}
+{% endblock %}
