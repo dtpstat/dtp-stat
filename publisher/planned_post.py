@@ -52,7 +52,7 @@ class PlannedPost(models.Model):
                 # Переносим задачу в планировщике
                 sched = self.schedule
                 sched.next_run = self.effective_datetime
-                sched.save()
+                sched.save(update_fields=['next_run']) 
         else:  # новый объект
             try:
                 with transaction.atomic():
