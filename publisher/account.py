@@ -147,13 +147,14 @@ class AccountAdmin(admin.ModelAdmin):
             # POST: создаём формы из incoming data
             valid = True
             created = []
+            
+            from publisher.scheduler import schedule_task
             for acc in accounts:
                 prefix = f'acc_{acc.pk}'
                 post_form = PlannedPostForm(request.POST, prefix=prefix)
 
                 if post_form.is_valid():
-                    from publisher.scheduler import schedule_task
-                        
+                   
                     try:
                         with transaction.atomic():
                             # create PlannedPost
