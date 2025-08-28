@@ -60,9 +60,16 @@ class TelegramAccount(SocialNetworkBase):
                     chat_id=self.channel_id,
                     photo=photo_src,
                     caption=content,
+                    parse_mode='HTML',
                     timeout=30
                 )
-            else:
+
+                bot.send_message(
+                    chat_id=self.channel_id,
+                    text=content,
+                    parse_mode='HTML',
+                    timeout=30
+                )            else:
                 bot.send_message(
                     chat_id=self.channel_id,
                     text=content,
