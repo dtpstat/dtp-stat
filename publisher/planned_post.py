@@ -150,6 +150,7 @@ class PlannedPostAdmin(admin.ModelAdmin):
             return obj.get_status_display()
         
         return format_html('<b><a href="{}">{}</a></b>', url, obj.get_status_display())
+    
     clickable_status.short_description = "Status"
     
     def get_readonly_fields(self, request, obj=None):
