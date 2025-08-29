@@ -1,0 +1,89 @@
+.tweet-numbering {
+    display: inline-block;
+    font-size: 13px;
+    color: #555;
+    font-weight: bold;
+    user-select: none;
+    margin-right: 5px;
+}
+
+.tweet-arrow {
+    display: inline-block;
+    font-size: 13px;
+    color: #555;
+    font-weight: bold;
+    user-select: none;
+    margin-left: 5px;
+}
+
+.tweet-char-counter {
+    float: right;
+    font-size: 13px;
+    color: #555;
+    font-weight: bold;
+    user-select: none;
+    padding: 2px 5px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.tweet-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    cursor: default;
+    user-select: none;
+}
+
+.tweet-separator-line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: #ccc;
+}
+
+.tweet-separator-text {
+    padding: 0 15px;
+    color: #999;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+}
+
+.tweet-separator-remove {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    user-select: none;
+    vertical-align: middle;
+    margin-left: 5px;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.tweet-separator-remove:hover {
+    background-color: #ddd;
+}
+
+.tweet-separator-remove:active {
+    background-color: #e3e3e3;
+}
+
+.tweet-separator-remove:focus-visible {
+    outline: 2px solid #666;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.tweet-separator-remove svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tweet-char-counter.over-limit {
+    color: #b3261e;
+}
