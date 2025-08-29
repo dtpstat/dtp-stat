@@ -52,6 +52,17 @@ CKEDITOR.plugins.add('tweet_splitter', {
 
         editor.on('instanceReady', function() {
             updateTweetCounters(editor);
+            const container = editor.container && editor.container.$;
+            const form = container && container.closest ? container.closest('form') : null;
+            if (form && !form._tweetSplitterBound) {
+                form._tweetSplitterBound = true;
+                form.addEventListener('submit', (e) => {
+                    if (!validateTweets(editor)) {
+                        e.preventDefault();
+                        alert("❌ Нельзя сохранить: один или несколько твитов превышают 280 символов!");
+                    }
+                });
+            }
         });
 
         editor.on('key', function() {
@@ -115,20 +126,6 @@ function twitterLength(text) {
     return text.length;
 }
 
-editor.on('instanceReady', function() {
-    updateTweetCounters(editor);
-    const container = editor.container && editor.container.$;
-    const form = container && container.closest ? container.closest('form') : null;
-    if (form && !form._tweetSplitterBound) {
-        form._tweetSplitterBound = true;
-        form.addEventListener('submit', (e) => {
-            if (!validateTweets(editor)) {
-                e.preventDefault();
-                alert("❌ Нельзя сохранить: один или несколько твитов превышают 280 символов!");
-            }
-        });
-    }
-});
 function validateTweets(editor) {
     const editorData = editor.getData();
     const tempDiv = document.createElement('div');
