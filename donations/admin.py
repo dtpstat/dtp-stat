@@ -5,7 +5,9 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from datetime import timedelta
 
+from .constants import SUBSCRIPTION_THRESHOLD_DAYS
 from .models import Contact, Currency, CurrencyPriceHistory, Donation, Goal, Level, Subscription
 
 
@@ -103,18 +105,45 @@ class GoalAdmin(admin.ModelAdmin):
     )
 
 
+class SubscriptionWithoutDonationFilter(admin.SimpleListFilter):
+    title = _('Without expected donation')
+    parameter_name = 'without_expected_donation'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('true', _('Show')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'true':
+            return queryset.model.objects.with_overdue_donations(queryset)
+        return queryset
+
+
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     """
     Admin interface for the Subscription model.
     Manages recurring donations.
     """
-    list_display = ('id', 'contact', 'level', 'frequency', 'is_active', 'start_date', 'end_date', 'check_button', 'disable_button')
-    list_filter = ('frequency', 'level', 'currency', 'start_date')
+    list_display = (
+        'id',
+        'contact',
+        'level',
+        'frequency',
+        'is_active',
+        'start_date',
+        'end_date',
+        'last_expected_date',
+        'days_since_last_expected',
+        'check_button',
+        'disable_button',
+    )
+    list_filter = (SubscriptionWithoutDonationFilter, 'frequency', 'level', 'currency', 'start_date')
     search_fields = ('contact__email', 'contact__telegram', 'source', 'amount')
     # Use raw_id_fields for ForeignKey to avoid performance issues with large datasets
     raw_id_fields = ('contact',)
-    readonly_fields = ('created_at', 'updated_at', 'is_active', 'payment_dates_table', 'disable_button')
+    readonly_fields = ('created_at', 'updated_at', 'is_active', 'payment_dates_table', 'disable_button', 'check_button')
     inlines = [DonationInline]
 
     fieldsets = (
@@ -247,7 +276,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
                 _('Check Now')
             )
         return _("This subscription is already disabled.")
-    disable_button.short_description = _("Check Subscription")
+    check_button.short_description = _("Check Subscription")
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
@@ -289,7 +318,7 @@ class DonationAdmin(admin.ModelAdmin):
 
 @admin.register(Currency)
 class CurrencyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'created_at', 'updated_at')
+    list_display = ('name', 'code', 'latest_price', 'created_at', 'updated_at')
 
 @admin.register(CurrencyPriceHistory)
 class CurrencyPriceHistoryAdmin(admin.ModelAdmin):

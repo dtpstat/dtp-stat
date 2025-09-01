@@ -272,6 +272,27 @@ class Subscription(TimeStampedModel):
         else:
             return self.start_date <= today
 
+    @property
+    def last_expected_date(self):
+        today = timezone.now().date()
+        payment_dates = self.get_payment_dates()
+        expected_dates_in_past = [d for d in payment_dates if d <= today]
+
+        if not expected_dates_in_past:
+            return None
+
+        last_expected_date = expected_dates_in_past[-1]
+        return last_expected_date
+
+    @property
+    def days_since_last_expected(self):
+        today = timezone.now().date()
+        last_expected_date = self.last_expected_date
+        if not last_expected_date:
+            return None
+        days_since_last_expected = (today - last_expected_date).days
+        return days_since_last_expected
+
     def get_payment_dates(self, *, start_date: Optional[date] = None, end_date: Optional[date] = None) -> list:
         rule_freq = WEEKLY if self.frequency == self.Frequency.WEEKLY else MONTHLY
         if not end_date:
@@ -312,16 +333,12 @@ class Subscription(TimeStampedModel):
         self.end_date = on_date
         self.save(update_fields=['end_date', 'updated_at'])
 
-    def check_donation(self, on_date: Optional[date] = None, disable = True, threshold: Optional[int] = None):
+    def check_donation(self, disable = True, threshold: Optional[int] = None):
         if threshold is None:
             threshold = SUBSCRIPTION_THRESHOLD_DAYS
-        if not on_date:
-            on_date = timezone.now().date() - timedelta(days=threshold)
-        payment_dates = self.get_payment_dates(
-            end_date=on_date,
-        )
-        last_payment_date = payment_dates[-1] if payment_dates else None
-        if not last_payment_date:
+        today = timezone.now().date()
+        last_payment_date = self.last_expected_date
+        if not last_payment_date or (today - last_payment_date) < timedelta(days=threshold):
             return True
         if not Donation.objects.find_donations_by_contact_amount_currency_and_dates(
             contact=self.contact,
@@ -420,13 +437,13 @@ class Donation(TimeStampedModel):
         super().clean()
         if self.subscription:
             if not self.contact:
-                raise ValidationError(
-                    _("A donation linked to a subscription must also be linked to a contact.")
-                )
+                raise ValidationError({
+                    'contact': _("A donation linked to a subscription must also be linked to a contact.")
+                })
             if self.contact != self.subscription.contact:
-                raise ValidationError(
-                    _("The contact for this donation does not match the contact on the subscription.")
-                )
+                raise ValidationError({
+                    'contact': _("The contact for this donation does not match the contact on the subscription.")
+                })
         
         if self.is_confirmed and self.amount_in_base_currency is None:
             raise ValidationError({

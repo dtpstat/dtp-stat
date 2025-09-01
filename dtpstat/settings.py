@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'application.context_processors.get_donate_data',
                 'application.context_processors.settings',
+                'constance.context_processors.config',
             ],
         },
     },
@@ -230,5 +231,10 @@ CONSTANCE_CONFIG = {
     'DONATE_SUM_GOAL': (100000, 'Цель сбора'),
     'DONATE_END_DATE': ('2025-12-31', 'Дата окончания сбора'),
     'DONATE_MANUAL': (True, 'Использовать данные из конфига'),
+    'DONATES_TELEGRAM_TOKEN': ('your-token', 'Telegram token for donates'),
+    'DONATES_REPORT_CHAT_ID': (0, 'Telegram chat id for daily reports'),
+    'DONATES_SUBSCRIPTION_ALERT_CHAT_ID': (0, 'Telegram chat id for subscription alerts'),
+    'DONATES_GOOGLE_CREDENTIALS': ('{}', 'Google Drive credentials JSON'),
+    'DONATES_GOOGLE_TOKEN': ('{}', 'Google Drive token JSON'),
     'SHOW_LANGUAGE_SWITCHER': (False, 'Показывать переключатель языков'),
 }

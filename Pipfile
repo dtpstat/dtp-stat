@@ -32,11 +32,12 @@ tweepy = "==4.14.0"
 django-constance = "==4.3.2"
 typing = { version = "*", markers="python_version < '3.0'" }
 cryptography = "*"
-pytest = "*"
-pytest-django = "*"
 python-dateutil = "*"
-
-[dev-packages]
+requests = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+factory-boy = "*"
 
 [requires]
 python_version = "3.8"
