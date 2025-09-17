@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 
 <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="{% url 'home' %}">
@@ -12,7 +13,7 @@
 
     <form class="form-inline mr-auto mt-lg-0 d-lg-block" role="form">
         <div class="form-group">
-            <input class="form-control" type="text" id="regionSearch" placeholder="Поиск по карте">
+            <input class="form-control" type="text" id="regionSearch" placeholder="{% trans 'Поиск по карте' %}">
             <i class="fas fa-search"></i>
         </div>
     </form>
@@ -23,22 +24,56 @@
         <ul class="navbar-nav ml-auto my-2 my-lg-0">
             <li class="nav-item {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">
                 <div style="">
-                    <a class="nav-link" href="{% url 'blog' %}">Что почитать</a>
+                    <a class="nav-link" href="{% url 'blog' %}">{% trans "Что почитать" %}</a>
                 </div>
 
             </li>
             <li class="nav-item {% if 'dashboard' in request.path and 'pages' in request.path %}active{% endif %}">
-                <a class="nav-link" href="/pages/dashboard/">Статистика</a>
+                <a class="nav-link" href="/pages/dashboard/">{% trans "Статистика" %}</a>
             </li>
             <li class="nav-item {% if 'data' in request.resolver_match.url_name %}active{% endif %}">
-                <a class="nav-link" href="{% url "opendata" %}">Скачать данные</a>
+                <a class="nav-link" href="{% url "opendata" %}">{% trans "Скачать данные" %}</a>
             </li>
             <li class="nav-item {% if 'about' in request.path and 'pages' in request.path %}active{% endif %}">
-                <a class="nav-link" href="/pages/about/">О проекте</a>
+                <a class="nav-link" href="/pages/about/">{% trans "О проекте" %}</a>
             </li>
             <li class="nav-item support">
-                <a class="nav-link button support" href="{% url 'donate' %}">Поддержать проект</a>
+                <a class="nav-link button support" href="{% url 'donate' %}">{% trans "Поддержать проект" %}</a>
             </li>
+            {% if config.SHOW_LANGUAGE_SWITCHER %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% if LANGUAGE_CODE == 'en' %}
+                        🇬🇧 English
+                    {% else %}
+                        🇷🇺 Русский
+                    {% endif %}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="languageDropdown">
+                    {% if LANGUAGE_CODE != 'ru' %}
+                        <form action="{% url 'set_language' %}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.get_full_path|slice:'3:' }}" />
+                            <input name="language" type="hidden" value="ru" />
+                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
+                                🇷🇺 Русский
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if LANGUAGE_CODE != 'en' %}
+                        <form action="{% url 'set_language' %}" method="post">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="/en{{ request.get_full_path }}" />
+                            <input name="language" type="hidden" value="en" />
+                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
+                                🇬🇧 English
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
@@ -102,4 +137,5 @@
             }
         });
     })();
+
 </script>

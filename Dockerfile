@@ -5,6 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 RUN apt-get update && apt-get install -y --no-install-recommends \
   binutils \
   gdal-bin \
+  gettext \
   libproj-dev \
   locales \
   && sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen \

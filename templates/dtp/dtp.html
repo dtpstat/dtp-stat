@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block meta-tags %}
-    <meta property="og:title" content="ДТП {{ dtp.category.name }} по адресу {{ dtp.address| default_if_none:"неустановленному" }}">
-    <meta property="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address| default_if_none:"неустановленному" }}.">
-    <meta name="description" content="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }} произошло ДТП по адресу {{ dtp.address| default_if_none:"неустановленному" }}. Место отоброжено на карте.">
+    <meta property="og:title" content="{% trans 'ДТП' %} {{ dtp.category.name }} {% trans 'по адресу' %} {{ dtp.address| default_if_none:"неустановленному" }}">
+    <meta property="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} {% trans 'в' %} {{ dtp.datetime|date:'H:i' }} {% trans 'произошло ДТП по адресу' %} {{ dtp.address| default_if_none:"неустановленному" }}.">
+    <meta name="description" content="og:description" content="{{ dtp.datetime|date:'d.m.Y' }} {% trans 'в' %} {{ dtp.datetime|date:'H:i' }} {% trans 'произошло ДТП по адресу' %} {{ dtp.address| default_if_none:"неустановленному" }}. {% trans 'Место отображено на карте' %}.">
     <meta property="og:image" content="https://api.mapbox.com/styles/v1/piromant/cksbfibfhiveb17pljm5rp24i/static/url-https%3A%2F%2Fdtp-stat.ru%2Fstatic%2Fscheme%2Fmarker%2F{% if dtp.scheme and dtp.scheme != "150" %}{{ dtp.scheme }}{% else %}empty{% endif %}.png({{ dtp.point.0 }},{{ dtp.point.1 }})/{{ dtp.point.0 }},{{ dtp.point.1 }},11,0,60/600x350@2x?logo=false&access_token=pk.eyJ1IjoiaXNodW1pbGluIiwiYSI6ImNrZ3l3Z2pzMTB4dHcycXFoOXMwMjdqamoifQ.OXqhHnGXrwiGue3i3pLUYg"/>
-    <meta property="og:site_name" content="Карта ДТП" />    
+    <meta property="og:site_name" content="{% trans 'Карта ДТП' %}" />    
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="600" />
-    <title>ДТП {{ dtp.category.name }} по адресу {{ dtp.address| default_if_none:"неустановленному" }}</title>
+    <title>{% trans 'ДТП' %} {{ dtp.category.name }} {% trans 'по адресу' %} {{ dtp.address| default_if_none:"неустановленному" }}</title>
 {% endblock %}
 
 {% block extra-head %}
@@ -57,14 +58,14 @@
                     <div class="map-buttons row justify-content-between">
                         <div class="col-auto">
                             <a href="{% url "home" %}?center={{ dtp.point.1 }}:{{ dtp.point.0 }}&zoom=15" class="button"
-                               target="_blank"><i class="far fa-map"></i> Показать ДТП рядом</a>
+                               target="_blank"><i class="far fa-map"></i> {% trans 'Показать ДТП рядом' %}</a>
                         </div>
                         <div class="col-auto toggle-map d-none" id='toggle-check'>
                             <a class="button toggle active" id="toggle-map" data-to="map"><i
                                     class="fas fa-map-marker-alt"></i>
-                                Карта</a>
+                                {% trans 'Карта' %}</a>
                             <a class="button toggle" id="toggle-panorama" data-to="panorama"><i
-                                    class="fas fa-video"></i> Панорама</a>
+                                    class="fas fa-video"></i> {% trans 'Панорама' %}</a>
                         </div>
 
                     </div>
@@ -72,7 +73,7 @@
                     <p>{{ dtp.datetime|date:'l' }}, {{ dtp.datetime|date:'d.m.Y' }} в {{ dtp.datetime|date:'H:i' }}
 
                         <span style="color:#ddd; margin: 0 5px;">|</span>
-                        {{ dtp.address| default_if_none:"<span style='color:#ddd'>Адрес неизвестен</span>" }}</p>
+                        {{ dtp.address| default_if_none:"<span style='color:#ddd'>{% trans 'Адрес неизвестен' %}</span>" }}</p>
                     <h1>{{ dtp.category.name }}</h1>
                     <div class="row">
                         <div class="col-auto indicator indicator_transport">
@@ -81,7 +82,7 @@
                                     <img src="{% static 'media/all.svg' %}" class="dtp-icon">
                                 </div>
                                 <div class="col">
-                                    <p class="name">Транспорт</p>
+                                    <p class="name">{% trans 'Транспорт' %}</p>
                                     <p class="value">{{ vehicles.count }}</p>
                                 </div>
                             </div>
@@ -92,7 +93,7 @@
                                     <img src="{% static 'media/participants.svg' %}" class="dtp-icon">
                                 </div>
                                 <div class="col">
-                                    <p class="name">Участники</p>
+                                    <p class="name">{% trans 'Участники' %}</p>
                                     <p class="value">{{ dtp.participant_set.count }}</p>
                                 </div>
                             </div>
@@ -104,7 +105,7 @@
                                     <img src="{% static 'media/injured.svg' %}" class="dtp-icon">
                                 </div>
                                 <div class="col">
-                                    <p class="name">Пострадали</p>
+                                    <p class="name">{% trans 'Пострадали' %}</p>
                                     <p class="value">{{ injured }}</p>
                                 </div>
                             </div>
@@ -116,7 +117,7 @@
                                     <img src="{% static 'media/dead.svg' %}" class="dtp-icon">
                                 </div>
                                 <div class="col">
-                                    <p class="name">Погибли</p>
+                                    <p class="name">{% trans 'Погибли' %}</p>
                                     <p class="value">{{ dead }}</p>
                                 </div>
                             </div>
@@ -156,7 +157,7 @@
 
         <section class="participants">
             <div class="container">
-                <h2>Участники ДТП</h2>
+                <h2>{% trans 'Участники ДТП' %}</h2>
                 <div class="participants__inner horizontal-scroll">
                 <div class="row">
                     {% for participant in participants %}
@@ -169,11 +170,11 @@
                                 </span>
                                     <div class="participant-card__info">
                                         <p><b>{{ participant.role }}</b></p>
-                                        <p>{{ participant.gender |default_if_none:"пол неизвестен"}}</p>
+                                        <p>{{ participant.gender |default_if_none:"{% trans 'пол неизвестен' %}"}}</p>
                                     </div>
                                 </div>
                                 <div class="participant-card__content">
-                                    <p>{{ participant.health_status | default_if_none:"cостояние неизвестно" }}</p>
+                                    <p>{{ participant.health_status | default_if_none:"{% trans 'состояние неизвестно' %}" }}</p>
                                 </div>
                                 {% if participant.violations.count %}
                                     <div class="participant-card__footer">
@@ -204,16 +205,16 @@
                                             <p><b>{{ participant.role }}</b></p>
                                             <p>
                                                 {% if participant.driving_experience %}
-                                                    {{ participant.gender | default_if_none:"пол неизвестен"}}, стаж (лет) —
+                                                    {{ participant.gender | default_if_none:"{% trans 'пол неизвестен' %}"}}, {% trans 'стаж (лет)' %} —
                                                     {{ participant.driving_experience }}
                                                 {% else %}
-                                                    {{ participant.gender |default_if_none:"пол неизвестен"}}
+                                                    {{ participant.gender |default_if_none:"{% trans 'пол неизвестен' %}"}}
                                                 {% endif %}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="participant-card__content">
-                                        <p>{{ participant.health_status |default_if_none:"cостояние неизвестно"}}</p>
+                                        <p>{{ participant.health_status |default_if_none:"{% trans 'состояние неизвестно' %}"}}</p>
                                     </div>
                                     {% if participant.violations.count %}
                                         <div class="participant-card__footer">
@@ -238,7 +239,7 @@
                 <a class="error-report">
                     <span class="error-report__label">
                         <img src="{% static 'media/gibdd.svg' %}" width="36" height="32" alt="">
-                        Официальные данные ГИБДД
+                        {% trans 'Официальные данные ГИБДД' %}
                     </span>
                    <!-- <span class="error-report__button">Нашли ошибку?</span> -->
                 </a>
@@ -267,7 +268,7 @@
 
         <section class="news-section">
             <div class="container">
-                <h2>Новости по теме</h2>
+                <h2>{% trans 'Новости по теме' %}</h2>
                 <div class="row">
                     {% for post in posts %}
                         <div class="col-12 col-sm-6 col-md-4">

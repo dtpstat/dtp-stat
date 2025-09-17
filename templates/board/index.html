@@ -1,24 +1,25 @@
 {% extends "base.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block content %}
     <div class="container mt-5 mb-5" style="min-height: 50vh">
         <ul class="nav justify-content-center mt-3 mb-3">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
+                <a class="nav-link" href="{% url 'admin:index' %}">{% trans 'Админка' %}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'admin:application_blogpost_changelist' %}">Блог</a>
+                <a class="nav-link" href="{% url 'admin:application_blogpost_changelist' %}">{% trans 'Блог' %}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'admin:application_page_changelist' %}">Статичные страницы</a>
+                <a class="nav-link" href="{% url 'admin:application_page_changelist' %}">{% trans 'Статичные страницы' %}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'ticket' in request.resolver_match.url_name %}active{% endif %}" href="{% url "tickets_list" %}">Тикеты</a>
+                <a class="nav-link {% if 'ticket' in request.resolver_match.url_name %}active{% endif %}" href="{% url "tickets_list" %}">{% trans 'Тикеты' %}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url "account_logout" %}">Выйти из профиля</a>
+                <a class="nav-link" href="{% url "account_logout" %}">{% trans 'Выйти из профиля' %}</a>
             </li>
         </ul>
 

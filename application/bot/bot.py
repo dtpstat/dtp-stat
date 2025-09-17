@@ -9,6 +9,7 @@ from PIL import ImageDraw
 import os
 import tweepy
 import telegram
+import vk_api
 
 
 
@@ -19,14 +20,14 @@ import environ
 env = environ.Env()
 
 def pogibli(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "погиб"
     else:
         return "погибли"
 
 
 def postradali(num):
-    if num[-1] in ["1"] and num != '11':
+    if num[-1] == "1" and num[-2:] != "11":
         return "пострадал"
     else:
         return "пострадали"
@@ -214,6 +215,38 @@ def send_telegram_post(text):
             except Exception as e:
                 print(f"[send_telegram_post] Ошибка при отправке в {channel}: {e}")
             photo.seek(0)
+
+
+def send_vk_post(text):
+    log_template = "[send_vk_post] {0}"
+
+    phone_number = env("VK_ACCOUNT_PHONE_NUMBER")
+    password = env("VK_ACCOUNT_PASSWORD")
+    community_id = env("VK_COMMUNITY_ID")
+
+    vk_session = vk_api.VkApi(phone_number, password)
+    try:
+        vk_session.auth(token_only=True)
+    except Exception as e:
+        print(log_template.format(f"Ошибка авторизации в VK: {e}"))
+        return
+
+    vk = vk_session.get_api()
+    photo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img.png")
+    try:
+        upload = vk_api.VkUpload(vk_session)
+        photo = upload.photo_wall(photo_path, group_id=community_id)[0]
+    except Exception as e:
+        print(log_template.format(f"Ошибка загрузки фото на сервер VK: {e}"))
+        return
+    try:
+        attachment = f"photo{photo['owner_id']}_{photo['id']}"
+        vk.wall.post(owner_id=-int(community_id), from_group=1, message=text, attachments=attachment)
+    except Exception as e:
+        print(log_template.format(f"Ошибка при отправке поста в VK: {e}"))
+        return
+
+    print(log_template.format("Пост успешно отправлен в VK"))
 
 
 def main(message="today"):

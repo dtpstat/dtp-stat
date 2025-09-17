@@ -1,3 +1,6 @@
+import zipfile
+import io
+
 import calendar
 import json
 import logging
@@ -91,20 +94,30 @@ def get_region_by_center_point(center_point):
 
 def opendata(region=None, force=False):
     if not os.path.exists(settings.MEDIA_ROOT + "/opendata/"):
+        print(f"[opendata] Create folder = {settings.MEDIA_ROOT}/opendata/...")
         os.makedirs(settings.MEDIA_ROOT + "/opendata/")
+
     if region:
         active_region_ids = [region.id]
     else:
         active_region_ids = data_models.Download.objects.filter(last_update__isnull=False).values('region').distinct()
 
+    print(f"[opendata] active regions = {active_region_ids}")
+
     for region_id in tqdm(active_region_ids):
+        print(f"[opendata] Process region = {region_id}")
         region = get_object_or_404(data_models.Region, id=region_id['region'])
         latest_download = region.download_set.filter(last_update__isnull=False).latest('date')
         latest_opendata, created = models.OpenData.objects.get_or_create(
             region=region
         )
 
+        print(f"[opendata] region = {region}")
+        print(f"[opendata] latest_download = {latest_download}")
+        print(f"[opendata] latest_opendata = {latest_opendata}")
+
         if latest_opendata.date == latest_download.date and not force:
+            print(f"[opendata] ip region...")
             continue
 
         data = []
@@ -120,10 +133,13 @@ def opendata(region=None, force=False):
                 obj.data['export'] = {**obj.as_dict(), **{'gibdd_id': obj.gibdd_slug}}
             data.append(obj.data['export'])
 
+        print(f"[opendata] export_opendata as '{region.slug}'")
         export_opendata(data, region.slug, latest_download, latest_opendata)
 
 
 def export_opendata(data, region_slug, latest_download, latest_opendata):
+
+    print(f"[export_opendata] Make geojson data for '{region_slug}' with {len(data)} items...")
 
     geo_data = {"type": "FeatureCollection", "features": [
         {"type": "Feature",
@@ -133,14 +149,22 @@ def export_opendata(data, region_slug, latest_download, latest_opendata):
     ]}
 
     path = settings.MEDIA_ROOT + '/opendata/' + region_slug + '.geojson'
-    with open(path, 'w') as data_file:
-        json.dump(geo_data, data_file, ensure_ascii=False)
+    zip_path = settings.MEDIA_ROOT + '/opendata/' + region_slug + '.geojson.zip'
+
+    print(f"[export_opendata] path = {path}")
+    print(f"[export_opendata] zip_path = {zip_path}")
+
+    # Сохраняем geojson во временный буфер
+    geojson_bytes = json.dumps(geo_data, ensure_ascii=False).encode('utf-8')
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(region_slug + '.geojson', geojson_bytes)
 
     if region_slug == "russia":
         shutil.make_archive(region_slug + '.geojson', 'zip', settings.MEDIA_ROOT + '/opendata/')
 
     latest_opendata.date = latest_download.date
-    latest_opendata.file_size = os.stat(path).st_size
+    latest_opendata.file_size = os.stat(zip_path).st_size
+    
     latest_opendata.save()
 
 

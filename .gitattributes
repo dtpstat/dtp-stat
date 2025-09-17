@@ -1,0 +1,1 @@
+manage.py text eol=lf # Для корректной работы внутри Docker
