@@ -67,19 +67,193 @@
             </div>
         </div>
 
+        <table class="table" width="100%">
+            <col width="*"/>
+            <col width="225px"/>
+            <col width="80px"/>
+            <col width="225px"/>
 
-        <table class="table">
             <tbody>
             {% for opendata_item in opendata %}
                 <tr>
                     <td><b>{{ opendata_item.region.name|default:"Россия" }}</b></td>
-                    <td class="small">{{ start_date|date:"F Y"|lower }} - {{ opendata_item.date|date:"F Y"|lower }}</td>
-                    <td class="small">{{ opendata_item.mb_file_size|floatformat:"2" }} mb</td>
-                    <td class="text-center"><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson.zip"
+                    <td class="small" style="text-align: center;">{{ start_date|date:"F Y"|lower }} - {{ opendata_item.date|date:"F Y"|lower }}</td>
+                    <td class="small" style="text-align: center;">{{ opendata_item.mb_file_size|floatformat:"2" }} mb</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/opendata/{{ opendata_item.region.slug }}.geojson.zip"
                                                class="button">Скачать&nbsp;.geojson</a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+
+
+        <h2 class="text-center mb-4" id="years">{% trans 'Аккумулированные данные' %}</h2>
+        <div>
+            <p>Данные сразу за год по всей РФ.</p>
+            <p>Формат данных <strong>JSON</strong></p>
+            <p>
+                <a data-toggle="collapse" href="#collapseExampleJSON" role="button"
+                aria-expanded="false" aria-controls="collapseExample">
+                    {% trans 'Структура данных' %}
+                </a>
+            </p>
+            <div class="collapse" id="collapseExampleJSON">
+                <div class="card card-body">
+                    <pre><code><samp style="font-family: 'Courier New', Courier, monospace !important;">{
+"EM_NUMBER": 225353115,                                               # идентификатор ДТП
+"EMTP_NUMBER": 820000001,                                             # идентификатор ДТП в ГИБДД
+"DATE_TIME": "2026-01-01T00:06:00",                                   # дата и время
+"REGIONS": ["Республика Дагестан", "Российская Федерация"],           # регионы
+"PLACE": "г. Дербент",                                                # место
+"NP": "г Дербент",                                                    # населённый пункт
+"STREET": "ул С.Габиева",                                             # улица
+"HOUSE": "8",                                                         # дом
+"STREET_SIGN": "Улицы и дороги местного значения в жилой застройке",  # категория улицы
+"ROADS": null,                                                        # дорога
+"ROAD_KM_M": null,                                                    # километр.метр дороги
+"ROAD_SIGN": "Местного значения (дорога местного значения, включая относящиеся к собственности поселений, муниципальных районов, городских округов)", # категория дороги
+"ROAD_TYPE": null,                                                    # тип дороги
+"LAT": 48.286707,                                                     # широта
+"LNG": 42.087480,                                                     # долгота
+"POINT": {"type": "Point", "coordinates": [48.286707, 42.08748]},     # координаты точки, можно использовать для совместимости с geoJSON
+"EM_TYPE": "Наезд на пешехода",                                       # тип ДТП
+"SCHEMA_ID": 3,                                                       # идентификатор схемы ДТП
+"VEH_AMOUNT": 1,                                                      # количество транспортных средств
+"LOST_AMOUNT": 0,                                                     # количество погибших
+"PERS_AMOUNT": 2,                                                     # количество участников
+"CHILDREN_ATTR": 11,                                                  # количество детей среди участников
+"SUFFER_AMOUNT": 1,                                                   # количество раненых
+"LIGHT_TYPE": "В темное время суток, освещение отсутствует",          # время суток
+"RD_CONSTR_HERES": ["Нерегулируемый перекрёсток равнозначных улиц (дорог)"],              # объекты УДТ на месте ДТП
+"RD_CONSTR_THERES":["Жилые дома индивидуальной застройки", "Нерегулируемый перекрёсток"], # объекты УДТ вблизи места ДТП
+"MOTION_INFLUENCES": ["Сведения отсутствуют"],                        # факторы, влияющие на движение
+"TRAFFIC_AREA_STATE": "Сухое",                                        # состояние дорожного покрытия
+"MT_RATE": "Режим движения не изменялся",                             # режим движения
+"CLOUDS":  ["Ясно"],                                                  # погода
+"DEFECTS": ["Не установлены"],                                        # дефекты дорожного покрытия
+"VEHICLES": [                                                         # транспортные средства
+    {
+    "N": 1,                                   # номер транспортного средства в ДТП
+    "MARK": "OMODA",                          # марка транспортного средства
+    "MODEL": "C5",                            # модель транспортного средства
+    "COLOR": "Серый",                         # цвет транспортного средства
+    "OKFS": "Частная собственность",          # форма собственности транспортного средства
+    "OKOPF": "Физические лица",               # организационно-правовая форма владельца транспортного средства
+    "ESCAPE": "Осталось на месте ДТП",        # скрывался ли участник с места ДТП
+    "PROD_TYPE": "В-класс (малый) до 3,9 м",  # категория транспортного средства
+    "RUDDER_TYPE": "С передним приводом",     # тип рулевого управления транспортного средства
+    "VEHICLE_YEAR": 2024,                     # год производства транспортного средства
+    "TECH_FAILURE_TYPE": ["Технические неисправности отсутствуют"],   # технические неисправности транспортного средства
+    "DAMAGE_DISPOSITION": null                # расположение повреждений транспортного средства
+    "PERSONS": [                              # участники внутри транспортного средства
+        {
+        "N": 1,                                       # номер участника внутри транспортного средства
+        "SEX": "Мужской",                             # пол участника
+        "ESCAPE": "Нет (не скрывался)",               # скрывался ли участник с места ДТП
+        "HV_TYPE": "Не пострадал",                    # состояние здоровья участника
+        "PART_TYPE": "Водитель",                      # роль участника (водитель, пассажир, пешеход и т.д.)
+        "DRIVER_SERVICE_LENGTH": 3,                   # стаж вождения участника (только у водителей)
+        "SAFETY_BELT": "Да",                          # использовал ли участник ремень безопасности (для водителей и пассажиров)
+        "CHILD_SAFETY_TYPE": null,                    # тип детского удерживающего устройства (для водителей и пассажиров)
+        "MED_RESULT_PERMILLE": 0,                     # промилле алкоголя в крови участника (для водителей)
+        "MAIN_PDD_DERANGEMENT": ["Нет нарушений"],    # основное нарушение ПДД участником
+        "ATTENDANT_PDD_DERANGEMENT":["Несоблюдение требований ОСАГО"] # дополнительное нарушение ПДД участником
+        }
+    ],
+    }
+],
+"PERSONS": [ ] # участники без транспортных средств (описание, как у участников внутри транспортных средств)
+}</samp></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <table class="table" width="100%">
+            <col width="*"/>
+            <col width="125px"/>
+            <col width="240px"/>
+            <col width="225px"/>
+            <tbody>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2015</td>
+                    <td class="small" style="text-align: center;">13 mb (<i><b>670 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2015.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2016</td>
+                    <td class="small" style="text-align: center;">12 mb (<i><b>616 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2016.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2017</td>
+                    <td class="small" style="text-align: center;">12 mb (<i><b>630 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2017.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2018</td>
+                    <td class="small" style="text-align: center;">12 mb (<i><b>601 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2018.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2019</td>
+                    <td class="small" style="text-align: center;">11 mb (<i><b>592 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2019.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2020</td>
+                    <td class="small" style="text-align: center;">11 mb (<i><b>505 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2020.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2021</td>
+                    <td class="small" style="text-align: center;">9.7 mb (<i><b>469 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2021.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2022</td>
+                    <td class="small" style="text-align: center;">9.6 mb (<i><b>463 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2022.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2023</td>
+                    <td class="small" style="text-align: center;">10 mb (<i><b>482 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2023.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2024</td>
+                    <td class="small" style="text-align: center;">9.9 mb (<i><b>478 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2024.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2025</td>
+                    <td class="small" style="text-align: center;">9.8 mb (<i><b>474 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2025.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2026</td>
+                    <td class="small" style="text-align: center;">664 kb (<i><b>28 mb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2026.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+                <tr>
+                    <td><b>Россия</b></td>
+                    <td class="small" style="text-align: center;">2015 - 2026</td>
+                    <td class="small" style="text-align: center;">118 mb (<i><b>5.9 gb</b> после распаковки</i>)</td>
+                    <td class="text-center" style="text-align: center;"><a href="/media/years/2015-2026.json.7z" class="button">Скачать&nbsp;.json.7z</a></td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
 {% endblock %}
